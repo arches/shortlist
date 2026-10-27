@@ -1,0 +1,105 @@
+# alloy: context-diagram
+# Render: d2 docs/shortlist.context.d2 docs/shortlist.context.svg
+#
+# Labels use the quoted "line\nline" form, not |md| block strings: a markdown
+# label replaces the node's shape, which silently drops stroke and
+# border-radius and leaves a white box with no border.
+
+vars: {
+  d2-config: {
+    layout-engine: dagre
+    theme-id: 0
+    pad: 24
+  }
+}
+
+# Paint the canvas, so dark text never lands on a host's dark background.
+style: {
+  fill: "#ffffff"
+}
+
+# Fill and font-color are one decision, set together in every class below.
+classes: {
+  subject: {
+    style: {
+      fill: "#1f5c8b"
+      stroke: "#123f61"
+      stroke-width: 3
+      border-radius: 8
+      font-color: "#ffffff"
+    }
+  }
+  external: {
+    style: {
+      fill: "#ffffff"
+      stroke: "#555555"
+      stroke-width: 1
+      font-color: "#111111"
+    }
+  }
+  actor: {
+    width: 170
+    height: 70
+    style: {
+      fill: "#f2f2f2"
+      stroke: "#555555"
+      stroke-width: 1
+      border-radius: 40
+      font-color: "#111111"
+    }
+  }
+  flow: {
+    style: {
+      stroke: "#333333"
+      stroke-width: 2
+      font-color: "#111111"
+    }
+  }
+  platform: {
+    style: {
+      stroke: "#666666"
+      stroke-width: 2
+      font-color: "#111111"
+    }
+  }
+}
+
+title: Shortlist Context Diagram {
+  near: top-center
+  shape: text
+  style: {
+    font-size: 28
+    bold: true
+    font-color: "#111111"
+  }
+}
+
+user: User {
+  class: actor
+}
+
+shortlist: "Shortlist\n\nCollects user information about restaurant experiences\nand presents it back to them later.\nAuthenticates its own list owners." {
+  class: subject
+}
+
+database: "PostgreSQL\nRelational database\n\nHolds all application data, including the hashed\ncredentials list owners sign in with" {
+  class: external
+}
+
+s3: "S3\nFrontend hosting\n\nServes the static frontend assets" {
+  class: external
+}
+
+fly: "Fly.io\nAPI hosting\n\nRuns the API as a single always-on container" {
+  class: external
+}
+
+user -> shortlist: Restaurant entries and experience notes {class: flow}
+shortlist -> user: Experience details {class: flow}
+user -> shortlist: Email and password, at sign-in {class: flow}
+shortlist -> user: A session that keeps the list open {class: flow}
+shortlist -> database: Store application data and credential hashes {class: flow}
+database -> shortlist: Retrieve application data {class: flow}
+s3 -> shortlist: Hosts the static frontend {class: platform}
+s3 -> user: Delivers the frontend to the user's browser {class: flow}
+fly -> shortlist: Runs the API container {class: platform}

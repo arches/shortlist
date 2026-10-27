@@ -1,0 +1,19 @@
+docs/DIRECTIVES.md
+docs/ASSUMPTIONS.md
+
+# Ruby
+/.bundle/
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/storage/*
+!/storage/.keep
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Local environment
+.env
