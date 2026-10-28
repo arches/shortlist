@@ -1,6 +1,12 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 
-import type { Experience } from "@/api/types";
+import type { Experience, ExperienceDraft } from "@/api/types";
+import { restaurantsKey } from "@/features/managing-my-list/queries";
 import { authenticated } from "@/session/session";
 
 // Experiences nest under the restaurant they happened at, as the API has them:
@@ -18,4 +24,33 @@ export function useExperiences(restaurantId: number): UseQueryResult<Experience[
     queryKey: experiencesKey(restaurantId),
     queryFn: () => authenticated<Experience[]>(`/restaurants/${restaurantId}/experiences`),
   });
+}
+
+// Recording an experience is what makes a restaurant read as visited, and
+// visited is derived from the experience count rather than stored — so the list
+// is stale the moment one is recorded, and both have to be invalidated.
+function useExperienceMutation<Variables>(
+  restaurantId: number,
+  mutationFn: (variables: Variables) => Promise<unknown>,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn,
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: experiencesKey(restaurantId) }),
+        queryClient.invalidateQueries({ queryKey: restaurantsKey }),
+      ]);
+    },
+  });
+}
+
+export function useRecordExperience(restaurantId: number) {
+  return useExperienceMutation(restaurantId, (draft: ExperienceDraft) =>
+    authenticated<Experience>(`/restaurants/${restaurantId}/experiences`, {
+      method: "POST",
+      body: { experience: draft },
+    }),
+  );
 }

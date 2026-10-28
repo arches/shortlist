@@ -53,6 +53,30 @@ export function requestAt(fetchMock: Mock, index: number) {
   };
 }
 
+// The request a test is about, when later calls have landed on top of it. A
+// mutation is followed by the refetches it invalidates, so the last call is
+// rarely the one under test — and a refetch can share the mutation's path,
+// which makes "the last call" quietly wrong rather than obviously wrong.
+function methodOf(call: unknown[] | undefined): string | undefined {
+  return (call?.at(1) as { method?: string } | undefined)?.method;
+}
+
+export function lastRequestWith(fetchMock: Mock, method: string) {
+  const calls = fetchMock.mock.calls as unknown[][];
+
+  // Walked backwards by hand rather than with findLastIndex, which the
+  // project's TypeScript lib target does not carry.
+  for (let index = calls.length - 1; index >= 0; index -= 1) {
+    if (methodOf(calls[index]) === method) return requestAt(fetchMock, index);
+  }
+
+  throw new Error(`no ${method} request was made`);
+}
+
+export function requestsWith(fetchMock: Mock, method: string): unknown[][] {
+  return (fetchMock.mock.calls as unknown[][]).filter((call) => methodOf(call) === method);
+}
+
 export function pathsRequested(fetchMock: Mock): string[] {
   return fetchMock.mock.calls.map((call) => String(call.at(0)));
 }

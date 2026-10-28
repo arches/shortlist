@@ -1,11 +1,14 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 
 import { subtitleOf } from "@/features/managing-my-list/RestaurantCard";
 import { useRestaurants } from "@/features/managing-my-list/queries";
 import { SessionEnded } from "@/session/session";
 
 import { ExperienceList } from "./ExperienceList";
+import { RecordExperienceDialog } from "./RecordExperienceDialog";
 
 // managing-experiences.wireframe.drawio.svg settles where experiences live: the
 // restaurant's own screen. It is headed with a "‹ My list" back link, the
@@ -19,6 +22,7 @@ import { ExperienceList } from "./ExperienceList";
 export function RestaurantScreen({ restaurantId }: { restaurantId: number }) {
   const navigate = useNavigate();
   const { data: restaurants, isPending, error } = useRestaurants();
+  const [recording, setRecording] = useState(false);
 
   const restaurant = restaurants?.find((one) => one.id === restaurantId);
 
@@ -53,10 +57,26 @@ export function RestaurantScreen({ restaurantId }: { restaurantId: number }) {
 
       {restaurant && (
         <>
-          <header className="mb-6">
-            <h1 className="text-2xl font-semibold tracking-tight">{restaurant.name}</h1>
-            <p className="text-muted-foreground text-sm">{subtitleOf(restaurant)}</p>
+          {/*
+            The wireframe heads the screen with the name and its subtitle, and
+            puts "+ Record an experience" beside them.
+          */}
+          <header className="mb-6 flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-semibold tracking-tight">{restaurant.name}</h1>
+              <p className="text-muted-foreground text-sm">{subtitleOf(restaurant)}</p>
+            </div>
+
+            <Button className="shrink-0" onClick={() => setRecording(true)}>
+              Record an experience
+            </Button>
           </header>
+
+          <RecordExperienceDialog
+            restaurant={restaurant}
+            open={recording}
+            onOpenChange={setRecording}
+          />
 
           <ExperienceList restaurantId={restaurant.id} />
         </>
