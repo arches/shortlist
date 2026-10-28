@@ -6,8 +6,19 @@ module Api
     # I have visited" — and this scope is what makes that true without a branch.
     include RestaurantScope
 
+    # managing-experiences.scenarios.md, "Changing an experience that is not
+    # mine": reported as not found, and theirs is unchanged. Reaching one means
+    # reaching its restaurant first, so another owner's experience is already
+    # out of reach before this message can be needed — what it answers is an
+    # experience id that belongs to some other restaurant of my own.
+    # Named apart from the restaurant refusal in RestaurantScope rather than
+    # shadowing it, so which of the two a reader is looking at is never a
+    # question about Ruby constant lookup.
+    EXPERIENCE_NOT_FOUND = "No such experience is at that restaurant.".freeze
+
     before_action :authenticate_owner!
     before_action :find_restaurant
+    before_action :find_experience, only: [ :update ]
 
     # Most recent first by the day it happened, undated ones last. The order is
     # settled here rather than in the browser, so every reader of this list sees
@@ -36,7 +47,30 @@ module Api
       end
     end
 
+    # An edit overwrites. There is no history of the history, so a corrected
+    # rating leaves no trace of what it used to be.
+    #
+    # The emptiness rule holds here as well as on a recording: checked only at
+    # the moment of recording, it is reachable in two steps by anybody who
+    # writes a rating and then deletes it. Nothing extra enforces that — the
+    # model validates on both, which is the point of putting it there.
+    def update
+      if @experience.update(experience_params)
+        render json: @experience
+      else
+        render_invalid(@experience)
+      end
+    end
+
     private
+      # Scoped through the restaurant, so an experience of another restaurant's
+      # cannot be reached by naming it here.
+      def find_experience
+        @experience = @restaurant.experiences.find_by(id: params[:id])
+
+        render_error(EXPERIENCE_NOT_FOUND, status: :not_found) if @experience.nil?
+      end
+
       # The three the owner sets. restaurant comes from the path, user from the
       # scope, recorded_at from the model, and nothing sets updated_at.
       #
