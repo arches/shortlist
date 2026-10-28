@@ -15,10 +15,11 @@ module Api
       render json: on_the_list.order(:name)
     end
 
-    # A restaurant needs a name and nothing else, because the usual way a
-    # restaurant arrives is as a name somebody mentioned.
+    # Adding a restaurant takes its name and its city and nothing else, because
+    # the usual way a restaurant arrives is as a name somebody mentioned. Every
+    # other detail is filled in later, through update.
     def create
-      restaurant = current_owner.restaurants.new(restaurant_params)
+      restaurant = current_owner.restaurants.new(create_params)
 
       if restaurant.save
         render json: restaurant, status: :created
@@ -31,7 +32,7 @@ module Api
     # to restate a whole restaurant to correct one field of it. Clearing a detail
     # is a distinct act from leaving it alone, and sending null is how it is said.
     def update
-      if @restaurant.update(restaurant_params)
+      if @restaurant.update(update_params)
         render json: @restaurant
       else
         render_invalid(@restaurant)
@@ -49,11 +50,20 @@ module Api
     end
 
     private
-      # The full attribute table from shortlist.data.md, less the four the owner
-      # does not set: id, user, the timestamps, and removed_at. The one-line
-      # address in the scenario is shorthand — the fields are separate here, and
-      # nothing parses one into the other.
-      def restaurant_params
+      # managing-my-list.wireframe.drawio.svg draws the Add dialog with Name and
+      # City and nothing else, so nothing else is settable on the way in. No
+      # artifact names an endpoint, so the narrowing is recorded in
+      # ASSUMPTIONS.md rather than taken as settled.
+      def create_params
+        params.expect(restaurant: [ :name, :city ])
+      end
+
+      # Editing still has all the details: the full attribute table from
+      # shortlist.data.md, less the four the owner does not set — id, user, the
+      # timestamps, and removed_at. The one-line address in the scenario is
+      # shorthand; the fields are separate here, and nothing parses one into
+      # the other.
+      def update_params
         params.expect(
           restaurant: [
             :name,

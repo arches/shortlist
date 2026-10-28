@@ -37,55 +37,52 @@ describe("adding a restaurant", () => {
   });
 
   // Scenario: Adding a restaurant I have only heard the name of
-  it("puts a restaurant on the list with only a name", async () => {
+  it("puts a restaurant on the list with a name and a city", async () => {
     await openTheDialog();
-    await type("Name *", "Lilia");
+    await type("Name *", "Tacos El Bronco");
+    await type("City", "Los Angeles");
 
-    fetchMock.mockResolvedValueOnce(respond(201, aRestaurant({ name: "Lilia" })));
+    fetchMock.mockResolvedValueOnce(
+      respond(201, aRestaurant({ name: "Tacos El Bronco", city: "Los Angeles" })),
+    );
     await submit();
 
     await waitFor(() => {
       expect(requestAt(fetchMock, 1).path).toBe("/api/restaurants");
     });
-    expect(requestAt(fetchMock, 1).body).toMatchObject({ restaurant: { name: "Lilia" } });
-  });
-
-  // Scenario: Adding a restaurant with everything I know about it. The wireframe
-  // draws four fields; this scenario needs an address and a specialty, so the
-  // form carries the whole attribute table.
-  it("accepts everything an owner knows about it", async () => {
-    await openTheDialog();
-    await type("Name *", "Tacos El Bronco");
-    await type("Cuisine", "Mexican");
-    await type("Specialty", "Suadero tacos");
-    await type("Address line 1", "4324 4th Ave");
-    await type("City", "Brooklyn");
-    await type("State", "NY");
-    await type("Postal code", "11232");
-    await type("Website", "https://tacoselbronco.com");
-    await type("Notes", "Cash only, closes early");
-
-    fetchMock.mockResolvedValueOnce(respond(201, aRestaurant({ name: "Tacos El Bronco" })));
-    await submit();
-
-    await waitFor(() => {
-      expect(requestAt(fetchMock, 1).body).toMatchObject({
-        restaurant: {
-          name: "Tacos El Bronco",
-          cuisine: "Mexican",
-          specialty: "Suadero tacos",
-          address_line_1: "4324 4th Ave",
-          city: "Brooklyn",
-          state: "NY",
-          postal_code: "11232",
-          url: "https://tacoselbronco.com",
-          notes: "Cash only, closes early",
-        },
-      });
+    expect(requestAt(fetchMock, 1).body).toMatchObject({
+      restaurant: { name: "Tacos El Bronco", city: "Los Angeles" },
     });
   });
 
-  it("sends nothing for the fields left empty", async () => {
+  // managing-my-list.wireframe.drawio.svg draws the Add dialog with Name * and
+  // City and nothing else. Everything else is filled in later, through Edit.
+  it("offers a name and a city, and nothing else", async () => {
+    await openTheDialog();
+
+    expect(screen.getByLabelText("Name *")).toBeInTheDocument();
+    expect(screen.getByLabelText("City")).toBeInTheDocument();
+
+    for (const label of [
+      "Cuisine",
+      "Specialty",
+      "Website",
+      "Google Maps",
+      "Yelp",
+      "Address line 1",
+      "Address line 2",
+      "State",
+      "Postal code",
+      "Country",
+      "Notes",
+    ]) {
+      expect(screen.queryByLabelText(label)).not.toBeInTheDocument();
+    }
+  });
+
+  // shortlist.data.md, optionality: city is optional, and the name is the only
+  // thing a Restaurant cannot be created without.
+  it("sends no city when the owner gives none", async () => {
     await openTheDialog();
     await type("Name *", "Lilia");
 
@@ -94,8 +91,7 @@ describe("adding a restaurant", () => {
 
     await waitFor(() => {
       const sent = requestAt(fetchMock, 1).body as { restaurant: Record<string, unknown> };
-      expect(sent.restaurant.cuisine).toBeNull();
-      expect(sent.restaurant.city).toBeNull();
+      expect(sent.restaurant).toEqual({ name: "Lilia", city: null });
     });
   });
 
@@ -121,24 +117,6 @@ describe("adding a restaurant", () => {
     await submit();
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Name can't be blank");
-  });
-
-  // Scenario Outline: Giving a restaurant a link that is not a web address
-  it.each([
-    ["javascript:alert(1)"],
-    ["data:text/html,<h1>hi</h1>"],
-    ["mailto:hi@lilianewyork.com"],
-  ])("reports %s as not a web address", async (link) => {
-    await openTheDialog();
-    await type("Name *", "Lilia");
-    await type("Website", link);
-
-    fetchMock.mockResolvedValueOnce(
-      invalid({ url: ["Url must be a web address beginning http:// or https://"] }),
-    );
-    await submit();
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("must be a web address");
   });
 
   it("closes once the restaurant is on the list", async () => {

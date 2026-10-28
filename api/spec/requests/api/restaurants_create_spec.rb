@@ -10,17 +10,20 @@ RSpec.describe "POST /api/restaurants" do
   end
 
   # Scenario: Adding a restaurant I have only heard the name of
-  describe "with only a name" do
-    it "puts it on my list" do
-      add(name: "Lilia")
+  describe "with a name and a city" do
+    it "puts it on my list, keeping its city" do
+      add(name: "Tacos El Bronco", city: "Los Angeles")
 
       expect(response).to have_http_status(:created)
-      expect(response.parsed_body["name"]).to eq("Lilia")
-      expect(owner.restaurants.on_the_list.sole.name).to eq("Lilia")
+      expect(response.parsed_body).to include(
+        "name" => "Tacos El Bronco",
+        "city" => "Los Angeles"
+      )
+      expect(owner.restaurants.on_the_list.sole.city).to eq("Los Angeles")
     end
 
     it "does not read as visited, and has no experiences" do
-      add(name: "Lilia")
+      add(name: "Tacos El Bronco", city: "Los Angeles")
 
       expect(response.parsed_body["visited"]).to be(false)
       expect(response.parsed_body["experience_count"]).to eq(0)
@@ -28,46 +31,38 @@ RSpec.describe "POST /api/restaurants" do
 
     it "records when it went on the list" do
       freeze_time do
-        add(name: "Lilia")
+        add(name: "Tacos El Bronco", city: "Los Angeles")
 
         expect(owner.restaurants.sole.added_at).to eq(Time.current)
       end
     end
   end
 
-  # Scenario: Adding a restaurant with everything I know about it
-  describe "with everything I know about it" do
-    it "keeps all of those details" do
-      add(
-        name: "Tacos El Bronco",
-        cuisine: "Mexican",
-        specialty: "Suadero tacos",
-        address_line_1: "4324 4th Ave",
-        city: "Brooklyn",
-        state: "NY",
-        postal_code: "11232",
-        url: "https://tacoselbronco.com",
-        notes: "Cash only, closes early"
-      )
+  # shortlist.data.md, optionality: city is optional, and the name is the only
+  # thing a Restaurant cannot be created without.
+  describe "with only a name" do
+    it "puts it on my list with no city" do
+      add(name: "Lilia")
 
       expect(response).to have_http_status(:created)
-      expect(response.parsed_body).to include(
-        "name" => "Tacos El Bronco",
-        "cuisine" => "Mexican",
-        "specialty" => "Suadero tacos",
-        "address_line_1" => "4324 4th Ave",
-        "city" => "Brooklyn",
-        "state" => "NY",
-        "postal_code" => "11232",
-        "url" => "https://tacoselbronco.com",
-        "notes" => "Cash only, closes early"
-      )
+      expect(response.parsed_body["name"]).to eq("Lilia")
+      expect(owner.restaurants.on_the_list.sole.city).to be_nil
     end
+  end
 
-    it "still does not read as visited" do
-      add(name: "Tacos El Bronco", cuisine: "Mexican")
+  # Adding takes the name and the city and nothing else — see ASSUMPTIONS.md,
+  # "What adding a restaurant takes". Anything else is filled in later, through
+  # update, which is where the link rejection is now reached.
+  describe "with a detail the Add dialog does not offer" do
+    it "ignores it rather than storing it" do
+      add(name: "Lilia", cuisine: "Italian", url: "https://lilianewyork.com")
 
-      expect(response.parsed_body["visited"]).to be(false)
+      expect(response).to have_http_status(:created)
+      expect(owner.restaurants.on_the_list.sole).to have_attributes(
+        name: "Lilia",
+        cuisine: nil,
+        url: nil
+      )
     end
   end
 
@@ -109,39 +104,9 @@ RSpec.describe "POST /api/restaurants" do
     end
 
     it "rejects an absent name, and adds nothing" do
-      expect { add(cuisine: "Italian") }.not_to change(Restaurant, :count)
+      expect { add(city: "Los Angeles") }.not_to change(Restaurant, :count)
 
       expect(response).to have_http_status(:unprocessable_content)
-    end
-  end
-
-  # Scenario Outline: Giving a restaurant a link that is not a web address
-  describe "with a link that is not a web address" do
-    [
-      [ "javascript:alert(1)", "not a web address, and it gets rendered" ],
-      [ "data:text/html,<h1>hi</h1>", "same" ],
-      [ "mailto:hi@lilianewyork.com", "a web address is what this field means" ]
-    ].each do |link, why|
-      it "rejects #{link} — #{why}" do
-        expect { add(name: "Lilia", url: link) }.not_to change(Restaurant, :count)
-
-        expect(response).to have_http_status(:unprocessable_content)
-        expect(response.parsed_body["errors"]["url"]).to be_present
-      end
-    end
-
-    it "rejects a bad Google Maps link too" do
-      add(name: "Lilia", google_maps_url: "javascript:alert(1)")
-
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(response.parsed_body["errors"]["google_maps_url"]).to be_present
-    end
-
-    it "rejects a bad Yelp link too" do
-      add(name: "Lilia", yelp_url: "mailto:hi@lilianewyork.com")
-
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(response.parsed_body["errors"]["yelp_url"]).to be_present
     end
   end
 

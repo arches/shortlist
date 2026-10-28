@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { ALL_FIELDS, RestaurantForm } from "./RestaurantForm";
+import { ADD_FIELDS, RestaurantForm } from "./RestaurantForm";
 import { useAddRestaurant } from "./queries";
 
 interface AddRestaurantDialogProps {
@@ -47,7 +47,7 @@ export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogP
         </DialogHeader>
 
         <RestaurantForm
-          fields={ALL_FIELDS}
+          fields={ADD_FIELDS}
           submitLabel="Add"
           attributeErrors={attributeErrors}
           pending={add.isPending}

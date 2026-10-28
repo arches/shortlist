@@ -38,6 +38,14 @@ export const ALL_FIELDS = [
   { name: "notes", label: "Notes", multiline: true },
 ] as const satisfies readonly RestaurantField[];
 
+// managing-my-list.wireframe.drawio.svg draws the Add dialog with Name * and
+// City, and nothing else. Every other detail is filled in later, through the
+// Edit dialog — "Filling in a detail later" is an edit path, not an add one.
+export const ADD_FIELDS = [
+  { name: "name", label: "Name", required: true },
+  { name: "city", label: "City" },
+] as const satisfies readonly RestaurantField[];
+
 export interface RestaurantFormProps {
   fields: readonly RestaurantField[];
   restaurant?: Restaurant | undefined;
