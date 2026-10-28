@@ -1,7 +1,11 @@
 # Connection details come from DATABASE_URL, per shortlist.stack.md: configuration
 # is environment variables read through ENV.fetch, and the variable keeps the name
-# Rails already reads it under. The per-environment `database` key overrides the
-# name in the URL, so one variable serves development and test.
+# Rails already reads it under.
+#
+# A DATABASE_URL in the environment overrides anything named here, so the URL is
+# the only place a database name can usefully live. The test run is given its own,
+# from SHORTLIST_TEST_DATABASE_URL — Shortlist's own invention, so it carries the
+# prefix the stack's Naming section requires.
 default: &default
   adapter: postgresql
   encoding: unicode
@@ -10,11 +14,9 @@ default: &default
 
 development:
   <<: *default
-  database: shortlist_development
 
 test:
   <<: *default
-  database: shortlist_test
 
 production:
   <<: *default

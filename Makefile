@@ -2,9 +2,16 @@
 # local development environment. Everything below therefore runs in a container:
 # there is no supported way to run Shortlist on the host.
 
+# .env supplies SHORTLIST_TEST_DATABASE_URL below. Make builds it from
+# .env.example on first use and then restarts itself.
+include .env
+
 COMPOSE := docker compose
 RUN_API := $(COMPOSE) run --rm api
-RUN_TEST := $(COMPOSE) run --rm -e RAILS_ENV=test api
+RUN_TEST := $(COMPOSE) run --rm \
+	-e RAILS_ENV=test \
+	-e DATABASE_URL=$(SHORTLIST_TEST_DATABASE_URL) \
+	api
 
 .DEFAULT_GOAL := help
 .PHONY: help up down build test lint migrate console shell clean
