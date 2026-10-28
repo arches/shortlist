@@ -44,3 +44,13 @@ export function useChangeRestaurant() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
   });
 }
+
+export function useTakeRestaurantOffTheList() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) =>
+      authenticated<null>(`/restaurants/${id}`, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
+  });
+}

@@ -47,6 +47,10 @@ export async function clearField(label: string): Promise<void> {
   await userEvent.clear(screen.getByLabelText(label));
 }
 
+// The two forms the dialogs take: the Add and Edit forms are dialogs, the
+// removal confirmation is an alertdialog.
 export async function pressInDialog(name: string): Promise<void> {
-  await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name }));
+  const dialog = screen.queryByRole("dialog") ?? screen.getByRole("alertdialog");
+
+  await userEvent.click(within(dialog).getByRole("button", { name }));
 }
