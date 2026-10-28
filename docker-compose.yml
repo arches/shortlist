@@ -1,6 +1,6 @@
-# The local development environment, per shortlist.stack.md. Every command runs
-# in here, tests included. The frontend dev server joins this file when the
-# frontend itself lands.
+# The local development environment, per shortlist.stack.md: it runs the API, the
+# frontend dev server and Postgres, so nothing is external. Every command runs in
+# here, tests included.
 name: shortlist
 
 services:
@@ -31,5 +31,22 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build: ./frontend
+    environment:
+      # The dev server forwards /api to the api container. This is the dev
+      # server's own configuration, not the bundle's — shortlist.principles.md
+      # forbids configuration inside frontend/src, and nothing here crosses that
+      # line.
+      SHORTLIST_API_ORIGIN: http://api:3000
+    volumes:
+      - ./frontend:/app
+      - frontend-modules:/app/node_modules
+    ports:
+      - "${SHORTLIST_FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - api
+
 volumes:
   db-data:
+  frontend-modules:
