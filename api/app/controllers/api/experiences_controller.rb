@@ -18,7 +18,7 @@ module Api
 
     before_action :authenticate_owner!
     before_action :find_restaurant
-    before_action :find_experience, only: [ :update ]
+    before_action :find_experience, only: [ :update, :destroy ]
 
     # Most recent first by the day it happened, undated ones last. The order is
     # settled here rather than in the browser, so every reader of this list sees
@@ -60,6 +60,21 @@ module Api
       else
         render_invalid(@experience)
       end
+    end
+
+    # "And that experience is gone for good." Destroyed rather than retained,
+    # which is the opposite of taking a restaurant off the list: a restaurant is
+    # kept because nobody tidying their list intends to destroy years of their
+    # own notes, whereas this destroys one note outright and the owner is asked
+    # to confirm it first. Recovering a removed experience is out of scope in
+    # managing-experiences.scenarios.md because there is nothing left to restore.
+    #
+    # Removing the last experience takes visited away again. Nothing here does
+    # that — visited is derived from the count, so it follows from the row going.
+    def destroy
+      @experience.destroy!
+
+      head :no_content
     end
 
     private

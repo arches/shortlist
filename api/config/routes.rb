@@ -14,7 +14,7 @@ Rails.application.routes.draw do
       # live: the restaurant's own screen. An Experience has no name and so
       # cannot be picked out by one — the only handle on it is the Restaurant it
       # happened at, which is what nests it here.
-      resources :experiences, only: [ :index, :create, :update ]
+      resources :experiences, only: [ :index, :create, :update, :destroy ]
     end
   end
 end
