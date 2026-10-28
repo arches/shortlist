@@ -7,7 +7,7 @@ module Api
     NOT_FOUND = "No such restaurant is on your list.".freeze
 
     before_action :authenticate_owner!
-    before_action :find_restaurant, only: [ :update ]
+    before_action :find_restaurant, only: [ :update, :destroy ]
 
     # managing-my-list.scenarios.md: the List is the set of one owner's
     # non-removed Restaurants — informal, not an entity, and there is exactly
@@ -37,6 +37,16 @@ module Api
       else
         render_invalid(@restaurant)
       end
+    end
+
+    # Taking a restaurant off the list is a tidying action, and nobody doing it
+    # intends to destroy years of their own notes. So the row survives and its
+    # Experiences survive with it — Removed buys retention, not recovery, and
+    # nothing reads them back.
+    def destroy
+      @restaurant.update!(removed_at: Time.current)
+
+      head :no_content
     end
 
     private
