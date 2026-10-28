@@ -2,13 +2,12 @@ docs/DIRECTIVES.md
 docs/ASSUMPTIONS.md
 
 # Ruby
-/.bundle/
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
-/storage/*
-!/storage/.keep
+/api/.bundle/
+/api/log/*
+!/api/log/.keep
+/api/tmp/*
+!/api/tmp/.keep
+!/api/tmp/pids/.keep
 
 # Node
 node_modules/
