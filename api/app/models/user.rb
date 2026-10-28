@@ -5,6 +5,10 @@ class User < ApplicationRecord
 
   has_secure_password
 
+  # shortlist.data.md, Ownership: a User owns their Refresh tokens, and deleting
+  # a User cascades to them.
+  has_many :refresh_tokens, dependent: :destroy
+
   normalizes :email, with: ->(email) { email.to_s.strip.downcase }
   normalizes :name, with: ->(name) { name.to_s.strip }
 
