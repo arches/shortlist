@@ -1,42 +1,17 @@
 import { screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Restaurant } from "@/api/types";
 import { forgetSession, rememberSession } from "@/session/store";
 import { refused, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
+
+import { aRestaurant } from "./testing";
 
 import type { Mock } from "vitest";
 
 // Derived from managing-my-list.scenarios.md and the list screen in
 // managing-my-list.wireframe.drawio.svg, whose cards read "Italian · not
 // visited" and "Mexican · visited · 2 experiences".
-export function aRestaurant(attributes: Partial<Restaurant> = {}): Restaurant {
-  return {
-    id: 1,
-    user_id: 1,
-    name: "Lilia",
-    url: null,
-    google_maps_url: null,
-    yelp_url: null,
-    address_line_1: null,
-    address_line_2: null,
-    city: null,
-    state: null,
-    postal_code: null,
-    country: null,
-    cuisine: null,
-    specialty: null,
-    notes: null,
-    added_at: "2026-10-01T00:00:00.000Z",
-    updated_at: "2026-10-01T00:00:00.000Z",
-    visited: false,
-    experience_count: 0,
-    last_experienced_on: null,
-    ...attributes,
-  };
-}
-
 describe("my list", () => {
   let fetchMock: Mock;
 

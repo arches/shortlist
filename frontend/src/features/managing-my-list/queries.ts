@@ -1,6 +1,11 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 
-import type { Restaurant } from "@/api/types";
+import type { Restaurant, RestaurantDraft } from "@/api/types";
 import { authenticated } from "@/session/session";
 
 // There is exactly one List per owner and nothing stores it, so the key names
@@ -11,5 +16,18 @@ export function useRestaurants(): UseQueryResult<Restaurant[]> {
   return useQuery({
     queryKey: restaurantsKey,
     queryFn: () => authenticated<Restaurant[]>("/restaurants"),
+  });
+}
+
+export function useAddRestaurant() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (draft: RestaurantDraft) =>
+      authenticated<Restaurant>("/restaurants", {
+        method: "POST",
+        body: { restaurant: draft },
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
   });
 }
