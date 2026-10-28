@@ -9,6 +9,6 @@ Rails.application.routes.draw do
     end
 
     # There is no /list: a List is not an entity and an owner has exactly one.
-    resources :restaurants, only: [ :index, :create ]
+    resources :restaurants, only: [ :index, :create, :update ]
   end
 end
