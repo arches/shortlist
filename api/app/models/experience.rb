@@ -16,6 +16,17 @@ class Experience < ApplicationRecord
   validate :owner_matches_the_restaurants_owner
   validate :occurred_on_or_before_the_day_it_was_recorded
 
+  # shortlist.stack.md: no serializer library. Where a response differs from the
+  # row, an as_json override on the model.
+  #
+  # The one difference is the rating. shortlist.data.md holds it as a decimal
+  # because half-stars are a number and arithmetic over them stays obvious — but
+  # a BigDecimal serializes as the string "4.5", which would hand the frontend a
+  # string to parse back into the number the data model already calls it.
+  def as_json(options = nil)
+    super(options).merge("rating" => rating&.to_f)
+  end
+
   private
     def set_recorded_at
       self.recorded_at ||= Time.current
