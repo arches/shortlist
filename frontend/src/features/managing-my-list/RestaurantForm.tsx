@@ -6,13 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-// managing-my-list.wireframe.drawio.svg draws Name, Cuisine, Website and Notes.
-// It is read as illustrative rather than exhaustive, because "Adding a
-// restaurant with everything I know about it" requires an address and a
-// specialty to be settable and that scenario would otherwise be unreachable.
-// The six address fields are separate, as shortlist.data.md has them — the
+export interface RestaurantField {
+  name: keyof RestaurantDraft;
+  label: string;
+  required?: boolean;
+  placeholder?: string;
+  multiline?: boolean;
+}
+
+// Everything an owner can set, from shortlist.data.md's Restaurant attribute
+// table. The six address fields are separate, as the data model has them — the
 // one-line address in the scenario is shorthand and nothing parses it.
-const FIELDS = [
+//
+// Which of these a dialog shows is the dialog's own decision, because
+// managing-my-list.wireframe.drawio.svg draws one field set for adding and
+// another for editing. So the set arrives as a prop rather than being fixed
+// here, and this constant is only the widest one.
+export const ALL_FIELDS = [
   { name: "name", label: "Name", required: true },
   { name: "cuisine", label: "Cuisine" },
   { name: "specialty", label: "Specialty" },
@@ -25,16 +35,11 @@ const FIELDS = [
   { name: "state", label: "State" },
   { name: "postal_code", label: "Postal code" },
   { name: "country", label: "Country" },
-] as const satisfies readonly {
-  name: keyof RestaurantDraft;
-  label: string;
-  required?: boolean;
-  placeholder?: string;
-}[];
-
-type FieldName = (typeof FIELDS)[number]["name"];
+  { name: "notes", label: "Notes", multiline: true },
+] as const satisfies readonly RestaurantField[];
 
 export interface RestaurantFormProps {
+  fields: readonly RestaurantField[];
   restaurant?: Restaurant | undefined;
   submitLabel: string;
   attributeErrors?: Record<string, string[]>;
@@ -43,10 +48,13 @@ export interface RestaurantFormProps {
   onCancel: () => void;
 }
 
-function initialValues(restaurant: Restaurant | undefined): Record<string, string> {
-  const values: Record<string, string> = { notes: restaurant?.notes ?? "" };
+function initialValues(
+  fields: readonly RestaurantField[],
+  restaurant: Restaurant | undefined,
+): Record<string, string> {
+  const values: Record<string, string> = {};
 
-  for (const field of FIELDS) {
+  for (const field of fields) {
     values[field.name] = restaurant?.[field.name] ?? "";
   }
 
@@ -56,18 +64,22 @@ function initialValues(restaurant: Restaurant | undefined): Record<string, strin
 // Clearing a detail is a distinct act from leaving it alone, and both have to be
 // sayable — otherwise a note written by mistake can never be taken back. An
 // emptied field is sent as null, which is how the API hears "clear this".
-function draftFrom(values: Record<string, string>): RestaurantDraft {
+function draftFrom(
+  fields: readonly RestaurantField[],
+  values: Record<string, string>,
+): RestaurantDraft {
   const draft: Record<string, string | null> = {};
 
-  for (const key of [...FIELDS.map((field) => field.name), "notes" as const]) {
-    const value = (values[key] ?? "").trim();
-    draft[key] = value.length > 0 ? value : null;
+  for (const field of fields) {
+    const value = (values[field.name] ?? "").trim();
+    draft[field.name] = value.length > 0 ? value : null;
   }
 
   return draft as RestaurantDraft;
 }
 
 export function RestaurantForm({
+  fields,
   restaurant,
   submitLabel,
   attributeErrors = {},
@@ -75,7 +87,7 @@ export function RestaurantForm({
   onSubmit,
   onCancel,
 }: RestaurantFormProps) {
-  const [values, setValues] = useState(() => initialValues(restaurant));
+  const [values, setValues] = useState(() => initialValues(fields, restaurant));
 
   function set(name: string, value: string) {
     setValues((current) => ({ ...current, [name]: value }));
@@ -83,12 +95,12 @@ export function RestaurantForm({
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    onSubmit(draftFrom(values));
+    onSubmit(draftFrom(fields, values));
   }
 
   // The wireframe puts a small clear affordance on a filled field. Clearing has
   // to be reachable, and emptying the input is what says it.
-  function clearButtonFor(name: FieldName | "notes") {
+  function clearButtonFor(name: keyof RestaurantDraft) {
     if ((values[name] ?? "").length === 0) return null;
 
     return (
@@ -106,20 +118,29 @@ export function RestaurantForm({
   return (
     <form className="flex flex-col gap-4" onSubmit={submit} noValidate>
       <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto pr-1">
-        {FIELDS.map((field) => (
+        {fields.map((field) => (
           <div key={field.name} className="relative flex flex-col gap-2">
             <Label htmlFor={field.name}>
               {field.label}
-              {"required" in field && field.required ? " *" : ""}
+              {field.required ? " *" : ""}
             </Label>
 
-            <Input
-              id={field.name}
-              name={field.name}
-              placeholder={"placeholder" in field ? field.placeholder : undefined}
-              value={values[field.name] ?? ""}
-              onChange={(event) => set(field.name, event.target.value)}
-            />
+            {field.multiline ? (
+              <Textarea
+                id={field.name}
+                name={field.name}
+                value={values[field.name] ?? ""}
+                onChange={(event) => set(field.name, event.target.value)}
+              />
+            ) : (
+              <Input
+                id={field.name}
+                name={field.name}
+                placeholder={field.placeholder}
+                value={values[field.name] ?? ""}
+                onChange={(event) => set(field.name, event.target.value)}
+              />
+            )}
 
             {clearButtonFor(field.name)}
 
@@ -130,22 +151,6 @@ export function RestaurantForm({
             ))}
           </div>
         ))}
-
-        <div className="relative flex flex-col gap-2">
-          <Label htmlFor="notes">Notes</Label>
-          <Textarea
-            id="notes"
-            name="notes"
-            value={values.notes ?? ""}
-            onChange={(event) => set("notes", event.target.value)}
-          />
-          {clearButtonFor("notes")}
-          {attributeErrors.notes?.map((message) => (
-            <p key={message} role="alert" className="text-destructive text-sm">
-              {message}
-            </p>
-          ))}
-        </div>
       </div>
 
       {attributeErrors.base?.map((message) => (

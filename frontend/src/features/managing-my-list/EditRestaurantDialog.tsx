@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { RestaurantForm } from "./RestaurantForm";
+import { ALL_FIELDS, RestaurantForm } from "./RestaurantForm";
 import { useChangeRestaurant } from "./queries";
 
 interface EditRestaurantDialogProps {
@@ -53,6 +53,7 @@ export function EditRestaurantDialog({ restaurant, onClose }: EditRestaurantDial
           // own values rather than the previous one's.
           <RestaurantForm
             key={restaurant.id}
+            fields={ALL_FIELDS}
             restaurant={restaurant}
             submitLabel="Save"
             attributeErrors={attributeErrors}
