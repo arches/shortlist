@@ -7,6 +7,15 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 
 require "rspec/rails"
 
+# shortlist.stack.md: Webmock is the HTTP stubbing. Nothing in the suite reaches
+# Google, and an unstubbed call fails loudly rather than going out.
+require "webmock/rspec"
+WebMock.disable_net_connect!(allow_localhost: true)
+
+# The Places key is server-side configuration. The suite never spends it, but
+# the client reads it when it is built, so the test environment carries one.
+ENV["SHORTLIST_GOOGLE_PLACES_API_KEY"] ||= "test-places-key"
+
 Rails.root.glob("spec/support/**/*.rb").sort_by(&:to_s).each { |f| require f }
 
 begin

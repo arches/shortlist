@@ -8,6 +8,13 @@ Rails.application.routes.draw do
       post :renewal, to: "session_renewals#create"
     end
 
+    # managing-my-list.adding-a-restaurant.sequence.d2: the browser asks
+    # Shortlist for suggestions and Shortlist asks Google. Not nested under the
+    # list — a suggestion is a Google Place that may be on nobody's list.
+    namespace :places do
+      resources :suggestions, only: [ :index ]
+    end
+
     # There is no /list: a List is not an entity and an owner has exactly one.
     resources :restaurants, only: [ :index, :create, :update, :destroy ] do
       # managing-experiences.wireframe.drawio.svg settles where experiences
