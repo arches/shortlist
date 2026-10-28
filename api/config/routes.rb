@@ -9,6 +9,12 @@ Rails.application.routes.draw do
     end
 
     # There is no /list: a List is not an entity and an owner has exactly one.
-    resources :restaurants, only: [ :index, :create, :update, :destroy ]
+    resources :restaurants, only: [ :index, :create, :update, :destroy ] do
+      # managing-experiences.wireframe.drawio.svg settles where experiences
+      # live: the restaurant's own screen. An Experience has no name and so
+      # cannot be picked out by one — the only handle on it is the Restaurant it
+      # happened at, which is what nests it here.
+      resources :experiences, only: [ :index ]
+    end
   end
 end
