@@ -9,6 +9,12 @@ class Restaurant < ApplicationRecord
 
   belongs_to :user
 
+  # shortlist.data.md, Ownership: a Restaurant owns its Experiences. Were a
+  # Restaurant ever erased for real, its Experiences would go with it — which is
+  # the point of Removed, since a hard delete would destroy the experience
+  # history as a side effect of tidying the list.
+  has_many :experiences, dependent: :destroy
+
   # shortlist.data.md, Derived: Removed is the presence of removed_at. The List
   # is the set of one owner's non-removed Restaurants — informal, not an entity.
   scope :on_the_list, -> { where(removed_at: nil) }
@@ -37,9 +43,35 @@ class Restaurant < ApplicationRecord
     removed_at.present?
   end
 
-  # shortlist.data.md: removed_at never leaves the system in any response.
+  # shortlist.data.md, Derived: none of the three is stored.
+
+  def experience_count
+    experiences.size
+  end
+
+  # Visited is the experience count being greater than zero.
+  def visited?
+    experience_count.positive?
+  end
+
+  # The latest occurred_on across a Restaurant's Experiences; absent when it has
+  # none, or when none of them carry a date.
+  def last_experienced_on
+    experiences.maximum(:occurred_on)
+  end
+
+  # shortlist.data.md: removed_at never leaves the system in any response. The
+  # three derived values are not stored, so they are added here rather than read
+  # off the row — the wireframe's card reads "Mexican . visited . 2 experiences".
+  #
+  # shortlist.stack.md: no serializer library. Where a response differs from the
+  # row, an as_json override on the model.
   def as_json(options = nil)
-    super(options).except("removed_at")
+    super(options).except("removed_at").merge(
+      "visited" => visited?,
+      "experience_count" => experience_count,
+      "last_experienced_on" => last_experienced_on
+    )
   end
 
   private

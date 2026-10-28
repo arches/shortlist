@@ -13,6 +13,10 @@ class User < ApplicationRecord
   # every restaurant they ever recorded. Nothing in the application does that.
   has_many :restaurants, dependent: :destroy
 
+  # A User owns their Experiences too, so deleting one destroys every note they
+  # ever recorded.
+  has_many :experiences, dependent: :destroy
+
   normalizes :email, with: ->(email) { email.to_s.strip.downcase }
   normalizes :name, with: ->(name) { name.to_s.strip }
 
