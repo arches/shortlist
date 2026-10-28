@@ -1,4 +1,5 @@
 import type { Experience } from "@/api/types";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { Stars } from "./Stars";
@@ -10,7 +11,12 @@ import { formatDay, formatInstant } from "./dates";
 // experience carrying only one of them is the ordinary case rather than a
 // degenerate one — "No date" with the day it was written down instead, and
 // "No notes".
-export function ExperienceRow({ experience }: { experience: Experience }) {
+interface ExperienceRowProps {
+  experience: Experience;
+  onEdit: (experience: Experience) => void;
+}
+
+export function ExperienceRow({ experience, onEdit }: ExperienceRowProps) {
   return (
     <Card className="flex flex-col gap-2 p-4">
       <div className="flex items-start justify-between gap-4">
@@ -36,6 +42,17 @@ export function ExperienceRow({ experience }: { experience: Experience }) {
       <p className={experience.notes === null ? "text-muted-foreground text-sm" : "text-sm"}>
         {experience.notes ?? "No notes"}
       </p>
+
+      {/*
+        The wireframe puts "Edit · Remove" at the foot of each row. An
+        experience has no name, so these are the only handle on one — which is
+        why they sit on the row rather than anywhere a name could be typed.
+      */}
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={() => onEdit(experience)}>
+          Edit
+        </Button>
+      </div>
     </Card>
   );
 }

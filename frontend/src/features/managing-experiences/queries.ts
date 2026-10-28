@@ -54,3 +54,14 @@ export function useRecordExperience(restaurantId: number) {
     }),
   );
 }
+
+export function useChangeExperience(restaurantId: number) {
+  return useExperienceMutation(
+    restaurantId,
+    ({ id, draft }: { id: number; draft: ExperienceDraft }) =>
+      authenticated<Experience>(`/restaurants/${restaurantId}/experiences/${id}`, {
+        method: "PATCH",
+        body: { experience: draft },
+      }),
+  );
+}

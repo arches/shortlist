@@ -1,5 +1,9 @@
+import { useState } from "react";
+
+import type { Experience } from "@/api/types";
 import { SessionEnded } from "@/session/session";
 
+import { ChangeExperienceDialog } from "./ChangeExperienceDialog";
 import { ExperienceRow } from "./ExperienceRow";
 import { useExperiences } from "./queries";
 
@@ -13,6 +17,7 @@ import { useExperiences } from "./queries";
 // written down later.
 export function ExperienceList({ restaurantId }: { restaurantId: number }) {
   const { data: experiences, isPending, error } = useExperiences(restaurantId);
+  const [editing, setEditing] = useState<Experience | undefined>();
 
   return (
     <section>
@@ -33,6 +38,12 @@ export function ExperienceList({ restaurantId }: { restaurantId: number }) {
         </p>
       )}
 
+      <ChangeExperienceDialog
+        restaurantId={restaurantId}
+        experience={editing}
+        onClose={() => setEditing(undefined)}
+      />
+
       {experiences && experiences.length === 0 && (
         <p className="text-muted-foreground text-sm">No experiences here yet.</p>
       )}
@@ -41,7 +52,7 @@ export function ExperienceList({ restaurantId }: { restaurantId: number }) {
         <ul className="flex flex-col gap-3">
           {experiences.map((experience) => (
             <li key={experience.id}>
-              <ExperienceRow experience={experience} />
+              <ExperienceRow experience={experience} onEdit={setEditing} />
             </li>
           ))}
         </ul>
