@@ -6,6 +6,7 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 
+import { RestaurantScreen } from "@/features/managing-experiences/RestaurantScreen";
 import { ListScreen } from "@/features/managing-my-list/ListScreen";
 import { SignInScreen } from "@/features/signing-in/SignInScreen";
 import { couldBeSignedIn } from "@/session/store";
@@ -37,6 +38,24 @@ const listRoute = createRoute({
   },
 });
 
+// managing-experiences.wireframe.drawio.svg puts a restaurant's experiences on
+// its own screen, reached from the list. The path mirrors the API's, which nests
+// experiences under the restaurant they happened at.
+const restaurantRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/restaurants/$restaurantId",
+  component: RestaurantRoute,
+  beforeLoad: () => {
+    if (!couldBeSignedIn()) throw redirect({ to: "/sign-in" });
+  },
+});
+
+function RestaurantRoute() {
+  const { restaurantId } = restaurantRoute.useParams();
+
+  return <RestaurantScreen restaurantId={Number(restaurantId)} />;
+}
+
 function SignInRoute() {
   const navigate = signInRoute.useNavigate();
 
@@ -45,7 +64,7 @@ function SignInRoute() {
 
 export function createAppRouter() {
   return createRouter({
-    routeTree: rootRoute.addChildren([listRoute, signInRoute]),
+    routeTree: rootRoute.addChildren([listRoute, restaurantRoute, signInRoute]),
     defaultPreload: false,
   });
 }

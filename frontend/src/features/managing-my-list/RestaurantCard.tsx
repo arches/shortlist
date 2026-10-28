@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 import type { Restaurant } from "@/api/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,7 +36,22 @@ export function RestaurantCard({ restaurant, onEdit, onTakeOff }: RestaurantCard
   return (
     <Card className="flex flex-row items-center justify-between gap-4 p-4">
       <div className="min-w-0">
-        <h2 className="truncate font-medium">{restaurant.name}</h2>
+        {/*
+          managing-experiences.wireframe.drawio.svg draws the restaurant's own
+          screen with a "‹ My list" back link, but this wireframe draws no way
+          into it — the card has only Edit and Remove. The name is the link,
+          because it is the one thing on the card that identifies the restaurant
+          and "When I open 'Joe's Pizza'" reads as opening the thing named.
+        */}
+        <h2 className="truncate font-medium">
+          <Link
+            to="/restaurants/$restaurantId"
+            params={{ restaurantId: String(restaurant.id) }}
+            className="hover:underline"
+          >
+            {restaurant.name}
+          </Link>
+        </h2>
         <p className="text-muted-foreground text-sm">{subtitleOf(restaurant)}</p>
       </div>
 
