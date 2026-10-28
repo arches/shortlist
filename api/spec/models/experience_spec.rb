@@ -1,9 +1,9 @@
 require "rails_helper"
 
 # Derived from shortlist.data.md: the Experience attribute table, the Enumerations
-# section, and the four invariants that name an Experience. There is no HTTP
-# surface for an Experience in this run — recording-an-experience.scenarios.md
-# does not exist, so nothing specifies one.
+# section, and the four invariants that name an Experience. The HTTP surface an
+# owner reaches these through is managing-experiences.scenarios.md, and its specs
+# live under spec/requests/api — what is checked here is the record itself.
 RSpec.describe Experience do
   let(:owner) { create(:user) }
   let(:restaurant) { create(:restaurant, user: owner, name: "Joe's Pizza") }
