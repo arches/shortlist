@@ -54,3 +54,7 @@ export interface IssuedSession {
   refresh_token: string;
   expires_in: number;
 }
+
+// Re-exported so callers that only ever go through the session wrapper do not
+// have to reach into the client module.
+export type { RequestOptions } from "./client";
