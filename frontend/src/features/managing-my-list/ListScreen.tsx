@@ -1,16 +1,27 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import { signOut } from "@/session/session";
+import { SessionEnded, signOut } from "@/session/session";
+
+import { RestaurantCard } from "./RestaurantCard";
+import { useRestaurants } from "./queries";
 
 // managing-my-list.wireframe.drawio.svg: the screen is headed "My list", with a
-// primary Add beside the heading. The list itself arrives in the next commit.
+// primary Add beside the heading and one card per restaurant below it.
 //
 // The wireframe shows no sign-out control. One has to exist — "Signing out when
 // I am done" is a named scenario — so it sits in the header, which is the only
 // chrome the wireframe has.
 export function ListScreen() {
   const navigate = useNavigate();
+  const { data: restaurants, isPending, error } = useRestaurants();
+
+  // Scenario: My session ends in the middle of what I am doing. Only a refused
+  // renewal reaches here, and the answer to it is to ask for a sign-in.
+  useEffect(() => {
+    if (error instanceof SessionEnded) void navigate({ to: "/sign-in" });
+  }, [error, navigate]);
 
   async function leave() {
     try {
@@ -25,10 +36,40 @@ export function ListScreen() {
       <header className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">My list</h1>
 
-        <Button variant="ghost" onClick={() => void leave()}>
-          Sign out
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" onClick={() => void leave()}>
+            Sign out
+          </Button>
+        </div>
       </header>
+
+      {isPending && <p className="text-muted-foreground text-sm">Opening your list…</p>}
+
+      {error && !(error instanceof SessionEnded) && (
+        <p role="alert" className="text-destructive text-sm">
+          {error.message}
+        </p>
+      )}
+
+      {restaurants && restaurants.length === 0 && (
+        <p className="text-muted-foreground text-sm">
+          Nothing on your list yet.
+        </p>
+      )}
+
+      {restaurants && restaurants.length > 0 && (
+        <ul className="flex flex-col gap-3">
+          {restaurants.map((restaurant) => (
+            <li key={restaurant.id}>
+              <RestaurantCard
+                restaurant={restaurant}
+                onEdit={() => undefined}
+                onTakeOff={() => undefined}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   );
 }
