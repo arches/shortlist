@@ -15,5 +15,36 @@ module Api
     def index
       render json: @restaurant.experiences.most_recent_first
     end
+
+    # An experience needs one of a rating, a note or a date, and nothing else.
+    # All three are optional individually because the three reasons to write one
+    # down are different — a score, something worth remembering, and when it
+    # happened — and an owner rarely has all three to hand.
+    #
+    # The owner comes from the scope rather than from the request. An
+    # Experience's owner is the same User as its Restaurant's owner, and
+    # @restaurant was found through this owner's own list, so there is no way to
+    # record one against somebody else.
+    def create
+      experience = @restaurant.experiences.new(experience_params)
+      experience.user = current_owner
+
+      if experience.save
+        render json: experience, status: :created
+      else
+        render_invalid(experience)
+      end
+    end
+
+    private
+      # The three the owner sets. restaurant comes from the path, user from the
+      # scope, recorded_at from the model, and nothing sets updated_at.
+      #
+      # fetch rather than expect: all three are optional on their own, so an
+      # experience with nothing in it has to reach the model to be turned away.
+      # "It is rejected as empty" names that invariant, not a missing parameter.
+      def experience_params
+        params.fetch(:experience, {}).permit(:rating, :notes, :occurred_on)
+      end
   end
 end
