@@ -8,11 +8,23 @@ module Api
     # even when no User was found.
     REFUSAL = "The email or password is wrong.".freeze
 
+    before_action :authenticate_owner!, only: :destroy
+
     def create
       user = User.authenticate_by(email: credentials[:email], password: credentials[:password])
       return render_error(REFUSAL, status: :unauthorized) if user.nil?
 
       render json: issued_session(user), status: :created
+    end
+
+    # signing-in.scenarios.md: signing out destroys every refresh token the
+    # owner has, so no device can renew again. It is not instant on other
+    # devices — one already holding an unexpired access token keeps working
+    # until it expires, and fifteen minutes is the worst case.
+    def destroy
+      current_owner.refresh_tokens.destroy_all
+
+      head :no_content
     end
 
     private
