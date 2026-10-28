@@ -5,6 +5,8 @@ import { subtitleOf } from "@/features/managing-my-list/RestaurantCard";
 import { useRestaurants } from "@/features/managing-my-list/queries";
 import { SessionEnded } from "@/session/session";
 
+import { ExperienceList } from "./ExperienceList";
+
 // managing-experiences.wireframe.drawio.svg settles where experiences live: the
 // restaurant's own screen. It is headed with a "‹ My list" back link, the
 // restaurant's name, and the same subtitle the card on the list carries —
@@ -50,10 +52,14 @@ export function RestaurantScreen({ restaurantId }: { restaurantId: number }) {
       )}
 
       {restaurant && (
-        <header className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight">{restaurant.name}</h1>
-          <p className="text-muted-foreground text-sm">{subtitleOf(restaurant)}</p>
-        </header>
+        <>
+          <header className="mb-6">
+            <h1 className="text-2xl font-semibold tracking-tight">{restaurant.name}</h1>
+            <p className="text-muted-foreground text-sm">{subtitleOf(restaurant)}</p>
+          </header>
+
+          <ExperienceList restaurantId={restaurant.id} />
+        </>
       )}
     </main>
   );

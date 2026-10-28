@@ -47,6 +47,31 @@ export type RestaurantDraft = Partial<
   >
 >;
 
+// The shape the API sends back, from shortlist.data.md's Experience attribute
+// table. rating is a number rather than a string: the column is a decimal, and
+// an as_json override on the model sends it as the number the data model calls
+// it. occurred_on is a plain date with no time and no zone in it; recorded_at
+// is a real instant.
+export interface Experience {
+  id: number;
+  restaurant_id: number;
+  user_id: number;
+  rating: number | null;
+  notes: string | null;
+  occurred_on: string | null;
+  recorded_at: string;
+  updated_at: string;
+}
+
+// The three an owner sets. All three are optional individually, because the
+// three reasons to write an experience down are different — a score, something
+// worth remembering, and when it happened. All three absent is not an
+// experience, which is the one rule that makes the others safe to leave
+// optional, and the API is what enforces it.
+export type ExperienceDraft = Partial<
+  Pick<Experience, "rating" | "notes" | "occurred_on">
+>;
+
 // signing-in.scenarios.md: signing in returns two things, and renewal returns a
 // fresh pair of both.
 export interface IssuedSession {
