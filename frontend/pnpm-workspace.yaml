@@ -1,0 +1,9 @@
+# One package, declared so this file can carry the setting below.
+packages:
+  - "."
+
+# pnpm refuses to run a dependency's build script it was not told about, and
+# keeping that refusal is the point. esbuild is the one exception: its install
+# script puts a prebuilt binary in place.
+allowBuilds:
+  esbuild: true

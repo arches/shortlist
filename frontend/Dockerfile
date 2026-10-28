@@ -7,12 +7,9 @@ RUN corepack enable
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-
-# pnpm refuses to run a dependency's build script it was not told about, and
-# keeping that refusal is the point. esbuild is the one exception: its install
-# script puts a prebuilt binary in place.
-RUN pnpm install --frozen-lockfile --allow-build=esbuild
+# pnpm-workspace.yaml carries the one dependency allowed to run a build script.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
