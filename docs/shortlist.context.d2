@@ -90,12 +90,17 @@ s3: "S3\nFrontend hosting\n\nServes the static frontend assets" {
   class: external
 }
 
+google-places-api: "Google Places API\n\nSource for canonical restaurant details" {
+  class: external
+}
+
 fly: "Fly.io\nAPI hosting\n\nRuns the API as a single always-on container" {
   class: external
 }
 
 user -> shortlist: Restaurant entries and experience notes {class: flow}
 shortlist -> user: Experience details {class: flow}
+google-places-api -> shortlist: Restaurant details {class: flow}
 user -> shortlist: Email and password, at sign-in {class: flow}
 shortlist -> user: A session that keeps the list open {class: flow}
 shortlist -> database: Store application data and credential hashes {class: flow}

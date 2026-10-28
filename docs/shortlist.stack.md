@@ -31,11 +31,18 @@ This is not the dependency list. Nothing here arrived as a dependency of somethi
 | Authentication            | Hand-rolled JWT          |         | Issued and verified by the API itself. There is no identity provider                             |
 | Password hashing          | bcrypt                   |         | Through `has_secure_password`. Shortlist stores the digest and never the password                |
 | Token signing             | HS256                    |         | The `jwt` gem, keyed on `SECRET_KEY_BASE`. One service both signs and verifies, so no public key |
-| Tests                     | RSpec                    |         | `rspec-rails`                                                                                    |
-| Test data                 | factory_bot              |         | Rails fixtures are not used                                                                      |
 | Linting                   | RuboCop                  |         | `rubocop-rails-omakase`, taken as it ships                                                       |
 | Package manager           | Bundler                  |         |                                                                                                  |
 | Configuration and secrets | Environment variables    |         | Read through `ENV.fetch`. Rails encrypted credentials are not used — see **Naming** below        |
+| HTTP Client               | Net::HTTP                |         |                                                                                                  |
+
+## Backend - Testing
+
+| Category      | Selection   | Version | Decision                    |
+| ------------- | ----------- | ------- | --------------------------- |
+| Tests         | RSpec       |         | `rspec-rails`               |
+| Test data     | factory_bot |         | Rails fixtures are not used |
+| HTTP Stubbing | Webmock     |         |                             |
 
 ### Naming
 
@@ -43,13 +50,14 @@ An environment variable keeps the name Rails or a library already reads it under
 
 ## Platform
 
-| Category                      | Selection      | Version | Decision                                                                   |
-| ----------------------------- | -------------- | ------- | -------------------------------------------------------------------------- |
-| Relational database           | PostgreSQL     | 18      |                                                                            |
-| API hosting                   | Fly.io         |         | Always-on, for first-request latency                                       |
-| Frontend hosting              | S3             |         | Static assets                                                              |
-| Local development environment | Docker Compose |         | Runs the API, the frontend dev server and Postgres, so nothing is external |
-| Task runner                   | Make           |         |                                                                            |
+| Category                      | Selection         | Version | Decision                                                                                                               |
+| ----------------------------- | ----------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Relational database           | PostgreSQL        | 18      |                                                                                                                        |
+| API hosting                   | Fly.io            |         | Always-on, for first-request latency                                                                                   |
+| Frontend hosting              | S3                |         | Static assets                                                                                                          |
+| Local development environment | Docker Compose    |         | Runs the API, the frontend dev server and Postgres, so nothing is external                                             |
+| Task runner                   | Make              |         |                                                                                                                        |
+| Restaurant Details            | Google Places API | (New)   | Autocomplete (New) and Place Details (New). Called by the API, never the browser; the key is server-side configuration |
 
 ## Categories with no answer yet
 

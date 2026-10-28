@@ -1,0 +1,150 @@
+# alloy: none — the catalog has no sequence-diagram type. Authored at the owner's
+# direction without an entry, so `/alloy:fit` has nothing to check it against.
+#
+# Render: d2 docs/features/0001_managing-my-list/managing-my-list.adding-a-restaurant.sequence.d2 docs/features/0001_managing-my-list/managing-my-list.adding-a-restaurant.sequence.svg
+#
+# Covers the three add paths in managing-my-list.scenarios.md: the main path, the
+# restaurant already in the system, and the restaurant already on the list.
+#
+# Labels use the quoted "line\nline" form, not |md| block strings: a markdown
+# label replaces the node's shape, which silently drops stroke and
+# border-radius and leaves a white box with no border.
+
+vars: {
+  d2-config: {
+    layout-engine: dagre
+    theme-id: 0
+    pad: 24
+  }
+}
+
+# Paint the canvas, so dark text never lands on a host's dark background.
+style: {
+  fill: "#ffffff"
+}
+
+# Fill and font-color are one decision, set together in every class below.
+classes: {
+  actor: {
+    style: {
+      fill: "#f2f2f2"
+      stroke: "#555555"
+      stroke-width: 1
+      border-radius: 40
+      font-color: "#111111"
+    }
+  }
+  subject: {
+    style: {
+      fill: "#1f5c8b"
+      stroke: "#123f61"
+      stroke-width: 3
+      border-radius: 8
+      font-color: "#ffffff"
+    }
+  }
+  external: {
+    style: {
+      fill: "#ffffff"
+      stroke: "#555555"
+      stroke-width: 1
+      font-color: "#111111"
+    }
+  }
+  call: {
+    style: {
+      stroke: "#333333"
+      stroke-width: 2
+      font-color: "#111111"
+    }
+  }
+  reply: {
+    style: {
+      stroke: "#333333"
+      stroke-width: 2
+      stroke-dash: 4
+      font-color: "#111111"
+    }
+  }
+  note: {
+    style: {
+      fill: "#fdf3d8"
+      stroke: "#8a6d1f"
+      stroke-width: 1
+      font-color: "#111111"
+    }
+  }
+}
+
+title: "Adding a restaurant to my list" {
+  near: top-center
+  shape: text
+  style: {
+    font-size: 28
+    bold: true
+    font-color: "#111111"
+  }
+}
+
+legend: "Solid arrow: a call.   Dashed arrow: its reply.   Grey frame: one branch of an alternative, only one of the pair runs.   Yellow box: a note." {
+  near: bottom-center
+  shape: text
+  style: {
+    font-size: 14
+    font-color: "#111111"
+  }
+}
+
+seq: "" {
+  shape: sequence_diagram
+
+  owner: "Authenticated List owner" {class: actor}
+  app: "Shortlist web app\nReact, in the browser" {class: subject}
+  api: "Shortlist API\nRails" {class: subject}
+  places: "Google Places API" {class: external}
+  db: "PostgreSQL" {class: external}
+
+  owner -> app: "Types \"Tacos El Bronco\"" {class: call}
+
+  app -> api: "GET /places/suggestions?q=Tacos El Bronco" {class: call}
+
+  api."The Places key is server-side configuration,\nso the browser never holds it." {class: note}
+
+  api -> places: "Autocomplete request" {class: call}
+  places -> api: "Suggestions: place ID and description" {class: reply}
+  api -> app: "Suggestions" {class: reply}
+  app -> owner: "Shows the autocomplete suggestions" {class: reply}
+
+  owner -> app: "Selects the right suggestion" {class: call}
+  app -> api: "POST /list/restaurants { google_place_id }" {class: call}
+
+  api -> db: "Find the Restaurant for this Place ID" {class: call}
+
+  "Alt — Restaurant is new to Shortlist": {
+    db -> api: "No such Restaurant" {class: reply}
+    api -> places: "Place Details for this Place ID" {class: call}
+    places -> api: "Name, address, cuisine" {class: reply}
+    api -> db: "Insert the Restaurant, caching those fields" {class: call}
+  }
+
+  "Alt — Restaurant is already in the system": {
+    db -> api: "The existing Restaurant" {class: reply}
+
+    api."Nothing is created. Two owners' lists\nshare one Restaurant row." {class: note}
+  }
+
+  api -> db: "Is this Restaurant already on my List?" {class: call}
+
+  "Alt — Already on my list": {
+    db -> api: "Yes" {class: reply}
+    api -> app: "422 — already on my list" {class: reply}
+    app -> owner: "Rejects the add; the List still shows one entry" {class: reply}
+  }
+
+  "Alt — Not yet on my list": {
+    db -> api: "No" {class: reply}
+    api -> db: "Add the Restaurant to my List" {class: call}
+    api -> app: "201 — the Restaurant, with address and cuisine" {class: reply}
+    app -> owner: "It appears on the List: not visited, no Experiences" {class: reply}
+  }
+}

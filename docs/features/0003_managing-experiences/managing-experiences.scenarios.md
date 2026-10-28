@@ -1,16 +1,16 @@
 # Feature: Managing experiences
 
-**Goal:** Keep an honest record of the meals I have actually eaten — write one down while I still remember it, correct it when I got it wrong, and read the lot back the next time I am deciding where to go.
+**Goal:** Keep an record of the meals I have actually eaten — write one down while I still remember it, correct it when I got it wrong, and read the lot back the next time I am deciding where to go.
 
-**Actor:** The list owner — the same single role as `managing-my-list.scenarios.md`. An experience is readable only by the owner who recorded it.
+**Actor:** The list owner
 
 **Status:** draft.
 
-An experience needs one of a rating, a note or a date, and nothing else. All three are optional individually because the three reasons to write one down are different — a score, something worth remembering, and when it happened — and an owner rarely has all three to hand. All three absent is not an experience, which is the one rule that makes the others safe to leave optional.
+An experience needs either a rating, a note, or a date. All three are optional individually because the reasons to write each one down are different: a score, something worth remembering, and when it happened. All three absent is not an experience.
 
 There is no rating of a restaurant, only of one experience, so nothing here averages anything. A restaurant with a 2 and a 5 shows a 2 and a 5.
 
-An experience has no name, so unlike a restaurant it cannot be picked out by one. The scenarios below identify one by the rating and date the owner can see, which is the only handle the owner has.
+An experience has no name. The scenarios below identify one by the rating and date the owner can see.
 
 Recording an experience is what makes a restaurant read as **visited**. Nothing else sets that, and removing the last experience takes it away again.
 
@@ -45,12 +45,12 @@ Scenario: Recording a rating and nothing else
 ```gherkin
 Scenario: Recording something worth remembering without scoring it
   Given "Tacos El Bronco" is on my list
-  When I record an experience there with the note "Suadero sold out by 8pm" and no rating
+  When I record an experience there with the note "Went here with Sam" and no rating
   Then "Tacos El Bronco" reads as visited
   And that experience shows no rating
 ```
 
-A note with no rating and a rating with no note are both complete experiences, and they are the two commonest shapes. Requiring a rating would turn every meal into a judgement; requiring a note would stop an owner recording the eleven adequate dinners between the memorable ones.
+A note with no rating and a rating with no note are both complete experiences.
 
 ```gherkin
 Scenario: Going back
@@ -70,7 +70,7 @@ Scenario: Two experiences on the same day
   Then "Tacos El Bronco" shows two experiences
 ```
 
-Lunch and dinner are two experiences. Nothing treats a date as something a restaurant can hold only one of.
+Lunch and dinner are two experiences.
 
 ```gherkin
 Scenario: Recording a meal from long before the restaurant went on my list
@@ -232,7 +232,7 @@ Scenario: Managing experiences while signed out
 ## Out of scope
 
 - **Moving an experience to a different restaurant.** An experience recorded against the wrong place is removed and recorded again; its restaurant never changes.
-- **Recovering a removed experience.** It is destroyed, so there is nothing to restore — unlike a restaurant taken off the list, where the open question lives in `shortlist.data.md`.
+- **Recovering a removed experience.** It is destroyed, so there is nothing to restore.
 - **Reaching the experiences of a restaurant that is off my list.** `managing-my-list.scenarios.md` covers that, and it is the same open question.
 - An overall rating, average or ranking across a restaurant's experiences, or across the list.
 - Photos or attachments on an experience.
