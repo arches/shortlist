@@ -13,6 +13,10 @@ class User < ApplicationRecord
   # every restaurant they ever recorded. Nothing in the application does that.
   has_many :restaurants, dependent: :destroy
 
+  # shortlist.data.md, Ownership: deleting a User deletes their lists, and their
+  # list items with them.
+  has_many :lists, dependent: :destroy
+
   # A User owns their Experiences too, so deleting one destroys every note they
   # ever recorded.
   has_many :experiences, dependent: :destroy
@@ -23,4 +27,14 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :name, presence: true
   validates :password, length: { minimum: MINIMUM_PASSWORD_LENGTH }, allow_nil: true
+
+  # shortlist.data.md, Invariants: the default list is called "My List" and is
+  # created when the user is created. There is no moment at which a User exists
+  # without one, so nothing downstream has to cope with an owner who has no List.
+  after_create :create_default_list
+
+  private
+    def create_default_list
+      lists.create!(name: List::DEFAULT_NAME)
+    end
 end

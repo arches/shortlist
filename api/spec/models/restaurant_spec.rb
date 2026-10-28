@@ -205,4 +205,15 @@ RSpec.describe Restaurant do
 
     expect { owner.destroy }.to change(Restaurant, :count).by(-1)
   end
+
+  # shortlist.data.md, Ownership: nothing erases restaurants. A Restaurant
+  # outlives every List item that points at it, and the foreign key is what
+  # refuses — there is no application path that tries.
+  describe "erasing a Restaurant" do
+    it "is refused while a List item points at it" do
+      item = create(:list_item)
+
+      expect { item.restaurant.destroy }.to raise_error(ActiveRecord::InvalidForeignKey)
+    end
+  end
 end

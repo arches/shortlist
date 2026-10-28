@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_27_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_29_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -24,6 +24,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_000004) do
     t.datetime "updated_at", null: false
     t.index ["restaurant_id"], name: "index_experiences_on_restaurant_id"
     t.index ["user_id"], name: "index_experiences_on_user_id"
+  end
+
+  create_table "list_items", force: :cascade do |t|
+    t.bigint "list_id", null: false
+    t.bigint "restaurant_id", null: false
+    t.datetime "added_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["list_id", "restaurant_id"], name: "index_list_items_on_list_id_and_restaurant_id", unique: true
+    t.index ["list_id"], name: "index_list_items_on_list_id"
+    t.index ["restaurant_id"], name: "index_list_items_on_restaurant_id"
+  end
+
+  create_table "lists", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", limit: 255, default: "My List", null: false
+    t.index ["user_id", "name"], name: "index_lists_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_lists_on_user_id"
   end
 
   create_table "refresh_tokens", force: :cascade do |t|
@@ -68,6 +85,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_27_000004) do
 
   add_foreign_key "experiences", "restaurants", on_delete: :cascade
   add_foreign_key "experiences", "users", on_delete: :cascade
+  add_foreign_key "list_items", "lists", on_delete: :cascade
+  add_foreign_key "list_items", "restaurants"
+  add_foreign_key "lists", "users", on_delete: :cascade
   add_foreign_key "refresh_tokens", "users", on_delete: :cascade
   add_foreign_key "restaurants", "users", on_delete: :cascade
 end

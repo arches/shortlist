@@ -15,6 +15,11 @@ class Restaurant < ApplicationRecord
   # history as a side effect of tidying the list.
   has_many :experiences, dependent: :destroy
 
+  # shortlist.data.md, Ownership: nothing erases restaurants, and a Restaurant
+  # outlives every List item that points at it. No dependent option, because
+  # there is nothing to cascade to — the foreign key refuses the delete instead.
+  has_many :list_items
+
   # shortlist.data.md, Derived: Removed is the presence of removed_at. The List
   # is the set of one owner's non-removed Restaurants — informal, not an entity.
   scope :on_the_list, -> { where(removed_at: nil) }

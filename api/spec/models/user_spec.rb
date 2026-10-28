@@ -99,4 +99,33 @@ RSpec.describe User do
       expect(user.authenticate("hunter2")).to be(false)
     end
   end
+
+  # shortlist.data.md, Invariants: the default list is called "My List" and is
+  # created when the user is created.
+  describe "the default list" do
+    it "is created with the User, called \"My List\"" do
+      expect(create(:user).lists.sole.name).to eq("My List")
+    end
+  end
+
+  # shortlist.data.md, Ownership: deleting a User deletes their lists, list
+  # items, experiences and refresh tokens. Nothing in the application does it.
+  describe "deleting a User" do
+    it "deletes their lists and the list items on them" do
+      owner = create(:user)
+      create(:list_item, list: owner.lists.sole)
+
+      expect { owner.destroy! }.to change(List, :count).by(-1)
+        .and change(ListItem, :count).by(-1)
+    end
+
+    it "leaves the Restaurants those list items pointed at standing" do
+      owner = create(:user)
+      item = create(:list_item, list: owner.lists.sole)
+
+      owner.destroy!
+
+      expect(item.restaurant.reload).to be_persisted
+    end
+  end
 end
