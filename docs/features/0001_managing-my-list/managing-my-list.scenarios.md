@@ -20,22 +20,14 @@ Given I am signed in as the owner of my list
 
 ```gherkin
 Scenario: Adding a restaurant I have only heard the name of
-  Given nothing named "Lilia" is on my list
-  When I add "Lilia" to my list
-  Then "Lilia" appears on my list
+  Given nothing named "Tacos El Bronco" is on my list
+  When I add "Tacos El Bronco" with city "Los Angeles"
+  Then "Tacos El Bronco" appears on my list with its city details
   And it does not read as visited
   And it has no experiences
 ```
 
 ## Alternate paths
-
-```gherkin
-Scenario: Adding a restaurant with everything I know about it
-  Given nothing named "Tacos El Bronco" is on my list
-  When I add "Tacos El Bronco" with cuisine "Mexican", specialty "Suadero tacos", address "4324 4th Ave, Brooklyn, NY 11232", site "https://tacoselbronco.com" and the note "Cash only, closes early"
-  Then "Tacos El Bronco" appears on my list with all of those details
-  And it does not read as visited
-```
 
 ```gherkin
 Scenario: Filling in a detail later
@@ -130,8 +122,8 @@ Scenario: Adding a restaurant with no name
 
 ```gherkin
 Scenario Outline: Giving a restaurant a link that is not a web address
-  Given nothing named "Lilia" is on my list
-  When I try to add "Lilia" with a site of <link>
+  Given a restaurant named "Lilia" is on my list
+  When I try to edit "Lilia" with a site of <link>
   Then it is rejected
   And nothing is added to my list
 
