@@ -14,7 +14,7 @@ RUN_TEST := $(COMPOSE) run --rm \
 	api
 
 .DEFAULT_GOAL := help
-.PHONY: help up down build test lint migrate console shell clean
+.PHONY: help up down build test lint migrate console shell user clean
 
 help: ## List the targets
 	@grep -hE '^[a-z][a-z-]*:.*?## ' $(MAKEFILE_LIST) \
@@ -47,6 +47,9 @@ console: .env ## Open a Rails console
 
 shell: .env ## Open a shell in the API container
 	$(RUN_API) bash
+
+user: .env ## Create an account by hand: make user EMAIL=.. NAME=.. PASSWORD=..
+	$(RUN_API) bin/rails "shortlist:user:create[$(EMAIL),$(NAME),$(PASSWORD)]"
 
 clean: ## Stop everything and discard the database volume
 	$(COMPOSE) down --volumes
