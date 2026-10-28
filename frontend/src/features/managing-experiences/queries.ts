@@ -65,3 +65,12 @@ export function useChangeExperience(restaurantId: number) {
       }),
   );
 }
+
+// Destroyed, not retained. Taking a restaurant off the list keeps its
+// experiences; this destroys one outright, which is why the owner confirms it
+// first and why there is nothing to restore afterwards.
+export function useRemoveExperience(restaurantId: number) {
+  return useExperienceMutation(restaurantId, (id: number) =>
+    authenticated<null>(`/restaurants/${restaurantId}/experiences/${id}`, { method: "DELETE" }),
+  );
+}

@@ -5,6 +5,7 @@ import { SessionEnded } from "@/session/session";
 
 import { ChangeExperienceDialog } from "./ChangeExperienceDialog";
 import { ExperienceRow } from "./ExperienceRow";
+import { RemoveExperienceDialog } from "./RemoveExperienceDialog";
 import { useExperiences } from "./queries";
 
 // managing-experiences.wireframe.drawio.svg heads the section "EXPERIENCES" and
@@ -18,6 +19,7 @@ import { useExperiences } from "./queries";
 export function ExperienceList({ restaurantId }: { restaurantId: number }) {
   const { data: experiences, isPending, error } = useExperiences(restaurantId);
   const [editing, setEditing] = useState<Experience | undefined>();
+  const [removing, setRemoving] = useState<Experience | undefined>();
 
   return (
     <section>
@@ -44,6 +46,12 @@ export function ExperienceList({ restaurantId }: { restaurantId: number }) {
         onClose={() => setEditing(undefined)}
       />
 
+      <RemoveExperienceDialog
+        restaurantId={restaurantId}
+        experience={removing}
+        onClose={() => setRemoving(undefined)}
+      />
+
       {experiences && experiences.length === 0 && (
         <p className="text-muted-foreground text-sm">No experiences here yet.</p>
       )}
@@ -52,7 +60,11 @@ export function ExperienceList({ restaurantId }: { restaurantId: number }) {
         <ul className="flex flex-col gap-3">
           {experiences.map((experience) => (
             <li key={experience.id}>
-              <ExperienceRow experience={experience} onEdit={setEditing} />
+              <ExperienceRow
+                experience={experience}
+                onEdit={setEditing}
+                onRemove={setRemoving}
+              />
             </li>
           ))}
         </ul>

@@ -14,9 +14,10 @@ import { formatDay, formatInstant } from "./dates";
 interface ExperienceRowProps {
   experience: Experience;
   onEdit: (experience: Experience) => void;
+  onRemove: (experience: Experience) => void;
 }
 
-export function ExperienceRow({ experience, onEdit }: ExperienceRowProps) {
+export function ExperienceRow({ experience, onEdit, onRemove }: ExperienceRowProps) {
   return (
     <Card className="flex flex-col gap-2 p-4">
       <div className="flex items-start justify-between gap-4">
@@ -51,6 +52,9 @@ export function ExperienceRow({ experience, onEdit }: ExperienceRowProps) {
       <div className="flex gap-2">
         <Button variant="outline" size="sm" onClick={() => onEdit(experience)}>
           Edit
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => onRemove(experience)}>
+          Remove
         </Button>
       </div>
     </Card>
