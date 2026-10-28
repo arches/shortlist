@@ -1,10 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
+import type { Restaurant } from "@/api/types";
 import { Button } from "@/components/ui/button";
 import { SessionEnded, signOut } from "@/session/session";
 
 import { AddRestaurantDialog } from "./AddRestaurantDialog";
+import { EditRestaurantDialog } from "./EditRestaurantDialog";
 import { RestaurantCard } from "./RestaurantCard";
 import { useRestaurants } from "./queries";
 
@@ -18,6 +20,7 @@ export function ListScreen() {
   const navigate = useNavigate();
   const { data: restaurants, isPending, error } = useRestaurants();
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<Restaurant | undefined>();
 
   // Scenario: My session ends in the middle of what I am doing. Only a refused
   // renewal reaches here, and the answer to it is to ask for a sign-in.
@@ -62,6 +65,7 @@ export function ListScreen() {
       )}
 
       <AddRestaurantDialog open={adding} onOpenChange={setAdding} />
+      <EditRestaurantDialog restaurant={editing} onClose={() => setEditing(undefined)} />
 
       {restaurants && restaurants.length > 0 && (
         <ul className="flex flex-col gap-3">
@@ -69,7 +73,7 @@ export function ListScreen() {
             <li key={restaurant.id}>
               <RestaurantCard
                 restaurant={restaurant}
-                onEdit={() => undefined}
+                onEdit={setEditing}
                 onTakeOff={() => undefined}
               />
             </li>

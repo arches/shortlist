@@ -31,3 +31,16 @@ export function useAddRestaurant() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
   });
 }
+
+export function useChangeRestaurant() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, draft }: { id: number; draft: RestaurantDraft }) =>
+      authenticated<Restaurant>(`/restaurants/${id}`, {
+        method: "PATCH",
+        body: { restaurant: draft },
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
+  });
+}
