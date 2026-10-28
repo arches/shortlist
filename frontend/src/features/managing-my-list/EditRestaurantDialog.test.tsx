@@ -178,6 +178,26 @@ describe("changing a restaurant", () => {
     expect(screen.getByRole("heading", { name: "Edit · Bar Primi" })).toBeInTheDocument();
   });
 
+  // Scenario Outline: Giving a restaurant a link that is not a web address. The
+  // outline runs against editing: adding takes a name and a city, so the
+  // Website field only ever appears here.
+  it.each([
+    ["javascript:alert(1)"],
+    ["data:text/html,<h1>hi</h1>"],
+    ["mailto:hi@lilianewyork.com"],
+  ])("reports %s as not a web address, and changes nothing", async (link) => {
+    await openEditorFor(aRestaurant({ name: "Lilia", url: null }));
+    await typeInto("Website", link);
+
+    fetchMock.mockResolvedValueOnce(
+      invalid({ url: ["Url must be a web address beginning http:// or https://"] }),
+    );
+    await pressInDialog("Save");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("must be a web address");
+    expect(screen.getByRole("heading", { name: "Edit · Lilia" })).toBeInTheDocument();
+  });
+
   it("closes once the change is saved", async () => {
     await openEditorFor(aRestaurant({ name: "Lilia" }));
     await typeInto("Cuisine", "Italian");

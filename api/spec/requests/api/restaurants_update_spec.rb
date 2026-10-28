@@ -146,14 +146,47 @@ RSpec.describe "PATCH /api/restaurants/:id" do
       expect(response).to have_http_status(:unprocessable_content)
       expect(restaurant.reload.name).to eq("Lilia")
     end
+  end
 
-    it "rejects a link that is not a web address, and changes nothing" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia", url: "https://lilianewyork.com")
+  # Scenario Outline: Giving a restaurant a link that is not a web address.
+  # Links on a restaurant are rendered as links, so what counts as one is a
+  # decision rather than a formality. The outline runs against editing: adding
+  # takes a name and a city, so a link only ever arrives here.
+  describe "giving it a link that is not a web address" do
+    [
+      [ "javascript:alert(1)", "not a web address, and it gets rendered" ],
+      [ "data:text/html,<h1>hi</h1>", "same" ],
+      [ "mailto:hi@lilianewyork.com", "a web address is what this field means" ]
+    ].each do |link, why|
+      it "rejects #{link} — #{why}" do
+        restaurant = create(:restaurant, user: owner, name: "Lilia", url: "https://lilianewyork.com")
 
-      change_restaurant(restaurant, url: "javascript:alert(1)")
+        change_restaurant(restaurant, url: link)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.parsed_body["errors"]["url"]).to be_present
+        expect(restaurant.reload.url).to eq("https://lilianewyork.com")
+      end
+    end
+
+    it "rejects a bad Google Maps link too" do
+      restaurant = create(:restaurant, user: owner, name: "Lilia")
+
+      change_restaurant(restaurant, google_maps_url: "javascript:alert(1)")
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(restaurant.reload.url).to eq("https://lilianewyork.com")
+      expect(response.parsed_body["errors"]["google_maps_url"]).to be_present
+      expect(restaurant.reload.google_maps_url).to be_nil
+    end
+
+    it "rejects a bad Yelp link too" do
+      restaurant = create(:restaurant, user: owner, name: "Lilia")
+
+      change_restaurant(restaurant, yelp_url: "mailto:hi@lilianewyork.com")
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.parsed_body["errors"]["yelp_url"]).to be_present
+      expect(restaurant.reload.yelp_url).to be_nil
     end
   end
 
