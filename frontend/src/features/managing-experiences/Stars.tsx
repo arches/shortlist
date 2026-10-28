@@ -9,7 +9,9 @@ import { STAR_POSITIONS, fillOf, ratingReads, type StarFill } from "./rating";
 // The stars are decoration and the number is the text: marking the strip
 // aria-hidden stops a reader hearing the rating twice, once as glyphs and once
 // as a number.
-function Star({ fill }: { fill: StarFill }) {
+// Exported so the rating control draws the same star the display does: one
+// drawing, so a half in the control cannot come to look unlike a half on a row.
+export function Star({ fill }: { fill: StarFill }) {
   if (fill === "full") return <span className="text-foreground">★</span>;
   if (fill === "empty") return <span className="text-muted-foreground">☆</span>;
 
