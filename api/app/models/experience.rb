@@ -7,6 +7,15 @@ class Experience < ApplicationRecord
   belongs_to :restaurant
   belongs_to :user
 
+  # managing-experiences.scenarios.md, "Reading a restaurant's experiences back":
+  # most recent first, by the day it happened. "Where an undated experience sits"
+  # puts the ones carrying no date at the end, and "Two experiences on one day,
+  # read back" breaks that tie on which was written down later — which settles
+  # the order rather than because anybody cares which dinner comes first.
+  scope :most_recent_first, -> {
+    order(Arel.sql("occurred_on DESC NULLS LAST, recorded_at DESC"))
+  }
+
   before_validation :set_recorded_at, on: :create
 
   validates :recorded_at, presence: true
