@@ -82,7 +82,7 @@ Scenario Outline: Credentials that do not match an account
     | nobody@fastmail.com     | "hunter2"                      | neither matches anything       |
 ```
 
-One outcome, three causes, deliberately. Telling the three apart would turn the sign-in form into a way to ask whether an address has an account, and a private list whose membership can be probed is not private. This is the rule `managing-my-list.scenarios.md` borrows when it reports another owner's restaurant as not found rather than not permitted, and `recording-an-experience.scenarios.md` is said to match it.
+One outcome, three causes, deliberately. Telling the three apart would turn the sign-in form into a way to ask whether an address has an account, and a private list whose membership can be probed is not private. This is the rule `managing-my-list.scenarios.md` borrows when it reports another owner's restaurant as not found rather than not permitted, and `managing-experiences.scenarios.md` is said to match it.
 
 Nothing else enforces this now that the wording is ours: there is no provider reporting success either way on our behalf, so the refusal for an unknown address and the refusal for a wrong password have to be the same string, produced by the same path, taking the same time.
 

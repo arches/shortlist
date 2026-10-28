@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1160px" height="1260px" viewBox="0 0 1160 1260" content="&lt;mxfile host=&quot;app.diagrams.net&quot; type=&quot;device&quot;&gt;&lt;diagram name=&quot;Managing experiences&quot; id=&quot;0&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;">
+<rect x="0" y="0" width="1160" height="1260" fill="#ffffff" stroke="none"/>
+<text x="42.0" y="48.8" font-family="Helvetica, Arial, sans-serif" font-size="25" font-weight="700" fill="#111111" text-anchor="start">Managing experiences — wireframe</text>
+<text x="42.0" y="76.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#444444" text-anchor="start">Draft. Pairs with managing-experiences.scenarios.md — the ordering, the confirmation and the nine rating values come from it. Settles where experiences live: the restaurant&#x27;s own screen.</text>
+<line x1="40" y1="92" x2="1120" y2="92" stroke="#999999" stroke-width="1"/>
+<rect x="40" y="112" width="520" height="498" fill="#ffffff" stroke="#555555" stroke-width="2"/>
+<rect x="40" y="112" width="520" height="54" fill="#f2f2f2" stroke="#555555" stroke-width="2"/>
+<text x="60.0" y="131.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="start">‹  My list</text>
+<text x="60.0" y="155.2" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#111111" text-anchor="start">Joe&#x27;s Pizza</text>
+<text x="540.0" y="153.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="end">Pizza · visited · 3 experiences</text>
+<rect x="58" y="184" width="186" height="28" fill="#1f5c8b" stroke="#123f61" stroke-width="1"/>
+<text x="151.0" y="201.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">+  Record an experience</text>
+<text x="60.0" y="243.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#666666" text-anchor="start">EXPERIENCES</text>
+<line x1="58" y1="252" x2="542" y2="252" stroke="#999999" stroke-width="1"/>
+<text x="74.0" y="289.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="94.7" y="289.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="115.5" y="289.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="136.2" y="289.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="157.0" y="289.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="181.2" y="288.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#111111" text-anchor="start">4</text>
+<text x="540.0" y="288.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#111111" text-anchor="end">24 Oct 2026</text>
+<text x="68.0" y="324.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">Corner slice, still the best one</text>
+<text x="540.0" y="343.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#1f5c8b" text-anchor="end">Edit  ·  Remove</text>
+<line x1="58" y1="346" x2="542" y2="346" stroke="#999999" stroke-width="1"/>
+<text x="74.0" y="381.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="94.7" y="381.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="115.5" y="381.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="136.2" y="381.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="157.0" y="381.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="181.2" y="380.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#111111" text-anchor="start">3</text>
+<text x="540.0" y="380.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#111111" text-anchor="end">2 May 2026</text>
+<text x="68.0" y="416.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start" font-style="italic">No notes</text>
+<text x="540.0" y="435.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#1f5c8b" text-anchor="end">Edit  ·  Remove</text>
+<line x1="58" y1="438" x2="542" y2="438" stroke="#999999" stroke-width="1"/>
+<text x="74.0" y="473.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="94.7" y="473.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="115.5" y="473.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="136.2" y="473.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<rect x="136.22" y="453.55" width="9.774999999999999" height="28.9" fill="#ffffff" stroke="none"/>
+<text x="136.2" y="473.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="157.0" y="473.9" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="181.2" y="472.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#111111" text-anchor="start">3.5</text>
+<text x="540.0" y="472.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="end">No date</text>
+<text x="540.0" y="489.5" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="400" fill="#666666" text-anchor="end" font-style="italic">recorded 20 Oct 2026</text>
+<text x="68.0" y="508.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">Queue out the door</text>
+<text x="540.0" y="527.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#1f5c8b" text-anchor="end">Edit  ·  Remove</text>
+<rect x="58" y="544" width="484" height="48" fill="#fff8e1" stroke="#8a6d1f" stroke-width="1" stroke-dasharray="5 3"/>
+<text x="72.0" y="564.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">Newest first, by the day it happened. Undated experiences come last.</text>
+<text x="72.0" y="582.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">Remove opens the confirmation drawn below.</text>
+<rect x="600" y="112" width="520" height="498" fill="#ffffff" stroke="#555555" stroke-width="2"/>
+<rect x="600" y="112" width="520" height="54" fill="#f2f2f2" stroke="#555555" stroke-width="2"/>
+<text x="620.0" y="137.2" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#111111" text-anchor="start">Record an experience</text>
+<text x="620.0" y="155.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="start">Joe&#x27;s Pizza</text>
+<text x="620.0" y="199.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#666666" text-anchor="start">RATING</text>
+<text x="678.0" y="199.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="start">optional</text>
+<text x="638.0" y="241.1" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="669.7" y="241.1" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="701.4" y="241.1" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="733.2" y="241.1" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<rect x="733.16" y="209.9" width="14.95" height="44.199999999999996" fill="#ffffff" stroke="none"/>
+<text x="733.2" y="241.1" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="764.9" y="241.1" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="798.5" y="236.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#111111" text-anchor="start">3.5</text>
+<text x="1100.0" y="235.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#1f5c8b" text-anchor="end">Clear  ✕</text>
+<text x="620.0" y="269.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">Click the left half of a star for a half star. Clear leaves it with no rating at all.</text>
+<text x="620.0" y="305.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#666666" text-anchor="start">WHEN</text>
+<text x="668.0" y="305.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="start">optional</text>
+<rect x="618" y="314" width="230" height="30" fill="#ffffff" stroke="#555555" stroke-width="1"/>
+<text x="632.0" y="333.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#111111" text-anchor="start">24 Oct 2026</text>
+<text x="838.0" y="333.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#444444" text-anchor="end">▾</text>
+<text x="864.0" y="332.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">Leave empty if you can&#x27;t remember.</text>
+<text x="620.0" y="381.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#666666" text-anchor="start">NOTES</text>
+<text x="672.0" y="381.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="start">optional</text>
+<rect x="618" y="390" width="484" height="84" fill="#ffffff" stroke="#555555" stroke-width="1"/>
+<text x="632.0" y="414.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#111111" text-anchor="start">Corner slice, still the best one</text>
+<rect x="618" y="490" width="484" height="36" fill="#fff8e1" stroke="#8a6d1f" stroke-width="1" stroke-dasharray="5 3"/>
+<text x="632.0" y="511.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">At least one of the three. Save stays disabled while all three are empty.</text>
+<rect x="870" y="548" width="108" height="32" fill="#ffffff" stroke="#555555" stroke-width="1"/>
+<text x="924.0" y="567.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#111111" text-anchor="middle">Cancel</text>
+<rect x="990" y="548" width="112" height="32" fill="#1f5c8b" stroke="#123f61" stroke-width="1"/>
+<text x="1046.0" y="567.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">Save</text>
+<rect x="40" y="645" width="1080" height="280" fill="#ffffff" stroke="#555555" stroke-width="2"/>
+<rect x="40" y="645" width="1080" height="42" fill="#f2f2f2" stroke="#555555" stroke-width="2"/>
+<text x="60.0" y="670.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#111111" text-anchor="start">The rating control</text>
+<text x="1100.0" y="669.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="end">Nine values: 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5 — plus no rating, which is not nought.</text>
+<text x="80.0" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="104.4" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="128.8" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="153.2" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="177.6" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="70.0" y="773.5" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#111111" text-anchor="start">No rating</text>
+<text x="70.0" y="792.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">the default, and not a score of nought</text>
+<text x="338.0" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="362.4" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="386.8" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="411.2" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="435.6" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="328.0" y="773.5" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#111111" text-anchor="start">1</text>
+<text x="328.0" y="792.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">the lowest there is</text>
+<text x="596.0" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="620.4" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="644.8" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<rect x="644.8" y="716.0" width="11.5" height="34.0" fill="#ffffff" stroke="none"/>
+<text x="644.8" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="669.2" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="693.6" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="586.0" y="773.5" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#111111" text-anchor="start">2.5</text>
+<text x="586.0" y="792.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">half steps all the way up</text>
+<text x="854.0" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="878.4" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="902.8" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="927.2" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="951.6" y="740.0" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="844.0" y="773.5" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#111111" text-anchor="start">5</text>
+<text x="844.0" y="792.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">the top</text>
+<line x1="58" y1="809" x2="1102" y2="809" stroke="#999999" stroke-width="1"/>
+<text x="78.0" y="837.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#111111" text-anchor="start">Choosing a half</text>
+<text x="114.0" y="888.9" font-family="Helvetica, Arial, sans-serif" font-size="34" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<rect x="114" y="848.1" width="19.549999999999997" height="57.8" fill="#ffffff" stroke="none"/>
+<text x="114.0" y="888.9" font-family="Helvetica, Arial, sans-serif" font-size="34" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<line x1="114" y1="853" x2="114" y2="901" stroke="#111111" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="158.0" y="870.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">Left half of the star → 2.5</text>
+<text x="158.0" y="890.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">Right half of the star → 3</text>
+<text x="382.0" y="870.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">One control, nine reachable values, and no way to express 0, 3.7 or 5.5 — the three things</text>
+<text x="382.0" y="890.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">the scenarios reject. A slider or a number field would let the owner type all three.</text>
+<rect x="40" y="945" width="1080" height="200" fill="#ffffff" stroke="#555555" stroke-width="2"/>
+<rect x="40" y="945" width="1080" height="42" fill="#f2f2f2" stroke="#555555" stroke-width="2"/>
+<text x="60.0" y="970.9" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#111111" text-anchor="start">Removing an experience</text>
+<text x="1100.0" y="969.9" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="end">Confirmed first. The experience is destroyed, not kept.</text>
+<rect x="70" y="1005" width="380" height="112" fill="#ffffff" stroke="#555555" stroke-width="2"/>
+<text x="88.0" y="1031.5" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#111111" text-anchor="start">Remove this experience?</text>
+<text x="92.0" y="1055.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="106.6" y="1055.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="121.3" y="1055.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="135.9" y="1055.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<rect x="135.92000000000002" y="1040.8" width="6.8999999999999995" height="20.4" fill="#ffffff" stroke="none"/>
+<text x="135.9" y="1055.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="150.6" y="1055.2" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="164.0" y="1054.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#666666" text-anchor="start">Queue out the door · no date</text>
+<text x="88.0" y="1076.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#111111" text-anchor="start">This cannot be undone.</text>
+<rect x="226" y="1085" width="100" height="26" fill="#ffffff" stroke="#555555" stroke-width="1"/>
+<text x="276.0" y="1101.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#111111" text-anchor="middle">Cancel</text>
+<rect x="338" y="1085" width="100" height="26" fill="#1f5c8b" stroke="#123f61" stroke-width="1"/>
+<text x="388.0" y="1101.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">Remove</text>
+<text x="488.0" y="1028.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">Confirmed because it cannot be undone. Taking a restaurant off the list is</text>
+<text x="488.0" y="1048.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">confirmed too, but that keeps its experiences — this destroys the note outright.</text>
+<text x="488.0" y="1080.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">The dialog names the experience, which is the only way to tell apart several</text>
+<text x="488.0" y="1100.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="start">recorded at the same restaurant.</text>
+<rect x="40" y="1175" width="1080" height="66" fill="#ffffff" stroke="#999999" stroke-width="1"/>
+<text x="60.0" y="1198.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#666666" text-anchor="start">LEGEND</text>
+<rect x="58" y="1211" width="22" height="16" fill="#ffffff" stroke="#555555" stroke-width="1"/>
+<text x="90.0" y="1222.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">on screen</text>
+<rect x="168" y="1211" width="22" height="16" fill="#fff8e1" stroke="#8a6d1f" stroke-width="1" stroke-dasharray="5 3"/>
+<text x="200.0" y="1222.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">annotation, not on screen</text>
+<text x="388.0" y="1224.2" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<text x="404.0" y="1222.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">whole star given</text>
+<text x="538.0" y="1224.2" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#c77700" text-anchor="middle">★</text>
+<rect x="538" y="1206.25" width="8.625" height="25.5" fill="#ffffff" stroke="none"/>
+<text x="538.0" y="1224.2" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="554.0" y="1222.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">half star given</text>
+<text x="668.0" y="1224.2" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="400" fill="#999999" text-anchor="middle">☆</text>
+<text x="684.0" y="1222.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#111111" text-anchor="start">not given</text>
+<text x="1100.0" y="1222.8" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#444444" text-anchor="end">Fill and outline change together, so these survive greyscale.</text>
+</svg>

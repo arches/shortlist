@@ -8,7 +8,7 @@
 
 A restaurant needs a name and nothing else. Every other detail is optional, because the usual way a restaurant arrives is as a name somebody mentioned.
 
-Names are unique per user, which is what lets `recording-an-experience.scenarios.md` treat a name as a way to identify a restaurant. So the paths that end differently here are mostly the ones where a name collides, and the one where a restaurant with history is taken off the list.
+Names are unique per user, which is what lets `managing-experiences.scenarios.md` treat a name as a way to identify a restaurant. So the paths that end differently here are mostly the ones where a name collides, and the one where a restaurant with history is taken off the list.
 
 Background:
 
@@ -158,7 +158,7 @@ Scenario Outline: Changing a restaurant I cannot reach
     | the restaurant was never on my list at all      |
 ```
 
-A restaurant belonging to someone else is reported the same way as one that does not exist. Saying "not allowed" instead would confirm that another owner's restaurant exists, which is the same reasoning behind the deliberately generic sign-in failure and the matching rule in `recording-an-experience.scenarios.md`.
+A restaurant belonging to someone else is reported the same way as one that does not exist. Saying "not allowed" instead would confirm that another owner's restaurant exists, which is the same reasoning behind the deliberately generic sign-in failure and the matching rule in `managing-experiences.scenarios.md`.
 
 ```gherkin
 Scenario: Managing my list while signed out
@@ -171,7 +171,7 @@ Scenario: Managing my list while signed out
 ## Out of scope
 
 - **Restoring a restaurant taken off the list.** The data is retained, so this is buildable, but nothing exposes it and `shortlist.data.md` carries that as an open question.
-- Recording, editing or removing an experience — `recording-an-experience.scenarios.md` and its follow-ons.
+- Recording, changing or removing an experience — `managing-experiences.scenarios.md`.
 - Sharing a list, or seeing anybody else's.
 - Photos or attachments.
 - Geocoding an address, map display, and importing from Google Maps or anywhere else.
