@@ -1,135 +1,124 @@
 require "rails_helper"
 
-# Derived from managing-my-list.scenarios.md and shortlist.data.md's History and
-# retention section: Removed buys retention, not recovery.
+# Derived from shortlist.data.md's Ownership statements — removing a list item
+# destroys that row and nothing else — and from the Remove confirmation in
+# managing-my-list.wireframe.drawio. The refusals match RestaurantScope.
 RSpec.describe "DELETE /api/restaurants/:id" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }
 
-  def take_off(restaurant_or_id, headers = headers_for(owner))
-    id = restaurant_or_id.respond_to?(:id) ? restaurant_or_id.id : restaurant_or_id
+  def take_off(id, headers = headers_for(owner))
     delete "/api/restaurants/#{id}", headers: headers, as: :json
   end
 
-  def get_the_list
-    get "/api/restaurants", headers: headers_for(owner), as: :json
-  end
-
-  # Scenario: Taking a restaurant off my list that I have visited
   describe "a restaurant I have visited" do
-    let!(:joes) { create(:restaurant, user: owner, name: "Joe's Pizza") }
-    let!(:experiences) { create_list(:experience, 2, restaurant: joes, user: owner) }
+    let(:restaurant) { create(:restaurant, on_the_list_of: owner, name: "Joe's Pizza") }
+    let!(:experiences) { create_list(:experience, 2, restaurant: restaurant, user: owner) }
 
     it "takes it off my list" do
-      take_off(joes)
+      take_off(restaurant.id)
 
       expect(response).to have_http_status(:no_content)
+      expect(owner.restaurants.reload).to be_empty
     end
 
-    it "leaves nothing named Joe's Pizza on my list" do
-      take_off(joes)
-      get_the_list
+    it "destroys the List item and nothing else" do
+      expect { take_off(restaurant.id) }.to change(ListItem, :count).by(-1)
 
-      expect(response.parsed_body.map { |r| r["name"] }).not_to include("Joe's Pizza")
+      expect(Restaurant.exists?(restaurant.id)).to be(true)
     end
 
-    # "And I can no longer reach those experiences." Nothing in the application
-    # reads them back.
-    it "puts those experiences out of reach" do
-      take_off(joes)
-      get_the_list
+    # managing-experiences.wireframe.drawio.svg: taking a restaurant off the
+    # list keeps its experiences. They stand, out of reach until it goes back
+    # on — shortlist.data.md, Invariants.
+    it "leaves my experiences at it standing" do
+      expect { take_off(restaurant.id) }.not_to change(Experience, :count)
 
-      expect(response.parsed_body).to eq([])
+      expect(experiences.map { |e| Experience.exists?(e.id) }).to all(be(true))
     end
 
-    # Those experiences are retained rather than erased: a hard delete would
-    # destroy years of the owner's own notes as a side effect of tidying.
-    it "retains the experiences rather than erasing them" do
-      expect { take_off(joes) }.not_to change(Experience, :count)
+    # A Restaurant is shared, so somebody else's list is untouched by mine.
+    it "leaves it on another owner's list" do
+      somebody_else = create(:user)
+      create(:list_item, list: somebody_else.lists.sole, restaurant: restaurant)
 
-      expect(Experience.where(id: experiences.map(&:id)).count).to eq(2)
-    end
+      take_off(restaurant.id)
 
-    it "retains the restaurant row itself" do
-      expect { take_off(joes) }.not_to change(Restaurant, :count)
-
-      expect(joes.reload).to be_removed
-    end
-
-    it "frees the name for a new restaurant" do
-      take_off(joes)
-
-      post "/api/restaurants", params: { restaurant: { name: "Joe's Pizza" } },
-        headers: headers_for(owner), as: :json
-
-      expect(response).to have_http_status(:created)
-      expect(response.parsed_body["experience_count"]).to eq(0)
+      expect(somebody_else.restaurants.reload).to contain_exactly(restaurant)
     end
   end
 
   describe "a restaurant I have never been to" do
     it "takes it off my list" do
-      lilia = create(:restaurant, user: owner, name: "Lilia")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Bar Primi")
 
-      take_off(lilia)
+      take_off(restaurant.id)
 
       expect(response).to have_http_status(:no_content)
-      expect(lilia.reload).to be_removed
+      expect(owner.restaurants.reload).to be_empty
     end
   end
 
-  # Scenario Outline: Changing a restaurant I cannot reach — "When I try to
-  # change or remove it", so removal takes the same three rows.
+  # Putting it back on is an ordinary add. What does not come back is reach of
+  # the old experiences until it does — they were never destroyed.
+  describe "putting it back on afterwards" do
+    it "brings my old experiences back into reach" do
+      restaurant = create(:restaurant, on_the_list_of: owner, google_place_id: "ChIJJoes")
+      create(:experience, restaurant: restaurant, user: owner)
+
+      take_off(restaurant.id)
+      post "/api/restaurants",
+        params: { restaurant: { google_place_id: "ChIJJoes" } },
+        headers: headers_for(owner), as: :json
+
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["experience_count"]).to eq(1)
+      expect(response.parsed_body["visited"]).to be(true)
+    end
+  end
+
+  # One refusal for every restaurant I cannot reach. "Belongs to another user"
+  # is not a case that exists any more — a Restaurant is shared — so what it
+  # used to mean is a Place on somebody else's list and not on mine.
   describe "a restaurant I cannot reach" do
-    it "reports a restaurant belonging to another owner as not found" do
-      theirs = create(:restaurant, user: create(:user), name: "Joe's Pizza")
+    it "reports one on somebody else's list as not found" do
+      theirs = create(:restaurant, on_the_list_of: create(:user))
 
-      take_off(theirs)
+      take_off(theirs.id)
 
       expect(response).to have_http_status(:not_found)
-      expect(response.parsed_body["error"]).to eq("No such restaurant is on your list.")
-      expect(theirs.reload).not_to be_removed
+      expect(ListItem.count).to eq(1)
     end
 
-    it "reports a restaurant already off my list as not found" do
-      taken_off = create(:restaurant, :removed, user: owner, name: "Joe's Pizza",
-        removed_at: 1.week.ago)
+    it "reports one already off my list as not found" do
+      restaurant = create(:restaurant)
 
-      take_off(taken_off)
-
-      expect(response).to have_http_status(:not_found)
-      expect(taken_off.reload.removed_at).to be_within(1.second).of(1.week.ago)
-    end
-
-    it "reports a restaurant that was never on my list as not found" do
-      take_off(0)
+      take_off(restaurant.id)
 
       expect(response).to have_http_status(:not_found)
-      expect(response.parsed_body["error"]).to eq("No such restaurant is on your list.")
     end
 
     it "reports all three in one identical wording" do
-      theirs = create(:restaurant, user: create(:user), name: "Joe's Pizza")
-      already_off = create(:restaurant, :removed, user: owner, name: "Bar Primi")
-
-      bodies = [ theirs.id, already_off.id, 0 ].map do |id|
+      wordings = [
+        create(:restaurant, on_the_list_of: create(:user)).id,
+        create(:restaurant).id,
+        0
+      ].map do |id|
         take_off(id)
-        [ response.status, response.body ]
+        [ response.status, response.parsed_body["error"] ]
       end
 
-      expect(bodies.uniq.length).to eq(1)
+      expect(wordings.uniq.size).to eq(1)
+      expect(wordings.first).to eq([ 404, RestaurantScope::NOT_FOUND ])
     end
   end
 
-  # Scenario: Managing my list while signed out
   describe "when my session has ended" do
     it "asks me to sign in, and takes nothing off my list" do
-      lilia = create(:restaurant, user: owner, name: "Lilia")
+      restaurant = create(:restaurant, on_the_list_of: owner)
 
-      take_off(lilia, {})
+      expect { take_off(restaurant.id, {}) }.not_to change(ListItem, :count)
 
       expect(response).to have_http_status(:unauthorized)
-      expect(response.parsed_body["error"]).to eq("Sign in to continue.")
-      expect(lilia.reload).not_to be_removed
     end
   end
 end

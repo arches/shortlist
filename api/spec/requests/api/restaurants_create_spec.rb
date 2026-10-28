@@ -1,161 +1,157 @@
 require "rails_helper"
 
-# Derived from managing-my-list.scenarios.md. Background: I am signed in as the
-# owner of my list.
+# Derived from managing-my-list.scenarios.md, its three add paths, and the
+# sequence diagram that routes them. Background: I am signed in as the owner of
+# my list.
 RSpec.describe "POST /api/restaurants" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }
 
-  def add(attributes, headers = headers_for(owner))
-    post "/api/restaurants", params: { restaurant: attributes }, headers: headers, as: :json
+  def add(google_place_id, headers = headers_for(owner))
+    post "/api/restaurants",
+      params: { restaurant: { google_place_id: google_place_id } },
+      headers: headers,
+      as: :json
   end
 
-  # Scenario: Adding a restaurant I have only heard the name of
-  describe "with a name and a city" do
-    it "puts it on my list, keeping its city" do
-      add(name: "Tacos El Bronco", city: "Los Angeles")
+  def stub_tacos_el_bronco
+    stub_place_details(
+      "ChIJTacos",
+      place_details_body(
+        google_place_id: "ChIJTacos",
+        name: "Tacos El Bronco",
+        cuisine: "Mexican restaurant",
+        components: [
+          address_component("4324", "4324", "street_number"),
+          address_component("4th Avenue", "4th Ave", "route"),
+          address_component("Brooklyn", "Brooklyn", "locality"),
+          address_component("New York", "NY", "administrative_area_level_1")
+        ]
+      )
+    )
+  end
+
+  # Scenario: Adding new restaurant
+  describe "a Place that is new to Shortlist" do
+    before { stub_tacos_el_bronco }
+
+    it "puts it on my list with its address and cuisine" do
+      add("ChIJTacos")
 
       expect(response).to have_http_status(:created)
       expect(response.parsed_body).to include(
         "name" => "Tacos El Bronco",
-        "city" => "Los Angeles"
+        "cuisine" => "Mexican restaurant",
+        "address_line_1" => "4324 4th Avenue",
+        "city" => "Brooklyn",
+        "state" => "NY"
       )
-      expect(owner.restaurants.on_the_list.sole.city).to eq("Los Angeles")
     end
 
     it "does not read as visited, and has no experiences" do
-      add(name: "Tacos El Bronco", city: "Los Angeles")
+      add("ChIJTacos")
 
       expect(response.parsed_body["visited"]).to be(false)
       expect(response.parsed_body["experience_count"]).to eq(0)
     end
 
-    it "records when it went on the list" do
-      freeze_time do
-        add(name: "Tacos El Bronco", city: "Los Angeles")
+    it "creates the Restaurant and the List item that puts it on my list" do
+      expect { add("ChIJTacos") }
+        .to change(Restaurant, :count).by(1)
+        .and change(ListItem, :count).by(1)
 
-        expect(owner.restaurants.sole.added_at).to eq(Time.current)
+      expect(owner.restaurants.sole.google_place_id).to eq("ChIJTacos")
+    end
+
+    it "records when it went on my list" do
+      freeze_time do
+        add("ChIJTacos")
+
+        expect(owner.lists.sole.list_items.sole.added_at).to eq(Time.current)
       end
     end
   end
 
-  # shortlist.data.md, optionality: city is optional, and the name is the only
-  # thing a Restaurant cannot be created without.
-  describe "with only a name" do
-    it "puts it on my list with no city" do
-      add(name: "Lilia")
-
-      expect(response).to have_http_status(:created)
-      expect(response.parsed_body["name"]).to eq("Lilia")
-      expect(owner.restaurants.on_the_list.sole.city).to be_nil
+  # Scenario: Adding a restaurant that exists in the system but not on my list
+  describe "a Place already in the system" do
+    let!(:existing) do
+      create(:restaurant, on_the_list_of: create(:user),
+        google_place_id: "ChIJTacos", name: "Tacos El Bronco")
     end
-  end
 
-  # Adding takes the name and the city and nothing else — see ASSUMPTIONS.md,
-  # "What adding a restaurant takes". Anything else is filled in later, through
-  # update, which is where the link rejection is now reached.
-  describe "with a detail the Add dialog does not offer" do
-    it "ignores it rather than storing it" do
-      add(name: "Lilia", cuisine: "Italian", url: "https://lilianewyork.com")
+    it "puts it on my list without creating a second Restaurant" do
+      expect { add("ChIJTacos") }.to change(ListItem, :count).by(1)
 
+      expect(Restaurant.count).to eq(1)
       expect(response).to have_http_status(:created)
-      expect(owner.restaurants.on_the_list.sole).to have_attributes(
-        name: "Lilia",
-        cuisine: nil,
-        url: nil
-      )
+      expect(owner.restaurants.sole).to eq(existing)
+    end
+
+    # Only a Place new to Shortlist costs a Place Details call, which is the
+    # one ADR 0001 says we eventually pay for.
+    it "does not ask Google for details it already has" do
+      add("ChIJTacos")
+
+      expect(a_request(:get, //)).not_to have_been_made
+    end
+
+    it "does not read as visited on mine, whatever the other owner has done" do
+      create(:experience, restaurant: existing, user: existing.list_items.sole.list.user)
+
+      add("ChIJTacos")
+
+      expect(response.parsed_body["visited"]).to be(false)
+      expect(response.parsed_body["experience_count"]).to eq(0)
     end
   end
 
   # Scenario: Adding a restaurant that is already on my list
-  describe "when it is already on my list" do
-    it "is rejected as already on my list" do
-      create(:restaurant, user: owner, name: "Joe's Pizza")
+  describe "a Place already on my list" do
+    before do
+      create(:restaurant, on_the_list_of: owner,
+        google_place_id: "ChIJJoes", name: "Joe's Pizza")
+    end
 
-      add(name: "Joe's Pizza")
+    it "is rejected as already on my list" do
+      add("ChIJJoes")
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(response.parsed_body["errors"]["name"]).to include("Name is already on your list")
+      expect(response.parsed_body["errors"].values.flatten.join)
+        .to include("already on your list")
     end
 
     it "leaves my list showing one Joe's Pizza" do
-      create(:restaurant, user: owner, name: "Joe's Pizza")
+      expect { add("ChIJJoes") }.not_to change(ListItem, :count)
 
-      expect { add(name: "Joe's Pizza") }.not_to change(Restaurant, :count)
-
-      expect(owner.restaurants.on_the_list.count).to eq(1)
-    end
-
-    it "is rejected however the name was typed" do
-      create(:restaurant, user: owner, name: "Joe's Pizza")
-
-      add(name: "  joe's PIZZA ")
-
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(owner.restaurants.pluck(:name)).to eq([ "Joe's Pizza" ])
     end
   end
 
-  # Scenario: Adding a restaurant with no name
-  describe "with no name" do
-    it "rejects a name that is only whitespace, and adds nothing" do
-      expect { add(name: "   ") }.not_to change(Restaurant, :count)
+  describe "with no Place picked" do
+    it "is rejected, and adds nothing" do
+      expect { add("") }.not_to change(ListItem, :count)
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(response.parsed_body["errors"]["name"]).to be_present
-    end
-
-    it "rejects an absent name, and adds nothing" do
-      expect { add(city: "Los Angeles") }.not_to change(Restaurant, :count)
-
-      expect(response).to have_http_status(:unprocessable_content)
+      expect(a_request(:get, //)).not_to have_been_made
     end
   end
 
-  # Scenario: Adding a restaurant I previously took off my list
-  describe "when I previously took it off my list" do
-    it "puts a new one on my list rather than colliding" do
-      create(:restaurant, :removed, user: owner, name: "Joe's Pizza")
+  describe "when Google cannot be reached" do
+    it "reports it, and adds nothing" do
+      stub_request(:get, "https://places.googleapis.com/v1/places/ChIJTacos").to_timeout
 
-      add(name: "Joe's Pizza")
+      expect { add("ChIJTacos") }.not_to change(Restaurant, :count)
 
-      expect(response).to have_http_status(:created)
-      expect(owner.restaurants.on_the_list.sole.name).to eq("Joe's Pizza")
-    end
-
-    # What comes back is a new restaurant that happens to share a name — the old
-    # experiences do not return with it.
-    it "does not read as visited, and has none of the old experiences" do
-      taken_off = create(:restaurant, :removed, user: owner, name: "Joe's Pizza")
-      create_list(:experience, 2, restaurant: taken_off, user: owner)
-
-      add(name: "Joe's Pizza")
-
-      expect(response.parsed_body["visited"]).to be(false)
-      expect(response.parsed_body["experience_count"]).to eq(0)
-      expect(response.parsed_body["id"]).not_to eq(taken_off.id)
-    end
-  end
-
-  # Scenario: Two owners keeping the same restaurant
-  describe "when another owner has it on their list" do
-    it "puts it on mine too, and nothing connects the two" do
-      other = create(:user)
-      theirs = create(:restaurant, user: other, name: "Joe's Pizza")
-
-      add(name: "Joe's Pizza")
-
-      expect(response).to have_http_status(:created)
-      expect(response.parsed_body["id"]).not_to eq(theirs.id)
-      expect(response.parsed_body["visited"]).to be(false)
+      expect(response).to have_http_status(:bad_gateway)
     end
   end
 
   # Scenario: Managing my list while signed out
   describe "when my session has ended" do
     it "asks me to sign in, and adds nothing" do
-      expect { add({ name: "Bar Primi" }, {}) }.not_to change(Restaurant, :count)
+      expect { add("ChIJTacos", {}) }.not_to change(ListItem, :count)
 
       expect(response).to have_http_status(:unauthorized)
-      expect(response.parsed_body["error"]).to eq("Sign in to continue.")
+      expect(a_request(:get, //)).not_to have_been_made
     end
   end
 end

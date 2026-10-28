@@ -16,7 +16,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
   end
 
   def restaurant_named(name, **attributes)
-    create(:restaurant, user: owner, name: name, **attributes)
+    create(:restaurant, on_the_list_of: owner, name: name, **attributes)
   end
 
   # Scenario: Writing down what I thought of a meal
@@ -37,12 +37,12 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
     # Nothing else sets that."
     it "makes the restaurant read as visited" do
       lilia = restaurant_named("Lilia")
-      expect(lilia.reload).not_to be_visited
+      expect(lilia.reload.visited_by?(owner)).to be(false)
 
       record_experience(lilia, rating: 4.5, occurred_on: "2026-10-18")
 
-      expect(lilia.reload).to be_visited
-      expect(lilia.experience_count).to eq(1)
+      expect(lilia.reload.visited_by?(owner)).to be(true)
+      expect(lilia.experience_count_for(owner)).to eq(1)
     end
   end
 
@@ -61,7 +61,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
       expect(response.parsed_body["rating"]).to eq(3.0)
       expect(response.parsed_body["occurred_on"]).to be_nil
       expect(response.parsed_body["notes"]).to be_nil
-      expect(joes.reload).to be_visited
+      expect(joes.reload.visited_by?(owner)).to be(true)
     end
 
     # Scenario: Recording something worth remembering without scoring it
@@ -73,7 +73,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
       expect(response).to have_http_status(:created)
       expect(response.parsed_body["rating"]).to be_nil
       expect(response.parsed_body["notes"]).to eq("Suadero sold out by 8pm")
-      expect(tacos.reload).to be_visited
+      expect(tacos.reload.visited_by?(owner)).to be(true)
     end
 
     it "records a date with no rating and no note" do
@@ -82,7 +82,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
       record_experience(lilia, occurred_on: "2026-10-18")
 
       expect(response).to have_http_status(:created)
-      expect(lilia.reload).to be_visited
+      expect(lilia.reload.visited_by?(owner)).to be(true)
     end
   end
 
@@ -96,7 +96,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
       record_experience(joes, rating: 4, occurred_on: "2026-10-20")
 
       expect(response).to have_http_status(:created)
-      expect(joes.reload.experience_count).to eq(2)
+      expect(joes.reload.experience_count_for(owner)).to eq(2)
       expect(joes.experiences.map { |one| one.rating.to_f }).to contain_exactly(3.0, 4.0)
     end
 
@@ -110,7 +110,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
       record_experience(joes, rating: 4, occurred_on: "2026-10-20")
 
       expect(response.parsed_body).not_to include("restaurant_rating", "average_rating", "rating_average")
-      expect(joes.reload.as_json.keys).not_to include("rating", "average_rating")
+      expect(joes.reload.as_json(owner: owner).keys).not_to include("rating", "average_rating")
     end
 
     # Scenario: Two experiences on the same day. Lunch and dinner are two
@@ -123,7 +123,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
       record_experience(tacos, rating: 2.5, occurred_on: "2026-10-20")
 
       expect(response).to have_http_status(:created)
-      expect(tacos.reload.experience_count).to eq(2)
+      expect(tacos.reload.experience_count_for(owner)).to eq(2)
     end
   end
 
@@ -131,13 +131,14 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
   # Putting a restaurant on the list is when the owner got round to writing it
   # down, not when they first ate there.
   it "takes a meal from long before the restaurant went on the list" do
-    bar_primi = restaurant_named("Bar Primi", added_at: Time.utc(2026, 10, 1))
+    bar_primi = restaurant_named("Bar Primi")
+    bar_primi.list_items.sole.update!(added_at: Time.utc(2026, 10, 1))
 
     record_experience(bar_primi, rating: 4, occurred_on: "2019-06-14")
 
     expect(response).to have_http_status(:created)
     expect(response.parsed_body["occurred_on"]).to eq("2019-06-14")
-    expect(bar_primi.reload).to be_visited
+    expect(bar_primi.reload.visited_by?(owner)).to be(true)
   end
 
   # Scenario: Recording an experience with nothing in it. All three absent is
@@ -151,7 +152,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(response.parsed_body["errors"]["base"]).to include("needs a rating, a note or a date")
-      expect(lilia.reload).not_to be_visited
+      expect(lilia.reload.visited_by?(owner)).to be(false)
     end
 
     # Rejected as empty rather than as a malformed request, so the invariant is
@@ -172,7 +173,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
       record_experience(lilia, notes: "   ")
 
       expect(response).to have_http_status(:unprocessable_content)
-      expect(lilia.reload).not_to be_visited
+      expect(lilia.reload.visited_by?(owner)).to be(false)
     end
   end
 
@@ -186,7 +187,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
     expect(response).to have_http_status(:unprocessable_content)
     expect(response.parsed_body["errors"]["occurred_on"])
       .to include("Occurred on cannot be later than the day it is recorded")
-    expect(lilia.reload.experience_count).to eq(0)
+    expect(lilia.reload.experience_count_for(owner)).to eq(0)
   end
 
   it "takes today's date, which is not the future" do
@@ -212,7 +213,7 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
         record_experience(lilia, rating: rating)
 
         expect(response).to have_http_status(:unprocessable_content)
-        expect(lilia.reload.experience_count).to eq(0)
+        expect(lilia.reload.experience_count_for(owner)).to eq(0)
       end
     end
 
@@ -235,22 +236,22 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
   # another owner's list for what is on it.
   describe "a restaurant I cannot reach" do
     it "reports another user's restaurant as not found and records nothing" do
-      theirs = create(:restaurant, user: create(:user), name: "Joe's Pizza")
+      theirs = create(:restaurant, on_the_list_of: create(:user), name: "Joe's Pizza")
 
       record_experience(theirs, rating: 4)
 
       expect(response).to have_http_status(:not_found)
       expect(response.parsed_body["error"]).to eq("No such restaurant is on your list.")
-      expect(theirs.reload.experience_count).to eq(0)
+      expect(theirs.reload.experiences).to be_empty
     end
 
     it "reports a restaurant off my list as not found and records nothing" do
-      taken_off = create(:restaurant, :removed, user: owner, name: "Joe's Pizza")
+      taken_off = create(:restaurant, name: "Joe's Pizza")
 
       record_experience(taken_off, rating: 4)
 
       expect(response).to have_http_status(:not_found)
-      expect(taken_off.reload.experience_count).to eq(0)
+      expect(taken_off.reload.experience_count_for(owner)).to eq(0)
     end
 
     it "reports a restaurant that was never on my list as not found" do
@@ -260,8 +261,8 @@ RSpec.describe "POST /api/restaurants/:restaurant_id/experiences" do
     end
 
     it "reports all three in one identical wording" do
-      theirs = create(:restaurant, user: create(:user), name: "Joe's Pizza")
-      taken_off = create(:restaurant, :removed, user: owner, name: "Bar Primi")
+      theirs = create(:restaurant, on_the_list_of: create(:user), name: "Joe's Pizza")
+      taken_off = create(:restaurant, name: "Bar Primi")
 
       bodies = [ theirs.id, taken_off.id, 0 ].map do |id|
         record_experience(id, rating: 4)

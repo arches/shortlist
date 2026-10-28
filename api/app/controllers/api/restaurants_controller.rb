@@ -5,27 +5,31 @@ module Api
     # artifacts require the same string produced by the same path.
     include RestaurantScope
 
+    UNAVAILABLE = "Restaurant details are unavailable just now.".freeze
+    NEEDS_A_PLACE = "Pick a restaurant from the suggestions.".freeze
+
     before_action :authenticate_owner!
     before_action :find_restaurant, only: [ :update, :destroy ]
 
-    # managing-my-list.scenarios.md: the List is the set of one owner's
-    # non-removed Restaurants — informal, not an entity, and there is exactly
-    # one per owner, so nothing identifies it in the URL.
+    # The List is the set of Restaurants my List items point at. There is
+    # exactly one List per owner, so nothing identifies it in the URL.
     def index
-      render json: on_the_list.order(:name)
+      render json: on_the_list.order(:name).as_json(owner: current_owner)
     end
 
-    # Adding a restaurant takes its name and its city and nothing else, because
-    # the usual way a restaurant arrives is as a name somebody mentioned. Every
-    # other detail is filled in later, through update.
+    # managing-my-list.scenarios.md: the owner types, picks a Google Places
+    # result, and what Shortlist receives is its Place ID. Every other detail is
+    # Google's, so nothing else is settable on the way in.
     def create
-      restaurant = current_owner.restaurants.new(create_params)
+      google_place_id = create_params[:google_place_id].to_s
+      return render_error(NEEDS_A_PLACE, status: :unprocessable_content) if google_place_id.empty?
 
-      if restaurant.save
-        render json: restaurant, status: :created
-      else
-        render_invalid(restaurant)
-      end
+      restaurant = restaurant_for(google_place_id)
+      return render_invalid(restaurant) unless restaurant.persisted?
+
+      add_to_my_list(restaurant)
+    rescue ::Places::Error
+      render_error(UNAVAILABLE, status: :bad_gateway)
     end
 
     # Changing one detail leaves the others alone: this is what rules out having
@@ -33,36 +37,50 @@ module Api
     # is a distinct act from leaving it alone, and sending null is how it is said.
     def update
       if @restaurant.update(update_params)
-        render json: @restaurant
+        render json: @restaurant.as_json(owner: current_owner)
       else
         render_invalid(@restaurant)
       end
     end
 
-    # Taking a restaurant off the list is a tidying action, and nobody doing it
-    # intends to destroy years of their own notes. So the row survives and its
-    # Experiences survive with it — Removed buys retention, not recovery, and
-    # nothing reads them back.
+    # Taking a restaurant off the list destroys that List item and nothing else.
+    # The Restaurant stands — it is shared, and somebody else may have it on
+    # their list — and so do my Experiences at it, which go out of reach until
+    # it goes back on.
     def destroy
-      @restaurant.update!(removed_at: Time.current)
+      my_list.list_items.find_by!(restaurant: @restaurant).destroy!
 
       head :no_content
     end
 
     private
-      # managing-my-list.wireframe.drawio.svg draws the Add dialog with Name and
-      # City and nothing else, so nothing else is settable on the way in. No
-      # artifact names an endpoint, so the narrowing is recorded in
-      # ASSUMPTIONS.md rather than taken as settled.
-      def create_params
-        params.expect(restaurant: [ :name, :city ])
+      # "And no new restaurant was created in the system": there is one row per
+      # Place for the whole system, so a Place already here is reused rather
+      # than copied. Only a Place new to Shortlist costs a Place Details call,
+      # which is the one ADR 0001 says we eventually pay for.
+      def restaurant_for(google_place_id)
+        Restaurant.find_by(google_place_id: google_place_id) ||
+          Restaurant.create(::Places::Client.new.details(google_place_id).to_restaurant_attributes)
       end
 
-      # Editing still has all the details: the full attribute table from
-      # shortlist.data.md, less the four the owner does not set — id, user, the
-      # timestamps, and removed_at. The one-line address in the scenario is
-      # shorthand; the fields are separate here, and nothing parses one into
-      # the other.
+      # A List holds a given Restaurant at most once, so a second add is the
+      # rejection rather than a second List item.
+      def add_to_my_list(restaurant)
+        item = my_list.list_items.new(restaurant: restaurant)
+
+        if item.save
+          render json: restaurant.as_json(owner: current_owner), status: :created
+        else
+          render_invalid(item)
+        end
+      end
+
+      # The Place ID and nothing else. Everything the owner sees about a
+      # Restaurant is cached from Google, so there is nothing else to send.
+      def create_params
+        params.expect(restaurant: [ :google_place_id ])
+      end
+
       def update_params
         params.expect(
           restaurant: [

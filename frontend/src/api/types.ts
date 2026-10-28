@@ -1,9 +1,13 @@
 // The shape the API sends back, from shortlist.data.md's Restaurant attribute
-// table plus its three derived values. removed_at is absent on purpose: it never
-// leaves the system in any response.
+// table plus its three derived values. A Restaurant is shared by every List
+// that holds it, so it carries no owner — the derived three are the owner's,
+// scoped by the API to whoever asked.
 export interface Restaurant {
   id: number;
-  user_id: number;
+
+  // Its identity. The surrogate id above is still what a URL carries — see
+  // ASSUMPTIONS.md, "A Restaurant's surrogate id".
+  google_place_id: string;
   name: string;
   url: string | null;
   google_maps_url: string | null;
@@ -17,17 +21,18 @@ export interface Restaurant {
   cuisine: string | null;
   specialty: string | null;
   notes: string | null;
-  added_at: string;
+  created_at: string;
   updated_at: string;
 
-  // Derived, not stored. Visited is the experience count being above zero.
+  // Derived, not stored, and mine rather than the Restaurant's. Visited is my
+  // experience count here being above zero; another owner's never show.
   visited: boolean;
   experience_count: number;
   last_experienced_on: string | null;
 }
 
-// Everything an owner can set. The six address fields are separate, as the data
-// model has them — the one-line address in the scenario is shorthand.
+// Everything an owner can still set through editing. Adding sets none of it:
+// a restaurant arrives as a Google Place and its details are Google's.
 export type RestaurantDraft = Partial<
   Pick<
     Restaurant,
@@ -78,6 +83,13 @@ export interface IssuedSession {
   access_token: string;
   refresh_token: string;
   expires_in: number;
+}
+
+// One autocomplete result, as GET /api/places/suggestions sends it. The owner
+// picks one and Shortlist adds the Place behind it.
+export interface PlaceSuggestion {
+  google_place_id: string;
+  description: string;
 }
 
 // Re-exported so callers that only ever go through the session wrapper do not

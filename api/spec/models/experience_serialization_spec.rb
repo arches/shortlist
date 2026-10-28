@@ -6,7 +6,7 @@ require "rails_helper"
 # values held as a decimal.
 RSpec.describe "An Experience on the wire" do
   let(:owner) { create(:user) }
-  let(:restaurant) { create(:restaurant, user: owner, name: "Joe's Pizza") }
+  let(:restaurant) { create(:restaurant, on_the_list_of: owner, name: "Joe's Pizza") }
 
   def experience(attributes)
     build(:experience, { restaurant: restaurant, user: owner }.merge(attributes))

@@ -4,7 +4,7 @@ require "rails_helper"
 # managing-experiences.scenarios.md. Background: today is 2026-10-27.
 RSpec.describe "The order a restaurant's experiences read in" do
   let(:owner) { create(:user) }
-  let(:restaurant) { create(:restaurant, user: owner, name: "Joe's Pizza") }
+  let(:restaurant) { create(:restaurant, on_the_list_of: owner, name: "Joe's Pizza") }
 
   around do |example|
     travel_to(Time.utc(2026, 10, 27, 12)) { example.run }

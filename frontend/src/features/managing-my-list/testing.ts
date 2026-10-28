@@ -8,7 +8,7 @@ import type { Restaurant } from "@/api/types";
 export function aRestaurant(attributes: Partial<Restaurant> = {}): Restaurant {
   return {
     id: 1,
-    user_id: 1,
+    google_place_id: "ChIJrTLr-GyuEmsRBfy61i59si0",
     name: "Lilia",
     url: null,
     google_maps_url: null,
@@ -22,7 +22,7 @@ export function aRestaurant(attributes: Partial<Restaurant> = {}): Restaurant {
     cuisine: null,
     specialty: null,
     notes: null,
-    added_at: "2026-10-01T00:00:00.000Z",
+    created_at: "2026-10-01T00:00:00.000Z",
     updated_at: "2026-10-01T00:00:00.000Z",
     visited: false,
     experience_count: 0,

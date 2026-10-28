@@ -14,7 +14,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
   # Scenario: Filling in a detail later
   describe "filling in a detail" do
     it "sets the one detail" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia", cuisine: nil)
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia", cuisine: nil)
 
       change_restaurant(restaurant, cuisine: "Italian")
 
@@ -23,7 +23,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
     end
 
     it "leaves the others alone" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia",
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia",
         cuisine: nil, address_line_1: nil, city: nil, notes: "Book a month ahead")
 
       change_restaurant(restaurant, cuisine: "Italian")
@@ -39,7 +39,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
   # alone — otherwise a note written by mistake can never be taken back.
   describe "clearing a detail" do
     it "clears the note" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia", notes: "Book a month ahead")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia", notes: "Book a month ahead")
 
       change_restaurant(restaurant, notes: nil)
 
@@ -49,7 +49,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
     end
 
     it "leaves a field alone when it is not mentioned at all" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia", notes: "Book a month ahead")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia", notes: "Book a month ahead")
 
       change_restaurant(restaurant, cuisine: "Italian")
 
@@ -57,7 +57,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
     end
 
     it "clears a link" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia", url: "https://lilianewyork.com")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia", url: "https://lilianewyork.com")
 
       change_restaurant(restaurant, url: nil)
 
@@ -69,17 +69,17 @@ RSpec.describe "PATCH /api/restaurants/:id" do
   # its history together; it does not create a second entry.
   describe "correcting a name" do
     it "renames it in place" do
-      restaurant = create(:restaurant, user: owner, name: "Bar Primi")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Bar Primi")
 
       expect { change_restaurant(restaurant, name: "Bar Primi Soho") }.not_to change(Restaurant, :count)
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["name"]).to eq("Bar Primi Soho")
-      expect(owner.restaurants.on_the_list.map(&:name)).to eq([ "Bar Primi Soho" ])
+      expect(owner.restaurants.map(&:name)).to eq([ "Bar Primi Soho" ])
     end
 
     it "leaves its experiences unchanged" do
-      restaurant = create(:restaurant, user: owner, name: "Bar Primi")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Bar Primi")
       experiences = create_list(:experience, 2, restaurant: restaurant, user: owner)
 
       change_restaurant(restaurant, name: "Bar Primi Soho")
@@ -88,50 +88,21 @@ RSpec.describe "PATCH /api/restaurants/:id" do
       expect(response.parsed_body["experience_count"]).to eq(2)
     end
 
-    it "leaves added_at alone" do
-      restaurant = create(:restaurant, user: owner, name: "Bar Primi", added_at: 2.years.ago)
+    it "leaves the List item's added_at alone" do
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Bar Primi")
+      restaurant.list_items.sole.update!(added_at: 2.years.ago)
 
       change_restaurant(restaurant, name: "Bar Primi Soho")
 
-      expect(restaurant.reload.added_at).to be_within(1.second).of(2.years.ago)
+      expect(restaurant.list_items.sole.reload.added_at).to be_within(1.second).of(2.years.ago)
     end
   end
 
-  # Scenario: Renaming a restaurant to one already on my list
-  describe "renaming to one already on my list" do
-    it "is rejected as already on my list" do
-      create(:restaurant, user: owner, name: "Joe's Pizza")
-      bar_primi = create(:restaurant, user: owner, name: "Bar Primi")
-
-      change_restaurant(bar_primi, name: "Joe's Pizza")
-
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(response.parsed_body["errors"]["name"]).to include("Name is already on your list")
-    end
-
-    it "leaves both restaurants keeping their names" do
-      create(:restaurant, user: owner, name: "Joe's Pizza")
-      bar_primi = create(:restaurant, user: owner, name: "Bar Primi")
-
-      change_restaurant(bar_primi, name: "Joe's Pizza")
-
-      expect(owner.restaurants.on_the_list.order(:name).map(&:name))
-        .to eq([ "Bar Primi", "Joe's Pizza" ])
-    end
-
+  describe "renaming" do
     it "lets a restaurant keep its own name" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia")
 
       change_restaurant(restaurant, name: "Lilia", cuisine: "Italian")
-
-      expect(response).to have_http_status(:ok)
-    end
-
-    it "takes a name freed by removal" do
-      create(:restaurant, :removed, user: owner, name: "Joe's Pizza")
-      bar_primi = create(:restaurant, user: owner, name: "Bar Primi")
-
-      change_restaurant(bar_primi, name: "Joe's Pizza")
 
       expect(response).to have_http_status(:ok)
     end
@@ -139,7 +110,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
 
   describe "changing a detail to something invalid" do
     it "rejects a name that is only whitespace, and changes nothing" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia")
 
       change_restaurant(restaurant, name: "   ")
 
@@ -151,7 +122,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
   # Scenario Outline: Giving a restaurant a link that is not a web address.
   # Links on a restaurant are rendered as links, so what counts as one is a
   # decision rather than a formality. The outline runs against editing: adding
-  # takes a name and a city, so a link only ever arrives here.
+  # takes a Place ID, so a link only ever arrives here.
   describe "giving it a link that is not a web address" do
     [
       [ "javascript:alert(1)", "not a web address, and it gets rendered" ],
@@ -159,7 +130,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
       [ "mailto:hi@lilianewyork.com", "a web address is what this field means" ]
     ].each do |link, why|
       it "rejects #{link} — #{why}" do
-        restaurant = create(:restaurant, user: owner, name: "Lilia", url: "https://lilianewyork.com")
+        restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia", url: "https://lilianewyork.com")
 
         change_restaurant(restaurant, url: link)
 
@@ -170,7 +141,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
     end
 
     it "rejects a bad Google Maps link too" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia")
 
       change_restaurant(restaurant, google_maps_url: "javascript:alert(1)")
 
@@ -180,7 +151,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
     end
 
     it "rejects a bad Yelp link too" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia")
 
       change_restaurant(restaurant, yelp_url: "mailto:hi@lilianewyork.com")
 
@@ -195,7 +166,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
   # another owner's restaurant exists.
   describe "a restaurant I cannot reach" do
     it "reports a restaurant belonging to another owner as not found" do
-      theirs = create(:restaurant, user: create(:user), name: "Joe's Pizza")
+      theirs = create(:restaurant, on_the_list_of: create(:user), name: "Joe's Pizza")
 
       change_restaurant(theirs, cuisine: "Pizza")
 
@@ -205,7 +176,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
     end
 
     it "reports a restaurant already off my list as not found" do
-      taken_off = create(:restaurant, :removed, user: owner, name: "Joe's Pizza")
+      taken_off = create(:restaurant, name: "Joe's Pizza")
 
       change_restaurant(taken_off, cuisine: "Pizza")
 
@@ -222,8 +193,8 @@ RSpec.describe "PATCH /api/restaurants/:id" do
     end
 
     it "reports all three in one identical wording" do
-      theirs = create(:restaurant, user: create(:user), name: "Joe's Pizza")
-      taken_off = create(:restaurant, :removed, user: owner, name: "Bar Primi")
+      theirs = create(:restaurant, on_the_list_of: create(:user), name: "Joe's Pizza")
+      taken_off = create(:restaurant, name: "Bar Primi")
 
       bodies = [ theirs.id, taken_off.id, 0 ].map do |id|
         change_restaurant(id, cuisine: "Pizza")
@@ -237,7 +208,7 @@ RSpec.describe "PATCH /api/restaurants/:id" do
   # Scenario: Managing my list while signed out
   describe "when my session has ended" do
     it "asks me to sign in, and changes nothing" do
-      restaurant = create(:restaurant, user: owner, name: "Lilia")
+      restaurant = create(:restaurant, on_the_list_of: owner, name: "Lilia")
 
       change_restaurant(restaurant, { cuisine: "Italian" }, {})
 

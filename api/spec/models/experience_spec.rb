@@ -6,7 +6,7 @@ require "rails_helper"
 # live under spec/requests/api — what is checked here is the record itself.
 RSpec.describe Experience do
   let(:owner) { create(:user) }
-  let(:restaurant) { create(:restaurant, user: owner, name: "Joe's Pizza") }
+  let(:restaurant) { create(:restaurant, on_the_list_of: owner, name: "Joe's Pizza") }
 
   it "is valid with a rating, a note and a date" do
     expect(build(:experience, restaurant: restaurant, user: owner)).to be_valid
@@ -96,17 +96,6 @@ RSpec.describe Experience do
     end
   end
 
-  # shortlist.data.md, Invariants: an Experience's owner is the same User as its
-  # Restaurant's owner.
-  describe "owner" do
-    it "rejects an Experience whose owner is not the Restaurant's owner" do
-      experience = build(:experience, restaurant: restaurant, user: create(:user))
-
-      expect(experience).not_to be_valid
-      expect(experience.errors[:user]).to be_present
-    end
-  end
-
   # shortlist.data.md, Invariants: occurred_on is never later than the day it is
   # recorded. A future date is a typo rather than a booking.
   describe "occurred_on" do
@@ -127,10 +116,11 @@ RSpec.describe Experience do
       expect(build(:experience, restaurant: restaurant, user: owner, occurred_on: nil)).to be_valid
     end
 
-    # Recording an Experience that happened long before the Restaurant was added
-    # is normal, and deliberately allowed.
-    it "accepts a date earlier than the Restaurant's added_at" do
-      old = create(:restaurant, user: owner, added_at: 1.week.ago)
+    # Recording an Experience that happened long before the Restaurant went on
+    # the List is normal, and deliberately allowed.
+    it "accepts a date earlier than the List item's added_at" do
+      old = create(:restaurant, on_the_list_of: owner)
+      old.list_items.sole.update!(added_at: 1.week.ago)
 
       expect(build(:experience, restaurant: old, user: owner,
         occurred_on: 5.years.ago.to_date)).to be_valid
@@ -155,18 +145,23 @@ RSpec.describe Experience do
     end
   end
 
-  # shortlist.data.md, Ownership.
+  # shortlist.data.md, Ownership: an Experience has exactly one owner, and
+  # deleting a User deletes their experiences. Nothing erases restaurants, so
+  # there is no path by which a Restaurant takes one with it.
   describe "ownership" do
-    it "is destroyed with its Restaurant" do
-      create(:experience, restaurant: restaurant, user: owner)
-
-      expect { restaurant.destroy }.to change(Experience, :count).by(-1)
-    end
-
     it "is destroyed with its User" do
       create(:experience, restaurant: restaurant, user: owner)
 
       expect { owner.destroy }.to change(Experience, :count).by(-1)
+    end
+
+    # An Experience does not require a List item. Removing a Restaurant from a
+    # List leaves that owner's Experiences standing, out of reach until it goes
+    # back on.
+    it "stands when the owner takes the Restaurant off their list" do
+      create(:experience, restaurant: restaurant, user: owner)
+
+      expect { restaurant.list_items.sole.destroy! }.not_to change(Experience, :count)
     end
   end
 end

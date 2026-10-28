@@ -8,7 +8,7 @@ require "rails_helper"
 # the browser. By the time a request arrives here it has been acknowledged.
 RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }
-  let(:joes) { create(:restaurant, user: owner, name: "Joe's Pizza") }
+  let(:joes) { create(:restaurant, on_the_list_of: owner, name: "Joe's Pizza") }
 
   around do |example|
     travel_to(Time.utc(2026, 10, 27, 12)) { example.run }
@@ -30,7 +30,7 @@ RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
       remove_experience(experience)
 
       expect(response).to have_http_status(:no_content)
-      expect(joes.reload.experience_count).to eq(0)
+      expect(joes.reload.experience_count_for(owner)).to eq(0)
     end
 
     # "And it no longer reads as visited." Nothing sets that — visited is
@@ -38,11 +38,11 @@ RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
     it "stops the restaurant reading as visited" do
       experience # recorded first, so the precondition below is about a visited restaurant
 
-      expect(joes.reload).to be_visited
+      expect(joes.reload.visited_by?(owner)).to be(true)
 
       remove_experience(experience)
 
-      expect(joes.reload).not_to be_visited
+      expect(joes.reload.visited_by?(owner)).to be(false)
     end
 
     # "And that experience is gone for good." Destroyed, not retained — the
@@ -59,7 +59,7 @@ RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
     it "leaves the restaurant on my list" do
       remove_experience(experience)
 
-      expect(owner.restaurants.on_the_list.map(&:name)).to eq([ "Joe's Pizza" ])
+      expect(owner.restaurants.map(&:name)).to eq([ "Joe's Pizza" ])
     end
   end
 
@@ -75,7 +75,7 @@ RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
 
       expect(response).to have_http_status(:no_content)
       expect(joes.reload.experiences.map(&:id)).to eq([ newer.id ])
-      expect(joes).to be_visited
+      expect(joes.visited_by?(owner)).to be(true)
       expect(joes.experiences.first.rating.to_f).to eq(4.0)
       expect(joes.experiences.first.occurred_on).to eq(Date.new(2026, 10, 20))
     end
@@ -87,7 +87,7 @@ RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
   describe "an experience that is not mine" do
     it "reports another user's as not found through their own restaurant" do
       them = create(:user)
-      theirs = create(:restaurant, user: them, name: "Joe's Pizza")
+      theirs = create(:restaurant, on_the_list_of: them, name: "Joe's Pizza")
       experience = create(:experience, restaurant: theirs, user: them, rating: 3, occurred_on: nil)
 
       remove_experience(experience, restaurant: theirs)
@@ -99,7 +99,7 @@ RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
 
     it "reports another user's as not found when named under a restaurant of mine" do
       them = create(:user)
-      theirs = create(:restaurant, user: them, name: "Lilia")
+      theirs = create(:restaurant, on_the_list_of: them, name: "Lilia")
       experience = create(:experience, restaurant: theirs, user: them, rating: 3, occurred_on: nil)
 
       remove_experience(experience)
@@ -110,7 +110,7 @@ RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
     end
 
     it "reports one of my own named under the wrong restaurant as not found" do
-      bar_primi = create(:restaurant, user: owner, name: "Bar Primi")
+      bar_primi = create(:restaurant, on_the_list_of: owner, name: "Bar Primi")
       experience = create(:experience, restaurant: bar_primi, user: owner, rating: 3, occurred_on: nil)
 
       remove_experience(experience)
@@ -128,7 +128,7 @@ RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
     # An experience at a restaurant off my list is out of reach with it, and
     # removing it is as unreachable as reading it.
     it "reports one at a restaurant off my list as not found" do
-      taken_off = create(:restaurant, :removed, user: owner, name: "Bar Primi")
+      taken_off = create(:restaurant, name: "Bar Primi")
       experience = create(:experience, restaurant: taken_off, user: owner, rating: 3, occurred_on: nil)
 
       remove_experience(experience, restaurant: taken_off)

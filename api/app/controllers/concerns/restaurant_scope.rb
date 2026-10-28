@@ -1,10 +1,10 @@
 # One owner's reachable restaurants, and the one refusal for everything else.
 #
 # managing-my-list.scenarios.md and managing-experiences.scenarios.md both
-# report a restaurant belonging to another owner, one already off the list, and
-# one that was never there at all identically. Saying "not allowed" instead
-# would confirm that another owner's restaurant exists, which is the same
-# reasoning behind the deliberately generic sign-in failure.
+# report a restaurant that is off the list and one that was never on it
+# identically. A Restaurant is shared now, so "belongs to another user" is not a
+# case that exists: what it used to mean is a Place on somebody else's list and
+# not on mine, which is the same refusal by the same path.
 #
 # Sharing the scope and the string is what keeps that true of both: there is no
 # branch that could leak the difference, and no second wording to drift.
@@ -14,10 +14,17 @@ module RestaurantScope
   NOT_FOUND = "No such restaurant is on your list.".freeze
 
   private
-    # shortlist.data.md, Derived: the List is the set of one owner's non-removed
-    # Restaurants — informal, not an entity, and there is exactly one per owner.
+    # Every owner has exactly one List, the default "My List" created with the
+    # User — see ASSUMPTIONS.md, "Which List a request works against". sole is
+    # deliberate: a second one would be a bug worth hearing about.
+    def my_list
+      current_owner.lists.sole
+    end
+
+    # The List is what an owner reaches restaurants through. A Restaurant with
+    # no List item of mine is not mine to see, whoever else holds it.
     def on_the_list
-      current_owner.restaurants.on_the_list
+      my_list.restaurants
     end
 
     # Nested under a restaurant the id arrives as :restaurant_id; on the

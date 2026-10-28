@@ -9,13 +9,11 @@ class User < ApplicationRecord
   # a User cascades to them.
   has_many :refresh_tokens, dependent: :destroy
 
-  # A User owns their Restaurants. Deleting a User cascades to them, destroying
-  # every restaurant they ever recorded. Nothing in the application does that.
-  has_many :restaurants, dependent: :destroy
-
   # shortlist.data.md, Ownership: deleting a User deletes their lists, and their
-  # list items with them.
+  # list items with them. The Restaurants those items point at are shared and
+  # stand, which is why nothing here is a dependent association to them.
   has_many :lists, dependent: :destroy
+  has_many :restaurants, through: :lists
 
   # A User owns their Experiences too, so deleting one destroys every note they
   # ever recorded.

@@ -1,10 +1,19 @@
 FactoryBot.define do
   factory :restaurant do
-    user
+    sequence(:google_place_id) { |n| "ChIJShortlistFixture#{n}" }
     sequence(:name) { |n| "Lilia #{n}" }
 
-    trait :removed do
-      removed_at { Time.current }
+    # Nobody owns a Restaurant. What an owner has is a List item pointing at
+    # one, so putting a Place on somebody's list is what this says — and it is
+    # what a spec nearly always means by naming an owner.
+    transient do
+      on_the_list_of { nil }
+    end
+
+    after(:create) do |restaurant, evaluator|
+      next if evaluator.on_the_list_of.nil?
+
+      create(:list_item, list: evaluator.on_the_list_of.lists.sole, restaurant: restaurant)
     end
 
     trait :with_everything do

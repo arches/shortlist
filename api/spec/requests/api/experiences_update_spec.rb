@@ -7,7 +7,7 @@ require "rails_helper"
 # one. Each test here reaches one by the id the owner's own screen holds.
 RSpec.describe "PATCH /api/restaurants/:restaurant_id/experiences/:id" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }
-  let(:lilia) { create(:restaurant, user: owner, name: "Lilia") }
+  let(:lilia) { create(:restaurant, on_the_list_of: owner, name: "Lilia") }
 
   around do |example|
     travel_to(Time.utc(2026, 10, 27, 12)) { example.run }
@@ -65,7 +65,7 @@ RSpec.describe "PATCH /api/restaurants/:restaurant_id/experiences/:id" do
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["occurred_on"]).to be_nil
       expect(response.parsed_body["rating"]).to eq(4.5)
-      expect(lilia.reload).to be_visited
+      expect(lilia.reload.visited_by?(owner)).to be(true)
     end
 
     it "leaves an attribute alone when it is not mentioned at all" do
@@ -146,7 +146,7 @@ RSpec.describe "PATCH /api/restaurants/:restaurant_id/experiences/:id" do
   describe "an experience that is not mine" do
     it "reports another user's as not found through their own restaurant" do
       them = create(:user)
-      theirs = create(:restaurant, user: them, name: "Joe's Pizza")
+      theirs = create(:restaurant, on_the_list_of: them, name: "Joe's Pizza")
       experience = create(:experience, restaurant: theirs, user: them, rating: 3, occurred_on: nil)
 
       change_experience(experience, { rating: 5 }, restaurant: theirs)
@@ -160,7 +160,7 @@ RSpec.describe "PATCH /api/restaurants/:restaurant_id/experiences/:id" do
     # the only way the experience-level refusal is reachable at all.
     it "reports another user's as not found when named under a restaurant of mine" do
       them = create(:user)
-      theirs = create(:restaurant, user: them, name: "Joe's Pizza")
+      theirs = create(:restaurant, on_the_list_of: them, name: "Joe's Pizza")
       experience = create(:experience, restaurant: theirs, user: them, rating: 3, occurred_on: nil)
 
       change_experience(experience, { rating: 5 })
@@ -171,7 +171,7 @@ RSpec.describe "PATCH /api/restaurants/:restaurant_id/experiences/:id" do
     end
 
     it "reports one of my own named under the wrong restaurant as not found" do
-      bar_primi = create(:restaurant, user: owner, name: "Bar Primi")
+      bar_primi = create(:restaurant, on_the_list_of: owner, name: "Bar Primi")
       experience = create(:experience, restaurant: bar_primi, user: owner, rating: 3, occurred_on: nil)
 
       change_experience(experience, { rating: 5 })
@@ -188,7 +188,7 @@ RSpec.describe "PATCH /api/restaurants/:restaurant_id/experiences/:id" do
 
     # An experience of a restaurant off my list is out of reach with it.
     it "reports one at a restaurant off my list as not found" do
-      taken_off = create(:restaurant, :removed, user: owner, name: "Bar Primi")
+      taken_off = create(:restaurant, name: "Bar Primi")
       experience = create(:experience, restaurant: taken_off, user: owner, rating: 3, occurred_on: nil)
 
       change_experience(experience, { rating: 5 }, restaurant: taken_off)

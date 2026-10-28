@@ -5,12 +5,29 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { Restaurant, RestaurantDraft } from "@/api/types";
+import type { PlaceSuggestion, Restaurant, RestaurantDraft } from "@/api/types";
 import { authenticated } from "@/session/session";
 
-// There is exactly one List per owner and nothing stores it, so the key names
-// the restaurants rather than a list.
+// There is exactly one List per owner, so nothing identifies it in the key.
 export const restaurantsKey = ["restaurants"] as const;
+
+// The owner is part-way through typing, so a short query asks for nothing —
+// see ASSUMPTIONS.md, "When autocomplete asks Google".
+const MINIMUM_QUERY_LENGTH = 2;
+
+export function usePlaceSuggestions(query: string) {
+  const trimmed = query.trim();
+
+  return useQuery({
+    queryKey: ["place-suggestions", trimmed] as const,
+    queryFn: () =>
+      authenticated<PlaceSuggestion[]>(
+        `/places/suggestions?q=${encodeURIComponent(trimmed)}`,
+      ),
+    enabled: trimmed.length >= MINIMUM_QUERY_LENGTH,
+    staleTime: 60_000,
+  });
+}
 
 export function useRestaurants(): UseQueryResult<Restaurant[]> {
   return useQuery({
@@ -19,14 +36,16 @@ export function useRestaurants(): UseQueryResult<Restaurant[]> {
   });
 }
 
+// A restaurant arrives as a Google Place. The Place ID is all Shortlist is
+// sent; every other detail is Google's and the API caches it.
 export function useAddRestaurant() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (draft: RestaurantDraft) =>
+    mutationFn: (googlePlaceId: string) =>
       authenticated<Restaurant>("/restaurants", {
         method: "POST",
-        body: { restaurant: draft },
+        body: { restaurant: { google_place_id: googlePlaceId } },
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
   });

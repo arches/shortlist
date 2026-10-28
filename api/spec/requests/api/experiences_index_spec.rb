@@ -6,7 +6,7 @@ require "rails_helper"
 # list, and today is 2026-10-27.
 RSpec.describe "GET /api/restaurants/:restaurant_id/experiences" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }
-  let(:restaurant) { create(:restaurant, user: owner, name: "Joe's Pizza") }
+  let(:restaurant) { create(:restaurant, on_the_list_of: owner, name: "Joe's Pizza") }
 
   around do |example|
     travel_to(Time.utc(2026, 10, 27, 12)) { example.run }
@@ -21,7 +21,7 @@ RSpec.describe "GET /api/restaurants/:restaurant_id/experiences" do
     create(
       :experience,
       restaurant: at,
-      user: at.user,
+      user: owner,
       occurred_on: occurred_on,
       recorded_at: recorded_at,
       rating: rating,
@@ -77,7 +77,7 @@ RSpec.describe "GET /api/restaurants/:restaurant_id/experiences" do
     # An Experience belongs to exactly one Restaurant, so another restaurant's
     # experiences are not reachable through this one.
     it "reads back only this restaurant's own" do
-      bar_primi = create(:restaurant, user: owner, name: "Bar Primi")
+      bar_primi = create(:restaurant, on_the_list_of: owner, name: "Bar Primi")
       experience(occurred_on: Date.new(2026, 10, 20), recorded_at: Time.utc(2026, 10, 21))
       experience(occurred_on: Date.new(2026, 10, 22), recorded_at: Time.utc(2026, 10, 23), at: bar_primi)
 
@@ -92,7 +92,7 @@ RSpec.describe "GET /api/restaurants/:restaurant_id/experiences" do
   # them apart would let somebody probe another owner's list for what is on it.
   describe "a restaurant I cannot reach" do
     it "reports a restaurant belonging to another user as not found" do
-      theirs = create(:restaurant, user: create(:user), name: "Joe's Pizza")
+      theirs = create(:restaurant, on_the_list_of: create(:user), name: "Joe's Pizza")
       experience(occurred_on: Date.new(2026, 10, 20), recorded_at: Time.utc(2026, 10, 21), at: theirs)
 
       read_experiences(theirs)
@@ -105,7 +105,7 @@ RSpec.describe "GET /api/restaurants/:restaurant_id/experiences" do
     # experiences". The rows survive — Removed buys retention, not recovery —
     # and nothing reads them back.
     it "reports a restaurant off my list as not found, experiences and all" do
-      taken_off = create(:restaurant, :removed, user: owner, name: "Bar Primi")
+      taken_off = create(:restaurant, name: "Bar Primi")
       experience(occurred_on: Date.new(2026, 10, 20), recorded_at: Time.utc(2026, 10, 21), at: taken_off)
 
       read_experiences(taken_off)
@@ -121,8 +121,8 @@ RSpec.describe "GET /api/restaurants/:restaurant_id/experiences" do
     end
 
     it "reports all three in one identical wording" do
-      theirs = create(:restaurant, user: create(:user), name: "Joe's Pizza")
-      taken_off = create(:restaurant, :removed, user: owner, name: "Bar Primi")
+      theirs = create(:restaurant, on_the_list_of: create(:user), name: "Joe's Pizza")
+      taken_off = create(:restaurant, name: "Bar Primi")
 
       bodies = [ theirs.id, taken_off.id, 0 ].map do |id|
         read_experiences(id)
