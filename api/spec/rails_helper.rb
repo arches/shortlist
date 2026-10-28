@@ -22,4 +22,8 @@ RSpec.configure do |config|
 
   # Test data is factory_bot; Rails fixtures are not used.
   config.include FactoryBot::Syntax::Methods
+
+  # Several artifacts turn on elapsed time: fifteen minutes, thirty days, and an
+  # occurred_on no later than the day it is recorded.
+  config.include ActiveSupport::Testing::TimeHelpers
 end

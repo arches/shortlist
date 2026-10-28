@@ -9,6 +9,10 @@ class User < ApplicationRecord
   # a User cascades to them.
   has_many :refresh_tokens, dependent: :destroy
 
+  # A User owns their Restaurants. Deleting a User cascades to them, destroying
+  # every restaurant they ever recorded. Nothing in the application does that.
+  has_many :restaurants, dependent: :destroy
+
   normalizes :email, with: ->(email) { email.to_s.strip.downcase }
   normalizes :name, with: ->(name) { name.to_s.strip }
 
