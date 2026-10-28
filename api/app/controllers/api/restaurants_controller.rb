@@ -1,10 +1,9 @@
 module Api
   class RestaurantsController < ApplicationController
-    # managing-my-list.scenarios.md: a restaurant belonging to someone else is
-    # reported the same way as one that does not exist. Saying "not allowed"
-    # instead would confirm that another owner's restaurant exists, which is the
-    # same reasoning behind the deliberately generic sign-in failure.
-    NOT_FOUND = "No such restaurant is on your list.".freeze
+    # The scope a restaurant is reachable through, and the one refusal for
+    # everything outside it. Shared with ExperiencesController, because the two
+    # artifacts require the same string produced by the same path.
+    include RestaurantScope
 
     before_action :authenticate_owner!
     before_action :find_restaurant, only: [ :update, :destroy ]
@@ -50,15 +49,6 @@ module Api
     end
 
     private
-      # A restaurant that belongs to another owner, is already off the list, or
-      # was never there at all is reported identically. The scope is what makes
-      # that true — there is no branch that could leak the difference.
-      def find_restaurant
-        @restaurant = on_the_list.find_by(id: params[:id])
-
-        render_error(NOT_FOUND, status: :not_found) if @restaurant.nil?
-      end
-
       # The full attribute table from shortlist.data.md, less the four the owner
       # does not set: id, user, the timestamps, and removed_at. The one-line
       # address in the scenario is shorthand — the fields are separate here, and
@@ -72,10 +62,6 @@ module Api
             :cuisine, :specialty, :notes
           ]
         )
-      end
-
-      def on_the_list
-        current_owner.restaurants.on_the_list
       end
   end
 end
