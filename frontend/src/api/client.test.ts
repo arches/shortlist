@@ -2,6 +2,8 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { requestAt, respond } from "@/test/http";
+
 import { ApiError, request } from "./client";
 
 // The client is the one place the frontend decides where the API is. Per
@@ -19,19 +21,8 @@ describe("the API client", () => {
     vi.unstubAllGlobals();
   });
 
-  function lastRequest(): { headers: Headers; body?: string } {
-    const init = fetchMock.mock.calls.at(0)?.at(1);
-    if (!init) throw new Error("fetch was never called");
-
-    return init as { headers: Headers; body?: string };
-  }
-
   function respondWith(status: number, body: unknown) {
-    fetchMock.mockResolvedValue({
-      ok: status >= 200 && status < 300,
-      status,
-      text: () => Promise.resolve(body === null ? "" : JSON.stringify(body)),
-    });
+    fetchMock.mockResolvedValue(respond(status, body));
   }
 
   it("asks the origin it is served from, by relative path", async () => {
@@ -39,7 +30,7 @@ describe("the API client", () => {
 
     await request("/restaurants");
 
-    expect(fetchMock.mock.calls.at(0)?.at(0)).toBe("/api/restaurants");
+    expect(requestAt(fetchMock, 0).path).toBe("/api/restaurants");
   });
 
   it("carries the access token in the Authorization header, not a cookie", async () => {
@@ -47,7 +38,7 @@ describe("the API client", () => {
 
     await request("/restaurants", { accessToken: "a-token" });
 
-    const { headers } = lastRequest();
+    const { headers } = requestAt(fetchMock, 0);
     expect(headers.get("Authorization")).toBe("Bearer a-token");
     expect(headers.has("Cookie")).toBe(false);
   });
@@ -57,7 +48,7 @@ describe("the API client", () => {
 
     await request("/restaurants");
 
-    const { headers } = lastRequest();
+    const { headers } = requestAt(fetchMock, 0);
     expect(headers.has("Authorization")).toBe(false);
   });
 
@@ -66,8 +57,8 @@ describe("the API client", () => {
 
     await request("/restaurants", { method: "POST", body: { restaurant: { name: "Lilia" } } });
 
-    const { body: sent, headers } = lastRequest();
-    expect(JSON.parse(sent ?? "")).toEqual({ restaurant: { name: "Lilia" } });
+    const { body: sent, headers } = requestAt(fetchMock, 0);
+    expect(sent).toEqual({ restaurant: { name: "Lilia" } });
     expect(headers.get("Content-Type")).toBe("application/json");
   });
 

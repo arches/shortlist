@@ -1,5 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  issuedPair,
+  noContent,
+  notFound,
+  pathsRequested,
+  refused,
+  requestAt,
+  respond,
+} from "@/test/http";
+
 import { authenticated, SessionEnded, signIn, signOut } from "./session";
 import { couldBeSignedIn, currentAccessToken, forgetSession, storedRefreshToken } from "./store";
 
@@ -7,24 +17,6 @@ import { couldBeSignedIn, currentAccessToken, forgetSession, storedRefreshToken 
 // done", "Staying on my list longer than an access token lasts", "Coming back
 // after my refresh token has expired", and "My session ends in the middle of
 // what I am doing".
-function respond(status: number, body: unknown) {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    text: () => Promise.resolve(body === null ? "" : JSON.stringify(body)),
-  };
-}
-
-function issuedPair(suffix: string) {
-  return respond(201, {
-    access_token: `access-${suffix}`,
-    refresh_token: `refresh-${suffix}`,
-    expires_in: 900,
-  });
-}
-
-const refused = () => respond(401, { error: "Sign in to continue." });
-
 describe("a session", () => {
   const fetchMock = vi.fn();
 
@@ -38,10 +30,6 @@ describe("a session", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
-
-  function pathsRequested(): string[] {
-    return fetchMock.mock.calls.map((call) => String(call.at(0)));
-  }
 
   // Scenario: Signing in to reach my list
   describe("signing in", () => {
@@ -74,7 +62,7 @@ describe("a session", () => {
       fetchMock.mockResolvedValueOnce(issuedPair("one"));
       await signIn("sam.reed@fastmail.com", "correct-horse-battery-staple");
 
-      fetchMock.mockResolvedValueOnce(respond(204, null));
+      fetchMock.mockResolvedValueOnce(noContent());
       await signOut();
 
       expect(currentAccessToken()).toBeUndefined();
@@ -115,7 +103,7 @@ describe("a session", () => {
       });
 
       expect(added.name).toBe("Bar Primi");
-      expect(pathsRequested()).toEqual([
+      expect(pathsRequested(fetchMock)).toEqual([
         "/api/restaurants",
         "/api/session/renewal",
         "/api/restaurants",
@@ -130,8 +118,7 @@ describe("a session", () => {
 
       await authenticated("/restaurants");
 
-      const retry = fetchMock.mock.calls.at(2)?.at(1) as { headers: Headers };
-      expect(retry.headers.get("Authorization")).toBe("Bearer access-two");
+      expect(requestAt(fetchMock, 2).headers.get("Authorization")).toBe("Bearer access-two");
     });
 
     it("keeps the rotated refresh token", async () => {
@@ -153,7 +140,7 @@ describe("a session", () => {
 
       await expect(authenticated("/restaurants")).rejects.toThrow("Sign in to continue.");
 
-      expect(pathsRequested().filter((path) => path.endsWith("/renewal"))).toHaveLength(1);
+      expect(pathsRequested(fetchMock).filter((path) => path.endsWith("/renewal"))).toHaveLength(1);
     });
   });
 
@@ -202,7 +189,7 @@ describe("a session", () => {
 
       fetchMock
         .mockResolvedValueOnce(refused())
-        .mockResolvedValueOnce(respond(401, { error: "That session cannot be renewed." }));
+        .mockResolvedValueOnce(refused("That session cannot be renewed."));
 
       await expect(authenticated("/restaurants")).rejects.toThrow(SessionEnded);
       expect(couldBeSignedIn()).toBe(false);
@@ -212,7 +199,7 @@ describe("a session", () => {
       fetchMock.mockResolvedValueOnce(refused());
 
       await expect(authenticated("/restaurants")).rejects.toThrow(SessionEnded);
-      expect(pathsRequested()).toEqual(["/api/restaurants"]);
+      expect(pathsRequested(fetchMock)).toEqual(["/api/restaurants"]);
     });
   });
 
@@ -220,15 +207,13 @@ describe("a session", () => {
   // caller's problem, and retrying it would hide a real failure.
   describe("a failure that is not a refusal", () => {
     it("is not retried", async () => {
-      fetchMock.mockResolvedValueOnce(
-        respond(404, { error: "No such restaurant is on your list." }),
-      );
+      fetchMock.mockResolvedValueOnce(notFound());
 
       await expect(authenticated("/restaurants/1", { method: "DELETE" })).rejects.toThrow(
         "No such restaurant is on your list.",
       );
 
-      expect(pathsRequested()).toHaveLength(1);
+      expect(pathsRequested(fetchMock)).toHaveLength(1);
     });
   });
 });
