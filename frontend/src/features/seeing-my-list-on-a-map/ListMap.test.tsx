@@ -86,7 +86,7 @@ describe("my list on a map", () => {
   // restaurant in the list", at the zoom level the scenario above it names.
   // Bacari is first, and Lilia being a continent away does not widen the view.
   // Both still get a pin.
-  it("opens centred on the first restaurant on the list, at zoom 10", async () => {
+  it("opens centred on the first restaurant on the list, at zoom 13", async () => {
     serve([
       aRestaurant({ ...BACARI, id: 1 }),
       aRestaurant({ id: 2, name: "Lilia", latitude: 40.7128, longitude: -73.9542 }),
@@ -309,7 +309,7 @@ describe("where the map opens", () => {
   });
 
   // "Given I shared my location in Silverlake ... Then I see a map centered
-  // around my location at zoom level 10. And I see a pin for Bacari on the map.
+  // around my location at zoom level 13. And I see a pin for Bacari on the map.
   // And I see Bacari in the list"
   it("centres on the owner's location, with Bacari pinned and listed", async () => {
     sharesLocation(SILVERLAKE);

@@ -11,7 +11,7 @@ const BACARI_POINT = { latitude: 34.0901, longitude: -118.2765 } as const;
 const BACARI_POINT_AS_CENTRE = { lat: BACARI_POINT.latitude, lng: BACARI_POINT.longitude };
 
 // Derived from seeing-my-list-on-a-map.scenarios.md: "I see a map centered
-// around my location at zoom level 10", and the failure path that falls back to
+// around my location at zoom level 13", and the failure path that falls back to
 // "the first restaurant in the list". This is the half of the map that can be
 // checked without Google.
 describe("the restaurants that can be drawn", () => {
@@ -53,17 +53,17 @@ describe("the view the map opens at, when the owner shared nothing", () => {
     expect(view).toEqual({ centre: { lat: 34.09, lng: -118.27 }, zoom: OPENING_ZOOM });
   });
 
-  // Zoom 10 whatever is on the list: the second restaurant being a continent
+  // Zoom 13 whatever is on the list: the second restaurant being a continent
   // away does not widen it. The owner pans there themselves.
-  it("opens at zoom 10 however far apart the restaurants are", () => {
+  it("opens at zoom 13 however far apart the restaurants are", () => {
     const near = viewOf([aLocatedRestaurant({ latitude: 34.09, longitude: -118.27 })]);
     const far = viewOf([
       aLocatedRestaurant({ latitude: 34.09, longitude: -118.27 }),
       aLocatedRestaurant({ latitude: 40.72, longitude: -73.99 }),
     ]);
 
-    expect(near.zoom).toBe(10);
-    expect(far.zoom).toBe(10);
+    expect(near.zoom).toBe(13);
+    expect(far.zoom).toBe(13);
   });
 
   it("centres on the one restaurant there is", () => {
@@ -103,8 +103,8 @@ describe("the view the map opens at, when the owner shared their location", () =
     expect(view).toEqual({ centre: SILVERLAKE, zoom: OPENING_ZOOM });
   });
 
-  it("opens at zoom 10 there too", () => {
-    expect(viewOf([aLocatedRestaurant(BACARI_POINT)], SILVERLAKE).zoom).toBe(10);
+  it("opens at zoom 13 there too", () => {
+    expect(viewOf([aLocatedRestaurant(BACARI_POINT)], SILVERLAKE).zoom).toBe(13);
   });
 
   // The list has no say in the centre once the owner has shared a point, so an

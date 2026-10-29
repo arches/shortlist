@@ -101,7 +101,7 @@ function PanTo({ point }: { point: Point | undefined }) {
 }
 
 // Scenario: Recentering on the user location — "When I click on the 'locate me'
-// button. Then I see a map centered around my location at zoom level 10".
+// button. Then I see a map centered around my location at zoom level 13".
 //
 // Both halves of that are set at once, which is what separates this from the
 // selection pan: a pan leaves the zoom where the owner left it, and this is the
@@ -182,7 +182,7 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         mapId={configuration.google_maps_map_id}
         className={`${HEIGHT} w-full overflow-hidden rounded-lg`}
         {...THE_OWNER_S_TO_MOVE}
-        // "I see a map centered around my location at zoom level 10", or the
+        // "I see a map centered around my location at zoom level 13", or the
         // first restaurant on the list when the owner shared nothing — where it
         // opens, not where it stays.
         defaultCenter={view.centre}

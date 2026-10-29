@@ -28,7 +28,7 @@ import type { Mock } from "vitest";
 // Shortlist asked for, and where it told the map to look.
 const LILIA = { id: 2, name: "Lilia", latitude: 40.7128, longitude: -73.9542 };
 
-// "I see a map centered around my location at zoom level 10" — centre and zoom
+// "I see a map centered around my location at zoom level 13" — centre and zoom
 // together, which is the whole of what the button does.
 const MY_LOCATION_AT_OPENING_ZOOM = JSON.stringify({
   center: SILVERLAKE,
@@ -59,7 +59,7 @@ describe("locating me", () => {
   });
 
   // Scenario: Recentering on the user location
-  it("recentres on the owner's location at zoom 10", async () => {
+  it("recentres on the owner's location at zoom 13", async () => {
     sharesLocation(SILVERLAKE);
 
     renderApp("/");

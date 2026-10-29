@@ -1,7 +1,7 @@
 import type { Restaurant } from "@/api/types";
 
 // seeing-my-list-on-a-map.scenarios.md: "I see a map centered around my
-// location at zoom level 10", falling back to "the first restaurant in the
+// location at zoom level 13", falling back to "the first restaurant in the
 // list" when the owner shares nothing. Which point that comes to is arithmetic
 // over the list and one shared point — the half of the map that can be tested
 // without Google.
@@ -19,9 +19,9 @@ export interface Point {
   lng: number;
 }
 
-// "at zoom level 10" — one number, wherever the map opens and however far
+// "at zoom level 13" — one number, wherever the map opens and however far
 // apart the list is. The owner moves the map from there themselves.
-export const OPENING_ZOOM = 10;
+export const OPENING_ZOOM = 13;
 
 // An owner who shared nothing and has an empty list has no point to be centred
 // around at all, and no artifact says where the map opens instead — see
@@ -48,7 +48,7 @@ export function pointOf(restaurant: LocatedRestaurant): Point {
 
 // The view the map opens at. The centre has two sources and the owner's own
 // location wins: "I shared my location in Silverlake ... Then I see a map
-// centered around my location at zoom level 10", against "I declined to share
+// centered around my location at zoom level 13", against "I declined to share
 // my location ... Then the map is centered on the first restaurant in the
 // list".
 //
