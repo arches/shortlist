@@ -20,6 +20,7 @@ ENV["SHORTLIST_GOOGLE_PLACES_API_KEY"] ||= "test-places-key"
 # Nothing in the suite draws a map, but the endpoint reads the key when asked
 # for it, so the test environment carries one of these too.
 ENV["SHORTLIST_GOOGLE_MAPS_API_KEY"] ||= "test-maps-key"
+ENV["SHORTLIST_GOOGLE_MAPS_MAP_ID"] ||= "test-map-id"
 
 Rails.root.glob("spec/support/**/*.rb").sort_by(&:to_s).each { |f| require f }
 

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Restaurant } from "@/api/types";
 import { forgetSession, rememberSession } from "@/session/store";
-import { noContent, notFound, requestAt, respond, stubFetch } from "@/test/http";
+import { lastRequestWith, noContent, notFound, requestsWith, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
 import { aRestaurant, openDialog, pressInDialog } from "./testing";
@@ -74,7 +74,7 @@ describe("taking a restaurant off my list", () => {
     await pressInDialog("Take it off");
 
     await waitFor(() => {
-      const { path } = requestAt(fetchMock, 1);
+      const { path } = lastRequestWith(fetchMock, "DELETE");
       expect(path).toBe("/api/list/restaurants/4");
     });
   });
@@ -86,7 +86,7 @@ describe("taking a restaurant off my list", () => {
     await pressInDialog("Take it off");
 
     await waitFor(() => {
-      expect(fetchMock.mock.calls.at(1)?.at(1)).toMatchObject({ method: "DELETE" });
+      expect(requestsWith(fetchMock, "DELETE")).toHaveLength(1);
     });
     // Only the restaurant is addressed. Nothing reaches an experiences endpoint.
     expect(
@@ -117,7 +117,7 @@ describe("taking a restaurant off my list", () => {
         screen.queryByRole("heading", { name: "Take “Joe's Pizza” off my list?" }),
       ).not.toBeInTheDocument();
     });
-    expect(fetchMock.mock.calls).toHaveLength(1);
+    expect(requestsWith(fetchMock, "DELETE")).toEqual([]);
   });
 
   // Scenario Outline: Changing a restaurant I cannot reach — "When I try to

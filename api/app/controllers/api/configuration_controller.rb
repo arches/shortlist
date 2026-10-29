@@ -15,7 +15,10 @@ module Api
     # is a session to read it with.
 
     def show
-      render json: { google_maps_api_key: google_maps_api_key }
+      render json: {
+        google_maps_api_key: google_maps_api_key,
+        google_maps_map_id: google_maps_map_id
+      }
     end
 
     private
@@ -24,6 +27,15 @@ module Api
       # and nothing here can reach the other one.
       def google_maps_api_key
         ENV.fetch("SHORTLIST_GOOGLE_MAPS_API_KEY")
+      end
+
+      # A Cloud-side Map ID, which the Maps JS API requires before it will draw
+      # an advanced marker — and an advanced marker is what draws a pin, the
+      # older one having been deprecated. Environment-specific and not
+      # inferable, so it travels the same way the key does. No artifact names
+      # it — see ASSUMPTIONS.md, "What a pin is drawn with".
+      def google_maps_map_id
+        ENV.fetch("SHORTLIST_GOOGLE_MAPS_MAP_ID")
       end
   end
 end

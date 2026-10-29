@@ -5,6 +5,8 @@ import { forgetSession, rememberSession } from "@/session/store";
 import { refused, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
+import { theConfiguration } from "@/features/seeing-my-list-on-a-map/testing";
+
 import { aRestaurant } from "./testing";
 
 import type { Mock } from "vitest";
@@ -142,7 +144,16 @@ describe("my list", () => {
   });
 
   it("shows nothing it cannot explain when the list could not be opened", async () => {
-    fetchMock.mockResolvedValue(respond(500, { error: "Something went wrong." }));
+    // The map asks for its own configuration, and this is about the list
+    // failing rather than both — so the map gets what it needs and has nothing
+    // of its own to report.
+    fetchMock.mockImplementation((path: string) =>
+      Promise.resolve(
+        String(path).endsWith("/configuration")
+          ? respond(200, theConfiguration())
+          : respond(500, { error: "Something went wrong." }),
+      ),
+    );
 
     renderApp("/");
 

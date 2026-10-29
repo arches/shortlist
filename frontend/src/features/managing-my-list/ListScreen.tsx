@@ -5,6 +5,8 @@ import type { Restaurant } from "@/api/types";
 import { Button } from "@/components/ui/button";
 import { SessionEnded, signOut } from "@/session/session";
 
+import { ListMap } from "@/features/seeing-my-list-on-a-map/ListMap";
+
 import { AddRestaurantDialog } from "./AddRestaurantDialog";
 import { RestaurantList } from "./RestaurantList";
 import { TakeOffListDialog } from "./TakeOffListDialog";
@@ -16,6 +18,10 @@ import { useRestaurants } from "./queries";
 // The wireframe shows no sign-out control. One has to exist — "Signing out when
 // I am done" is a named scenario — so it sits in the header, which is the only
 // chrome the wireframe has.
+//
+// seeing-my-list-on-a-map.scenarios.md calls itself an extension of this view:
+// "map and list together comprise a single page". So the map is part of this
+// screen rather than a screen of its own, and this is where both of them live.
 export function ListScreen() {
   const navigate = useNavigate();
   const { data: restaurants, isPending, error } = useRestaurants();
@@ -53,6 +59,16 @@ export function ListScreen() {
           <Button onClick={() => setAdding(true)}>Add</Button>
         </div>
       </header>
+
+      {/*
+        Scenario: Scrolling the list — "the map stays pinned to the top of the
+        screen so it's always visible". The page is what scrolls, and the map
+        sticks to the top of it, so the cards travel underneath. Opaque rather
+        than transparent, for the same reason.
+      */}
+      <div className="bg-background sticky top-0 z-10 mb-3 pb-3">
+        <ListMap restaurants={restaurants} />
+      </div>
 
       <RestaurantList
         restaurants={restaurants}

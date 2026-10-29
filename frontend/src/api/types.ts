@@ -16,6 +16,13 @@ export interface Restaurant {
   postal_code: string | null;
   country: string | null;
   cuisine: string | null;
+
+  // Where Google puts it. Absent for a Place Google had no point for, and for
+  // every row that predates the map — see ASSUMPTIONS.md, "Coordinates for
+  // restaurants already on a list". Numbers rather than the strings a decimal
+  // column would otherwise serialize to.
+  latitude: number | null;
+  longitude: number | null;
   created_at: string;
   updated_at: string;
 
@@ -57,6 +64,15 @@ export interface IssuedSession {
   access_token: string;
   refresh_token: string;
   expires_in: number;
+}
+
+// What GET /api/configuration serves, per shortlist.principles.md: the bundle
+// carries no configuration, so what the frontend cannot infer the API hands it,
+// unauthenticated. Both values are the Maps JS API's and neither is the Places
+// key, which never leaves the server.
+export interface Configuration {
+  google_maps_api_key: string;
+  google_maps_map_id: string;
 }
 
 // One autocomplete result, as GET /api/places/suggestions sends it. The owner
