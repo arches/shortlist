@@ -20,11 +20,6 @@ interface ListMapProps {
 // take the whole screen.
 const HEIGHT = "h-80";
 
-// seeing-my-list-on-a-map.scenarios.md puts manual panning and zooming out of
-// scope, and the Maps API ships both switched on — so leaving them alone would
-// build the out-of-scope thing by accident. Everything the owner could use to
-// move the map themselves is off; the map still moves when they pick a
-// restaurant, which is the main path rather than a gesture.
 // seeing-my-list-on-a-map.drawio highlights the chosen pin in yellow, and its
 // own note says the highlight is colour-based. Border and glyph are set with
 // the background rather than left to a default, so the pin stays readable
@@ -35,13 +30,22 @@ const HIGHLIGHT = {
   glyphColor: "#8a6d1f",
 } as const;
 
-const NOT_THE_OWNER_S_TO_MOVE = {
-  gestureHandling: "none",
+// Manually panning and zooming is no longer out of scope in
+// seeing-my-list-on-a-map.scenarios.md, so the map is the owner's to move.
+// Which affordances that comes to is not stated — see ASSUMPTIONS.md, "What
+// moving the map themselves comes to".
+const THE_OWNER_S_TO_MOVE = {
+  // A drag pans and ctrl-scroll zooms, while a plain scroll still scrolls the
+  // page. "greedy" would swallow that scroll, and Scenario: Scrolling the list
+  // needs the cards to travel under a map stuck to the top of the page.
+  gestureHandling: "cooperative",
+
+  // The zoom buttons, and nothing else the default UI would bring with them:
+  // the wireframe draws a bare map, and street view, map type and fullscreen
+  // are not what came into scope. The wheel, double-click zoom and the
+  // keyboard are simply no longer suppressed.
   disableDefaultUI: true,
-  zoomControl: false,
-  scrollwheel: false,
-  disableDoubleClickZoom: true,
-  keyboardShortcuts: false,
+  zoomControl: true,
 } as const;
 
 // Scenario: Selecting a restaurant on the list — "the map pans to show Bacari
@@ -104,7 +108,7 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         // an advanced marker is what a pin is now.
         mapId={configuration.google_maps_map_id}
         className={`${HEIGHT} w-full overflow-hidden rounded-lg`}
-        {...NOT_THE_OWNER_S_TO_MOVE}
+        {...THE_OWNER_S_TO_MOVE}
         // "the map is at zoom level 10. And the map is centered around the
         // first restaurant on my list" — where it opens, not where it stays.
         defaultCenter={view.centre}

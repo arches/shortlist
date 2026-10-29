@@ -130,21 +130,47 @@ describe("my list on a map", () => {
     expect(screen.queryAllByTestId("pin")).toEqual([]);
   });
 
-  // Out of scope: manually panning or zooming the map. The Maps API ships both
-  // switched on, so leaving them alone would build the out-of-scope thing by
-  // accident.
-  it("gives the owner no way to move the map themselves", async () => {
+  // Manually panning and zooming is no longer out of scope, so the map is the
+  // owner's to move — see ASSUMPTIONS.md, "What moving the map themselves comes
+  // to". Whether a drag really pans is Google's to answer, and the End-to-end
+  // tests row shortlist.stack.md leaves TBD is where that would be asked.
+  it("lets the owner move the map themselves", async () => {
     serve([aRestaurant(BACARI)]);
 
     renderApp("/");
 
     const map = await screen.findByTestId("map");
-    expect(map).toHaveAttribute("data-gesture-handling", "none");
-    expect(map).toHaveAttribute("data-zoom-control", "false");
-    expect(map).toHaveAttribute("data-scrollwheel", "false");
-    expect(map).toHaveAttribute("data-default-ui-disabled", "true");
-    expect(map).toHaveAttribute("data-double-click-zoom-disabled", "true");
-    expect(map).toHaveAttribute("data-keyboard-shortcuts", "false");
+    expect(map).toHaveAttribute("data-gesture-handling", "cooperative");
+    expect(map).toHaveAttribute("data-zoom-control", "true");
+
+    // Nothing suppresses the wheel, double-click zoom or the keyboard any more.
+    expect(map).not.toHaveAttribute("data-scrollwheel");
+    expect(map).not.toHaveAttribute("data-double-click-zoom-disabled");
+    expect(map).not.toHaveAttribute("data-keyboard-shortcuts");
+  });
+
+  // Scenario: Scrolling the list depends on this one. A plain scroll has to
+  // keep scrolling the page, or the cards cannot travel under a map stuck to
+  // the top of it, which is what "cooperative" buys over "greedy".
+  it("leaves the page's own scrolling alone", async () => {
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    expect(await screen.findByTestId("map")).not.toHaveAttribute(
+      "data-gesture-handling",
+      "greedy",
+    );
+  });
+
+  // The zoom buttons are the only chrome: the wireframe draws a bare map, and
+  // street view, map type and fullscreen are not what came into scope.
+  it("brings no other map chrome with them", async () => {
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    expect(await screen.findByTestId("map")).toHaveAttribute("data-default-ui-disabled", "true");
   });
 
   // shortlist.principles.md: the bundle carries no configuration, so the key

@@ -49,7 +49,6 @@ Scenario: Selecting a restaurant on the map
 
 ## Out of scope
 
-- Manually panning or zooming the map
 - Geolocating the user
 
 <!-- alloy: scenario -->

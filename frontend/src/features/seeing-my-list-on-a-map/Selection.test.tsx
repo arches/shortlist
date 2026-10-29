@@ -8,6 +8,7 @@ import { respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
 import { BACARI, cardFor, pinFor, theConfiguration } from "./testing";
+import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
 
@@ -57,6 +58,20 @@ describe("choosing a restaurant", () => {
       );
 
       expect(within(pinFor("Bacari")).getByTestId("highlighted-google-pin")).toBeInTheDocument();
+    });
+
+    // "the map pans to show Bacari in the center" names a pan and no zoom, and
+    // the zoom is the owner's now — see ASSUMPTIONS.md, "Whether choosing a
+    // restaurant changes the zoom".
+    it("pans without changing the zoom", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await userEvent.click(cardFor("Bacari"));
+
+      const map = screen.getByTestId("map");
+      expect(map).toHaveAttribute("data-panned-to");
+      expect(map).toHaveAttribute("data-zoom", String(OPENING_ZOOM));
     });
 
     it("leaves every other pin standard", async () => {
