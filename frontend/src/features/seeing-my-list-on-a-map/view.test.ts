@@ -3,11 +3,17 @@ import { describe, expect, it } from "vitest";
 import { aRestaurant } from "@/features/managing-my-list/testing";
 
 import { EMPTY_LIST_CENTRE, located, OPENING_ZOOM, viewOf } from "./view";
-import { aLocatedRestaurant } from "./testing";
+import { aLocatedRestaurant, SILVERLAKE } from "./testing";
 
-// Derived from seeing-my-list-on-a-map.scenarios.md: "the map is at zoom level
-// 10. And the map is centered around the first restaurant on my list". This is
-// the half of the map that can be checked without Google.
+// Bacari, as the feature's Background places it, and the same point in the
+// shape a centre takes.
+const BACARI_POINT = { latitude: 34.0901, longitude: -118.2765 } as const;
+const BACARI_POINT_AS_CENTRE = { lat: BACARI_POINT.latitude, lng: BACARI_POINT.longitude };
+
+// Derived from seeing-my-list-on-a-map.scenarios.md: "I see a map centered
+// around my location at zoom level 10", and the failure path that falls back to
+// "the first restaurant in the list". This is the half of the map that can be
+// checked without Google.
 describe("the restaurants that can be drawn", () => {
   it("keeps the ones Google gave a point for", () => {
     const bacari = aLocatedRestaurant({ name: "Bacari", latitude: 34.09, longitude: -118.27 });
@@ -35,7 +41,9 @@ describe("the restaurants that can be drawn", () => {
   });
 });
 
-describe("the view the map opens at", () => {
+// Scenario: Location not shared — "the map is centered on the first restaurant
+// in the list". Nothing shared is what every case in here passes.
+describe("the view the map opens at, when the owner shared nothing", () => {
   it("centres on the first restaurant on the list", () => {
     const view = viewOf([
       aLocatedRestaurant({ name: "Bacari", latitude: 34.09, longitude: -118.27 }),
@@ -82,5 +90,35 @@ describe("the view the map opens at", () => {
 
   it("has none either before the list has loaded", () => {
     expect(viewOf(undefined)).toEqual({ centre: EMPTY_LIST_CENTRE, zoom: OPENING_ZOOM });
+  });
+});
+
+// Scenario: See restaurants from my list — "Given I shared my location in
+// Silverlake ... Then I see a map centered around my location at zoom level
+// 10". The owner's own location is the centre, and the list only supplies pins.
+describe("the view the map opens at, when the owner shared their location", () => {
+  it("centres on where the owner is rather than on the first restaurant", () => {
+    const view = viewOf([aLocatedRestaurant({ name: "Bacari", ...BACARI_POINT })], SILVERLAKE);
+
+    expect(view).toEqual({ centre: SILVERLAKE, zoom: OPENING_ZOOM });
+  });
+
+  it("opens at zoom 10 there too", () => {
+    expect(viewOf([aLocatedRestaurant(BACARI_POINT)], SILVERLAKE).zoom).toBe(10);
+  });
+
+  // The list has no say in the centre once the owner has shared a point, so an
+  // empty one changes nothing.
+  it("centres there with nothing on the list at all", () => {
+    expect(viewOf([], SILVERLAKE)).toEqual({ centre: SILVERLAKE, zoom: OPENING_ZOOM });
+  });
+
+  // Declining and not having answered yet are the same absence here — see
+  // ASSUMPTIONS.md, "When the map waits for the owner's location" for who does
+  // the waiting.
+  it("falls back to the list when the owner shared nothing", () => {
+    const declined = viewOf([aLocatedRestaurant({ name: "Bacari", ...BACARI_POINT })], null);
+
+    expect(declined).toEqual({ centre: BACARI_POINT_AS_CENTRE, zoom: OPENING_ZOOM });
   });
 });

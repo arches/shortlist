@@ -35,6 +35,12 @@ export const BACARI = {
   longitude: -118.2765,
 } as const;
 
+// Where the owner is standing in Scenario: See restaurants from my list — "I
+// shared my location in Silverlake". Silverlake is the neighbourhood Bacari's
+// own address is in, so the two points sit close together, which is what makes
+// a test that confuses them worth writing.
+export const SILVERLAKE = { lat: 34.0869, lng: -118.2702 } as const;
+
 // The two halves of the page, picked out the way an owner points at them: a
 // card by the restaurant it names, a pin by the same.
 export function cardFor(name: string): HTMLElement {
