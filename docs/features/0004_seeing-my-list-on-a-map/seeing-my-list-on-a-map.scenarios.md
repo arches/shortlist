@@ -22,7 +22,7 @@ Managing My List focuses on the list itself, whereas this feature focuses on the
 Scenario: See restaurants from my list
   Given I shared my location in Silverlake
   When I view the main page
-  Then I see a map centered around my location at zoom level 10
+  Then I see a map centered around my location at zoom level 13
   And I see a pin for Bacari on the map
   And I see Bacari in the list
   And I see a blue dot showing my location
@@ -51,7 +51,7 @@ Scenario: Selecting a restaurant on the map
 ```gherkin
 Scenario: Recentering on the user location
   When I click on the "locate me" button
-  Then I see a map centered around my location at zoom level 10
+  Then I see a map centered around my location at zoom level 13
 ```
 
 ## Failure Paths
