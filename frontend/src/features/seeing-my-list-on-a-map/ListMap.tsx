@@ -1,9 +1,19 @@
-import { AdvancedMarker, APIProvider, Map, Pin, useMap } from "@vis.gl/react-google-maps";
+import {
+  AdvancedMarker,
+  APIProvider,
+  ControlPosition,
+  Map,
+  MapControl,
+  Pin,
+  useMap,
+} from "@vis.gl/react-google-maps";
+import { LocateFixed } from "lucide-react";
 import { useEffect } from "react";
 
 import type { Restaurant } from "@/api/types";
+import { Button } from "@/components/ui/button";
 
-import { located, pointOf, viewOf } from "./view";
+import { located, OPENING_ZOOM, pointOf, viewOf } from "./view";
 import type { Point } from "./view";
 import { useOwnerLocation } from "./location";
 import { useConfiguration } from "./queries";
@@ -38,6 +48,13 @@ const HIGHLIGHT = {
 // is the accuracy circle a real blue dot usually carries — see ASSUMPTIONS.md,
 // "What the blue dot is drawn as".
 const MY_LOCATION_DOT = "block size-3.5 rounded-full border-2 border-white bg-blue-600 shadow-md";
+
+// seeing-my-list-on-a-map.drawio draws the locate-me control as a 24px square
+// in the same column as the zoom buttons, at the map's right edge. White with a
+// shadow rather than the wireframe's grey, which is what the zoom buttons it
+// stacks with are — see ASSUMPTIONS.md, "What the locate-me button is drawn
+// as".
+const LOCATE_ME = "m-2.5 size-10 rounded-sm bg-background shadow-md hover:bg-background";
 
 // Manually panning and zooming is no longer out of scope in
 // seeing-my-list-on-a-map.scenarios.md, so the map is the owner's to move.
@@ -81,6 +98,43 @@ function PanTo({ point }: { point: Point | undefined }) {
   }, [map, lat, lng]);
 
   return null;
+}
+
+// Scenario: Recentering on the user location — "When I click on the 'locate me'
+// button. Then I see a map centered around my location at zoom level 10".
+//
+// Both halves of that are set at once, which is what separates this from the
+// selection pan: a pan leaves the zoom where the owner left it, and this is the
+// opening view again, zoom included. The scenario names the zoom, so the owner
+// having zoomed in since is not a reason to keep it.
+//
+// The location is the one read when the page opened, and clicking this does not
+// ask the browser again — see ASSUMPTIONS.md, "Whether the locate-me button
+// asks the browser again".
+//
+// It is drawn into the map's own control layer rather than over the map by this
+// page, so it sits inside the map and travels with it, the way the wireframe
+// draws it alongside the zoom buttons.
+function LocateMe({ shared }: { shared: Point }) {
+  const map = useMap();
+
+  return (
+    <MapControl position={ControlPosition.RIGHT_BOTTOM}>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Locate me"
+        className={LOCATE_ME}
+        onClick={() => {
+          if (map === null) return;
+
+          map.moveCamera({ center: shared, zoom: OPENING_ZOOM });
+        }}
+      >
+        <LocateFixed className="size-5" />
+      </Button>
+    </MapControl>
+  );
 }
 
 // The map half of the list screen. shortlist.context.d2 has Google Maps feeding
@@ -146,6 +200,12 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
             <span data-testid="my-location-dot" className={MY_LOCATION_DOT} />
           </AdvancedMarker>
         ) : null}
+
+        {/* Nothing to locate the owner at when they shared nothing, so there is
+            nothing to offer them — the same silence Scenario: Location not
+            shared gives the blue dot. See ASSUMPTIONS.md, "The locate-me button
+            when there is no location to go to". */}
+        {shared ? <LocateMe shared={shared} /> : null}
 
         {pins.map((restaurant) => (
           // "Markers should be standard google pins", per the wireframe's own
