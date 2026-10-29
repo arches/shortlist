@@ -1,5 +1,14 @@
 Rails.application.routes.draw do
   namespace :api do
+    # shortlist.principles.md: what the frontend cannot infer, the API serves,
+    # unauthenticated, because the frontend needs it before anybody has signed
+    # in. One value today — the Google Maps browser key — and a singular
+    # resource because there is one configuration rather than a collection.
+    # The controller keeps the singular name the thing has: there is one
+    # configuration, not a collection of them, so the route says which
+    # controller rather than letting the pluralization pick a wrong one.
+    resource :configuration, only: [ :show ], controller: "configuration"
+
     # A Session is not an entity — see shortlist.glossary.md. What this creates
     # is a token pair; what destroys it is signing out.
     resource :session, only: [ :create, :destroy ] do

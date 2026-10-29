@@ -16,6 +16,11 @@ WebMock.disable_net_connect!(allow_localhost: true)
 # the client reads it when it is built, so the test environment carries one.
 ENV["SHORTLIST_GOOGLE_PLACES_API_KEY"] ||= "test-places-key"
 
+# The Maps key is the browser's, served by the API per shortlist.principles.md.
+# Nothing in the suite draws a map, but the endpoint reads the key when asked
+# for it, so the test environment carries one of these too.
+ENV["SHORTLIST_GOOGLE_MAPS_API_KEY"] ||= "test-maps-key"
+
 Rails.root.glob("spec/support/**/*.rb").sort_by(&:to_s).each { |f| require f }
 
 begin
