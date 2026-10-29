@@ -48,6 +48,12 @@ Scenario: Selecting a restaurant on the map
   And I see Bacari highlighted on the list
 ```
 
+```gherkin
+Scenario: Recentering on the user location
+  When I click on the "locate me" button
+  Then I see a map centered around my location at zoom level 10
+```
+
 ## Failure Paths
 
 ```gherkin
