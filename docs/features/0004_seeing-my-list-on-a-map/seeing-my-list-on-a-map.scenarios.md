@@ -25,6 +25,7 @@ Scenario: See restaurants from my list
   Then I see a map centered around my location at zoom level 10
   And I see a pin for Bacari on the map
   And I see Bacari in the list
+  And I see a blue dot showing my location
 ```
 
 ```gherkin
@@ -54,6 +55,7 @@ Scenario: Location not shared
   Given I declined to share my location
   When I view the main page
   Then the map is centered on the first restaurant in the list
+  And there is no blue dot showing my location
 ```
 
 <!-- alloy: scenario -->
