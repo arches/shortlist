@@ -1,0 +1,103 @@
+<mxfile host="65bd71144e">
+    <diagram name="Managing my list" id="0">
+        <mxGraphModel dx="1632" dy="912" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="880" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="n2" value="" style="rounded=0;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=2;dashed=0;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="104" width="360" height="700" as="geometry"/>
+                </mxCell>
+                <mxCell id="n3" value="" style="rounded=0;html=1;fillColor=#f2f2f2;strokeColor=#555555;strokeWidth=2;dashed=0;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="104" width="360" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="n4" value="&lt;b&gt;+ Add&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;" parent="1" vertex="1">
+                    <mxGeometry x="311" y="112" width="76" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="n38" value="Managing my list — wireframe with map" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=25;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="34" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n40" value="My list" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="114" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="60" y="665" width="320" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="n11" value="" style="rounded=0;html=1;fillColor=#ffffff;strokeColor=#999999;strokeWidth=1;dashed=0;" parent="24" vertex="1">
+                    <mxGeometry width="320" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="n50" value="Joe's Pizza" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontColor=#111111;fontStyle=1;" parent="24" vertex="1">
+                    <mxGeometry x="12" y="12" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n51" value="Pizza - 943 Ash Ave, Los Angeles CA&lt;br&gt;Visited 1 time" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#666666;" parent="24" vertex="1">
+                    <mxGeometry x="12" y="34" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;" parent="24" vertex="1">
+                    <mxGeometry x="236" y="30" width="76" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="" style="group;fillColor=#FFFFCC;container=0;" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="60" y="581" width="320" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="60" y="497" width="320" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="n5" value="" style="rounded=0;html=1;fillColor=#ffffff;strokeColor=#999999;strokeWidth=1;dashed=0;" parent="26" vertex="1">
+                    <mxGeometry width="320" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="n42" value="Lilia" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontColor=#111111;fontStyle=1;" parent="26" vertex="1">
+                    <mxGeometry x="12" y="12" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n43" value="Italian - 12 Main St, New York NY&lt;br&gt;Visited 1 time" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#666666;" parent="26" vertex="1">
+                    <mxGeometry x="12" y="34" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;" parent="26" vertex="1">
+                    <mxGeometry x="236" y="27" width="76" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#66FFB3;" vertex="1" parent="1">
+                    <mxGeometry x="58" y="154" width="323" height="323" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;fillColor=#FF9999;position2=0.77;" vertex="1" parent="1">
+                    <mxGeometry x="113" y="344" width="34" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontColor=#000000;strokeColor=#9999FF;" edge="1" parent="1" source="32" target="27">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="Map with location markers" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" vertex="1" parent="1">
+                    <mxGeometry x="503" y="229" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;fillColor=#FFFF33;position2=0.77;" vertex="1" parent="1">
+                    <mxGeometry x="237" y="323" width="34" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;fillColor=#FF9999;position2=0.77;" vertex="1" parent="1">
+                    <mxGeometry x="133" y="181" width="34" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="40" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=34;entryDy=15;entryPerimeter=0;strokeColor=#9999FF;fontColor=#000000;" edge="1" parent="1" source="39" target="38">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="39" value="Markers should be standard google pins" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" vertex="1" parent="1">
+                    <mxGeometry x="456" y="112" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;strokeColor=#9999FF;fontColor=#000000;" edge="1" parent="1" source="41" target="n8">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#9999FF;fontColor=#000000;" edge="1" parent="1" source="41" target="37">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" value="Highlight is color-based" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" vertex="1" parent="1">
+                    <mxGeometry x="550" y="393" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="n8" value="" style="rounded=0;html=1;fillColor=#FFFFCC;strokeColor=#999999;strokeWidth=1;dashed=0;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="581" width="320" height="72" as="geometry"/>
+                </mxCell>
+                <mxCell id="n46" value="Tacos El Bronco" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="72" y="593" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n47" value="Mexican - 381 Sycamore St, Los Angeles CA&lt;br&gt;Visited 2 times" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="72" y="615" width="180" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="606" width="76" height="24" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

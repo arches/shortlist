@@ -18,6 +18,7 @@ This is not the dependency list. Nothing here arrived as a dependency of somethi
 | Linting                        | oxlint          |         |                                              |
 | Unit and component tests       | vitest          |         |                                              |
 | Package manager                | pnpm            |         |                                              |
+| Maps                           | Google Maps API |         |                                              |
 
 ## Backend
 

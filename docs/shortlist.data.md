@@ -63,6 +63,8 @@ A row is created at sign-in and replaced at every renewal: the presented row is 
 | postal code     | short text                 | yes      |                             | Cached value from Google Place data |
 | country         | short text                 | yes      |                             | Cached value from Google Place data |
 | cuisine         | short text                 | yes      | What kind of food it serves | Cached value from Google Place data |
+| latitude        | number                     | yes      |                             | Cached value from Google Place data |
+| longitude       | number                     | yes      |                             | Cached value from Google Place data |
 | created at      | UTC timestamp              | no       | Rails default               |                                     |
 | updated at      | UTC timestamp              | no       | Rails default               |                                     |
 
@@ -78,13 +80,13 @@ A Restaurant represents one Google Place, and there is one row per Place for the
 
 ### List item
 
-| Attribute  | Semantic type                  | Optional | Meaning                                              |
-| ---------- | ------------------------------ | -------- | ---------------------------------------------------- |
-| id         | identifier (bigint, generated) | no       |                                                      |
-| list       | reference (List)               | no       | Which List holds it.                                 |
-| restaurant | reference (Restaurant)         | no       | Which Restaurant it puts on that List.               |
-| added at   | UTC timestamp                  | no       | When the owner put this Restaurant on the List.      |
-| updated at | UTC timestamp                  | no       |                                                      |
+| Attribute  | Semantic type                  | Optional | Meaning                                         |
+| ---------- | ------------------------------ | -------- | ----------------------------------------------- |
+| id         | identifier (bigint, generated) | no       |                                                 |
+| list       | reference (List)               | no       | Which List holds it.                            |
+| restaurant | reference (Restaurant)         | no       | Which Restaurant it puts on that List.          |
+| added at   | UTC timestamp                  | no       | When the owner put this Restaurant on the List. |
+| updated at | UTC timestamp                  | no       |                                                 |
 
 ### Experience
 
@@ -109,14 +111,14 @@ A Restaurant represents one Google Place, and there is one row per Place for the
 
 ## Relationships
 
-| From       | To            | Cardinality | Optionality                                                                    |
-| ---------- | ------------- | ----------- | ------------------------------------------------------------------------------ |
-| User       | Refresh token | one to many | A User with none is signed out everywhere                                      |
-| User       | List          | one to many |                                                                                |
-| List       | List item     | one to many | A List with none is empty. A List item is on exactly one List.                 |
-| Restaurant | List item     | one to many | A Restaurant on nobody's List has no List items, and is kept anyway.           |
-| Restaurant | Experience    | one to many | An Experience happened at exactly one Restaurant.                              |
-| User       | Experience    | one to many | An Experience has exactly one owner.                                           |
+| From       | To            | Cardinality | Optionality                                                          |
+| ---------- | ------------- | ----------- | -------------------------------------------------------------------- |
+| User       | Refresh token | one to many | A User with none is signed out everywhere                            |
+| User       | List          | one to many |                                                                      |
+| List       | List item     | one to many | A List with none is empty. A List item is on exactly one List.       |
+| Restaurant | List item     | one to many | A Restaurant on nobody's List has no List items, and is kept anyway. |
+| Restaurant | Experience    | one to many | An Experience happened at exactly one Restaurant.                    |
+| User       | Experience    | one to many | An Experience has exactly one owner.                                 |
 
 ## Invariants
 
@@ -140,7 +142,7 @@ Intentionally held as a decimal rather than an enumerated type, because half-sta
 
 Not stored.
 
-- **experience count** — how many Experiences *one User* has at a Restaurant. **Visited** is this being greater than zero. Both are per owner: a Restaurant is never visited in its own right, only visited by somebody, so another owner's Experiences never show on my List item.
+- **experience count** — how many Experiences _one User_ has at a Restaurant. **Visited** is this being greater than zero. Both are per owner: a Restaurant is never visited in its own right, only visited by somebody, so another owner's Experiences never show on my List item.
 - **last experienced on** — the latest `occurred_on` across that same User's Experiences at the Restaurant; absent when they have none, or when none of them carry a date.
 - **expired** — a Refresh token whose `expires_at` has passed. Not a column: the comparison is made when the token is presented, so nothing has to sweep the table for correctness.
 
