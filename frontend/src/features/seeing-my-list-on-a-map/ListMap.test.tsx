@@ -7,7 +7,7 @@ import { requestAt, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
 import { BACARI, theConfiguration } from "./testing";
-import { EMPTY_LIST_ZOOM, ONE_RESTAURANT_ZOOM } from "./view";
+import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
 
@@ -69,7 +69,10 @@ describe("my list on a map", () => {
     expect(await screen.findByTestId("standard-google-pin")).toBeInTheDocument();
   });
 
-  it("encompasses every restaurant on the list", async () => {
+  // "And the map is at zoom level 10. And the map is centered around the first
+  // restaurant on my list" — Bacari is first, and Lilia being a continent away
+  // does not widen the view. Both still get a pin.
+  it("opens centred on the first restaurant on the list, at zoom 10", async () => {
     serve([
       aRestaurant({ ...BACARI, id: 1 }),
       aRestaurant({ id: 2, name: "Lilia", latitude: 40.7128, longitude: -73.9542 }),
@@ -77,10 +80,12 @@ describe("my list on a map", () => {
 
     renderApp("/");
 
-    expect(await screen.findByTestId("map")).toHaveAttribute(
-      "data-bounds",
-      JSON.stringify({ north: 40.7128, south: 34.0901, east: -73.9542, west: -118.2765 }),
+    const map = await screen.findByTestId("map");
+    expect(map).toHaveAttribute(
+      "data-center",
+      JSON.stringify({ lat: BACARI.latitude, lng: BACARI.longitude }),
     );
+    expect(map).toHaveAttribute("data-zoom", String(OPENING_ZOOM));
     expect(screen.getAllByTestId("pin")).toHaveLength(2);
   });
 
@@ -94,7 +99,7 @@ describe("my list on a map", () => {
       "data-center",
       JSON.stringify({ lat: BACARI.latitude, lng: BACARI.longitude }),
     );
-    expect(map).toHaveAttribute("data-zoom", String(ONE_RESTAURANT_ZOOM));
+    expect(map).toHaveAttribute("data-zoom", String(OPENING_ZOOM));
   });
 
   // A restaurant Google had no location for is on the list and not on the map
@@ -121,7 +126,7 @@ describe("my list on a map", () => {
     expect(await screen.findByText("Nothing on your list yet.")).toBeInTheDocument();
 
     const map = screen.getByTestId("map");
-    expect(map).toHaveAttribute("data-zoom", String(EMPTY_LIST_ZOOM));
+    expect(map).toHaveAttribute("data-zoom", String(OPENING_ZOOM));
     expect(screen.queryAllByTestId("pin")).toEqual([]);
   });
 

@@ -13,7 +13,6 @@ import type { ReactNode } from "react";
 interface MapProps {
   children?: ReactNode;
   mapId?: string;
-  defaultBounds?: { north: number; south: number; east: number; west: number };
   defaultCenter?: { lat: number; lng: number };
   defaultZoom?: number;
   center?: { lat: number; lng: number };
@@ -63,7 +62,6 @@ export function Map({ children, className, ...props }: MapProps) {
       data-testid="map"
       className={className}
       data-map-id={props.mapId}
-      data-bounds={attribute(props.defaultBounds)}
       data-center={attribute(props.defaultCenter)}
       data-panned-to={attribute(props.center)}
       data-zoom={attribute(props.defaultZoom)}

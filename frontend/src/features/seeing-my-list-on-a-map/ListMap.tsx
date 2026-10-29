@@ -79,9 +79,10 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         mapId={configuration.google_maps_map_id}
         className={`${HEIGHT} w-full overflow-hidden rounded-lg`}
         {...NOT_THE_OWNER_S_TO_MOVE}
-        {...(view.fit === "bounds"
-          ? { defaultBounds: view.bounds }
-          : { defaultCenter: view.centre, defaultZoom: view.zoom })}
+        // "the map is at zoom level 10. And the map is centered around the
+        // first restaurant on my list" — where it opens, not where it stays.
+        defaultCenter={view.centre}
+        defaultZoom={view.zoom}
         {...(chosen === undefined ? {} : { center: pointOf(chosen) })}
       >
         {pins.map((restaurant) => (

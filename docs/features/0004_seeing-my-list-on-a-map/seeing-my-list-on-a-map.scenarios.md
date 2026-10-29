@@ -20,7 +20,7 @@ Managing My List focuses on the list itself, whereas this feature focuses on the
 ```gherkin
 Scenario: See restaurants from my list
   When I view the main page
-  Then I see a map encompassing my restaurants
+  Then I see a map of my restaurants
   And the map is at zoom level 10
   And the map is centered around the first restaurant on my list
   And I see a pin for Bacari on the map
@@ -49,6 +49,7 @@ Scenario: Selecting a restaurant on the map
 
 ## Out of scope
 
+- Manually panning or zooming the map
 - Geolocating the user
 
 <!-- alloy: scenario -->
