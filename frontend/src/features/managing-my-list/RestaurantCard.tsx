@@ -9,26 +9,31 @@ interface RestaurantCardProps {
   onTakeOff: (restaurant: Restaurant) => void;
 }
 
-// managing-my-list.wireframe.drawio.svg: each card shows the name, then a
-// subtitle of cuisine, visited-ness and experience count — "Italian · not
-// visited", "Mexican · visited · 2 experiences", "visited · 1 experience" when
-// there is no cuisine — and an Edit and a Remove beside it.
-export function subtitleOf(restaurant: Restaurant): string {
-  const parts: string[] = [];
+// managing-my-list.wireframe.drawio: each card shows the name, then two lines
+// under it — "Italian - 12 Main St, New York NY" and "Visited 1 time".
+//
+// The first is what the restaurant is and where: the cuisine, then the street
+// and the town. Both halves are Google's and either can be absent, so the
+// separator only appears when there is something on each side of it.
+export function detailsOf(restaurant: Restaurant): string {
+  const town = [restaurant.city, restaurant.state].filter(Boolean).join(" ");
+  const place = [restaurant.address_line_1, town].filter(Boolean).join(", ");
 
-  if (restaurant.cuisine) parts.push(restaurant.cuisine);
+  return [restaurant.cuisine, place].filter(Boolean).join(" - ");
+}
 
-  // shortlist.glossary.md: Visited is having an Experience. There is no rating
-  // of a Restaurant, so nothing here averages anything.
-  parts.push(restaurant.visited ? "visited" : "not visited");
+// shortlist.glossary.md: Visited is having an Experience. The count is mine —
+// another owner's never show here — and there is no rating of a Restaurant, so
+// nothing averages anything.
+//
+// The wireframe draws only visited cards, so what an unvisited one reads is an
+// assumption — see ASSUMPTIONS.md, "What an unvisited card reads".
+export function visitsOf(restaurant: Restaurant): string {
+  if (!restaurant.visited) return "Not visited";
 
-  if (restaurant.experience_count > 0) {
-    parts.push(
-      restaurant.experience_count === 1 ? "1 experience" : `${restaurant.experience_count} experiences`,
-    );
-  }
-
-  return parts.join(" · ");
+  return restaurant.experience_count === 1
+    ? "Visited 1 time"
+    : `Visited ${restaurant.experience_count} times`;
 }
 
 export function RestaurantCard({ restaurant, onTakeOff }: RestaurantCardProps) {
@@ -51,7 +56,8 @@ export function RestaurantCard({ restaurant, onTakeOff }: RestaurantCardProps) {
             {restaurant.name}
           </Link>
         </h2>
-        <p className="text-muted-foreground text-sm">{subtitleOf(restaurant)}</p>
+        <p className="text-muted-foreground truncate text-sm">{detailsOf(restaurant)}</p>
+        <p className="text-muted-foreground text-sm">{visitsOf(restaurant)}</p>
       </div>
 
       <div className="flex shrink-0 gap-2">

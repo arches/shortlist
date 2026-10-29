@@ -3,18 +3,17 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-import { subtitleOf } from "@/features/managing-my-list/RestaurantCard";
 import { useRestaurants } from "@/features/managing-my-list/queries";
 import { SessionEnded } from "@/session/session";
 
 import { ExperienceList } from "./ExperienceList";
 import { RecordExperienceDialog } from "./RecordExperienceDialog";
+import { subtitleOf } from "./subtitle";
 
 // managing-experiences.wireframe.drawio.svg settles where experiences live: the
 // restaurant's own screen. It is headed with a "‹ My list" back link, the
-// restaurant's name, and the same subtitle the card on the list carries —
-// "Pizza · visited · 3 experiences" — so subtitleOf is reused rather than
-// rebuilt.
+// restaurant's name, and "Pizza · visited · 3 experiences" under it. That is
+// not what the list's card reads any more — see ./subtitle.ts.
 //
 // The restaurant itself comes out of the list response. shortlist.data.md has
 // exactly one List per owner and the list screen already fetches all of it, so

@@ -11,7 +11,7 @@ import type { Mock } from "vitest";
 
 // Derived from managing-my-list.scenarios.md and the list screen in
 // managing-my-list.wireframe.drawio.svg, whose cards read "Italian · not
-// visited" and "Mexican · visited · 2 experiences".
+// "Italian - 12 Main St, New York NY" over "Visited 1 time".
 describe("my list", () => {
   let fetchMock: Mock;
 
@@ -30,13 +30,22 @@ describe("my list", () => {
   // read as visited. And it has no experiences."
   it("shows a restaurant only heard the name of as not visited", async () => {
     fetchMock.mockResolvedValue(
-      respond(200, [aRestaurant({ name: "Lilia", cuisine: "Italian" })]),
+      respond(200, [
+        aRestaurant({
+          name: "Lilia",
+          cuisine: "Italian",
+          address_line_1: "12 Main St",
+          city: "New York",
+          state: "NY",
+        }),
+      ]),
     );
 
     renderApp("/");
 
     expect(await screen.findByRole("heading", { name: "Lilia" })).toBeInTheDocument();
-    expect(screen.getByText("Italian · not visited")).toBeInTheDocument();
+    expect(screen.getByText("Italian - 12 Main St, New York NY")).toBeInTheDocument();
+    expect(screen.getByText("Not visited")).toBeInTheDocument();
   });
 
   it("shows a visited restaurant with how many experiences it has", async () => {
@@ -45,6 +54,9 @@ describe("my list", () => {
         aRestaurant({
           name: "Tacos El Bronco",
           cuisine: "Mexican",
+          address_line_1: "381 Sycamore St",
+          city: "Los Angeles",
+          state: "CA",
           visited: true,
           experience_count: 2,
         }),
@@ -53,7 +65,8 @@ describe("my list", () => {
 
     renderApp("/");
 
-    expect(await screen.findByText("Mexican · visited · 2 experiences")).toBeInTheDocument();
+    expect(await screen.findByText("Visited 2 times")).toBeInTheDocument();
+    expect(screen.getByText("Mexican - 381 Sycamore St, Los Angeles CA")).toBeInTheDocument();
   });
 
   it("says one experience in the singular", async () => {
@@ -65,15 +78,22 @@ describe("my list", () => {
 
     renderApp("/");
 
-    expect(await screen.findByText("visited · 1 experience")).toBeInTheDocument();
+    expect(await screen.findByText("Visited 1 time")).toBeInTheDocument();
   });
 
-  it("leaves the cuisine out when there is none, and the count when it is zero", async () => {
-    fetchMock.mockResolvedValue(respond(200, [aRestaurant({ name: "Joe's Pizza" })]));
+  // Both halves of the details line are Google's, and either can be absent.
+  it("joins what Google sent and leaves out what it did not", async () => {
+    fetchMock.mockResolvedValue(
+      respond(200, [
+        aRestaurant({ name: "Joe's Pizza", cuisine: "Pizza" }),
+        aRestaurant({ id: 2, name: "Lilia", city: "New York", state: "NY" }),
+      ]),
+    );
 
     renderApp("/");
 
-    expect(await screen.findByText("not visited")).toBeInTheDocument();
+    expect(await screen.findByText("Pizza")).toBeInTheDocument();
+    expect(screen.getByText("New York NY")).toBeInTheDocument();
   });
 
   it("shows every restaurant on the list", async () => {
