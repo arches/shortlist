@@ -104,6 +104,7 @@ fly: "Fly.io\nAPI hosting\n\nRuns the API as a single always-on container" {
 
 user -> shortlist: Restaurant entries and experience notes {class: flow}
 shortlist -> user: Experience details {class: flow}
+user -> shortlist: Their location, when they share it {class: flow}
 google-places-api -> shortlist: Restaurant details {class: flow}
 google-maps -> shortlist: Map tiles and functionality {class: flow}
 user -> shortlist: Email and password, at sign-in {class: flow}

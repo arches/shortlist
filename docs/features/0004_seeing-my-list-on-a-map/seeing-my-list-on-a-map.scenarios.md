@@ -8,6 +8,7 @@ Status: draft
 
 ```gherkin
 Given I am signed in as the owner of my list
+And I have been asked to share my browser location
 And Bacari is on my list at 3626 Sunset Blvd, Los Angeles, CA 90026
 ```
 
@@ -19,10 +20,9 @@ Managing My List focuses on the list itself, whereas this feature focuses on the
 
 ```gherkin
 Scenario: See restaurants from my list
+  Given I shared my location in Silverlake
   When I view the main page
-  Then I see a map of my restaurants
-  And the map is at zoom level 10
-  And the map is centered around the first restaurant on my list
+  Then I see a map centered around my location at zoom level 10
   And I see a pin for Bacari on the map
   And I see Bacari in the list
 ```
@@ -47,8 +47,13 @@ Scenario: Selecting a restaurant on the map
   And I see Bacari highlighted on the list
 ```
 
-## Out of scope
+## Failure Paths
 
-- Geolocating the user
+```gherkin
+Scenario: Location not shared
+  Given I declined to share my location
+  When I view the main page
+  Then the map is centered on the first restaurant in the list
+```
 
 <!-- alloy: scenario -->
