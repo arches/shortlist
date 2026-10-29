@@ -21,14 +21,10 @@ Managing My List focuses on the list itself, whereas this feature focuses on the
 Scenario: See restaurants from my list
   When I view the main page
   Then I see a map encompassing my restaurants
+  And the map is at zoom level 10
+  And the map is centered around the first restaurant on my list
   And I see a pin for Bacari on the map
   And I see Bacari in the list
-```
-
-```gherkin
-Scenario: Scrolling the list
-  When I scroll the list
-  Then the map stays pinned to the top of the screen so it's always visible
 ```
 
 ```gherkin
@@ -53,7 +49,6 @@ Scenario: Selecting a restaurant on the map
 
 ## Out of scope
 
-- Manually panning or zooming the map
 - Geolocating the user
 
 <!-- alloy: scenario -->

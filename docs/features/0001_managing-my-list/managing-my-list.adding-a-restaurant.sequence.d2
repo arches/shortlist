@@ -123,7 +123,7 @@ seq: "" {
   "Alt — Restaurant is new to Shortlist": {
     db -> api: "No such Restaurant" {class: reply}
     api -> places: "Place Details for this Place ID" {class: call}
-    places -> api: "Name, address, cuisine" {class: reply}
+    places -> api: "Name, address, cuisine, latitude, longitude" {class: reply}
     api -> db: "Insert the Restaurant, caching those fields" {class: call}
   }
 
