@@ -57,11 +57,12 @@ RSpec.describe Places::Client do
   end
 
   describe "details" do
-    def details_for(components: [], cuisine: nil, name: "Tacos El Bronco")
+    def details_for(components: [], cuisine: nil, name: "Tacos El Bronco", location: nil)
       stub_place_details(
         "ChIJTacos",
         place_details_body(
-          google_place_id: "ChIJTacos", name: name, components: components, cuisine: cuisine
+          google_place_id: "ChIJTacos", name: name, components: components,
+          cuisine: cuisine, location: location
         )
       )
 
@@ -114,6 +115,19 @@ RSpec.describe Places::Client do
 
     it "leaves cuisine absent when the Place has no primary type" do
       expect(details_for.cuisine).to be_nil
+    end
+
+    # shortlist.data.md gained latitude and longitude for the map in
+    # seeing-my-list-on-a-map.scenarios.md. Google sends them as one location
+    # object, which the attribute table splits into two.
+    it "maps the coordinates" do
+      place = details_for(location: place_location(40.641234, -74.008765))
+
+      expect(place).to have_attributes(latitude: 40.641234, longitude: -74.008765)
+    end
+
+    it "leaves both coordinates absent when Google sends no location" do
+      expect(details_for).to have_attributes(latitude: nil, longitude: nil)
     end
 
     it "asks only for the fields Shortlist stores" do

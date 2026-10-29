@@ -24,13 +24,20 @@ module PlacesHelpers
   end
 
   # One Place Details response, in the shape the API actually answers with.
-  def place_details_body(google_place_id:, name:, components: [], cuisine: nil)
+  # Google sends the coordinates as a location object, which is absent for a
+  # Place it has no point for.
+  def place_details_body(google_place_id:, name:, components: [], cuisine: nil, location: nil)
     {
       id: google_place_id,
       displayName: { text: name, languageCode: "en" },
       addressComponents: components,
-      primaryTypeDisplayName: cuisine.nil? ? nil : { text: cuisine }
+      primaryTypeDisplayName: cuisine.nil? ? nil : { text: cuisine },
+      location: location
     }.compact
+  end
+
+  def place_location(latitude, longitude)
+    { latitude: latitude, longitude: longitude }
   end
 
   def address_component(long, short, *types)

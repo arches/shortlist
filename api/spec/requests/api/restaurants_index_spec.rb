@@ -70,6 +70,28 @@ RSpec.describe "GET /api/list/restaurants" do
       )
     end
 
+    # seeing-my-list-on-a-map.scenarios.md: the map needs a point per
+    # restaurant, and the pair travels as numbers rather than as the strings a
+    # decimal column would otherwise serialize to.
+    it "carries the coordinates as numbers" do
+      create(:restaurant, :located, on_the_list_of: owner)
+
+      get_the_list
+
+      expect(response.parsed_body.sole).to include(
+        "latitude" => 34.090123,
+        "longitude" => -118.276543
+      )
+    end
+
+    it "carries both coordinates absent for a restaurant Google had no point for" do
+      create(:restaurant, on_the_list_of: owner, latitude: nil, longitude: nil)
+
+      get_the_list
+
+      expect(response.parsed_body.sole).to include("latitude" => nil, "longitude" => nil)
+    end
+
     # There is nothing on a Restaurant an owner set, so nothing here was ever
     # theirs to correct.
     it "carries no detail an owner could have set" do

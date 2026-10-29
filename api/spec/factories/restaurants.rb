@@ -26,6 +26,15 @@ FactoryBot.define do
       state { "NY" }
       postal_code { "11232" }
       country { "USA" }
+      latitude { 40.6412340 }
+      longitude { -74.0087650 }
+    end
+
+    # Coordinates on their own, for the map: a Restaurant that has a point
+    # without needing the rest of what Google knows about it.
+    trait :located do
+      latitude { 34.0901230 }
+      longitude { -118.2765430 }
     end
   end
 end

@@ -11,7 +11,9 @@ module Places
     :state,
     :postal_code,
     :country,
-    :cuisine
+    :cuisine,
+    :latitude,
+    :longitude
   ) do
     def to_restaurant_attributes
       to_h

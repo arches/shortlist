@@ -25,7 +25,8 @@ RSpec.describe "POST /api/list/restaurants" do
           address_component("4th Avenue", "4th Ave", "route"),
           address_component("Brooklyn", "Brooklyn", "locality"),
           address_component("New York", "NY", "administrative_area_level_1")
-        ]
+        ],
+        location: place_location(40.641234, -74.008765)
       )
     )
   end
@@ -44,6 +45,18 @@ RSpec.describe "POST /api/list/restaurants" do
         "address_line_1" => "4324 4th Avenue",
         "city" => "Brooklyn",
         "state" => "NY"
+      )
+    end
+
+    # seeing-my-list-on-a-map.scenarios.md needs a point to draw a pin at, and
+    # shortlist.data.md caches it on the row like every other Google value — so
+    # the one Place Details call ADR 0001 pays for is where it comes from.
+    it "caches the coordinates Google sent with it" do
+      add("ChIJTacos")
+
+      expect(Restaurant.sole).to have_attributes(
+        latitude: BigDecimal("40.641234"),
+        longitude: BigDecimal("-74.008765")
       )
     end
 

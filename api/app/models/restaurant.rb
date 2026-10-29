@@ -31,6 +31,17 @@ class Restaurant < ApplicationRecord
 
   validates(*SHORT_TEXT_ATTRIBUTES, length: { maximum: SHORT_TEXT_LENGTH })
 
+  # shortlist.data.md holds both as an optional number. A number is only a
+  # coordinate inside its own range, so that is what is checked here: Google is
+  # the only thing that fills these in, and a value outside the range means the
+  # mapping went wrong rather than that the Place is somewhere unusual.
+  validates :latitude,
+    numericality: { greater_than_or_equal_to: -90, less_than_or_equal_to: 90 },
+    allow_nil: true
+  validates :longitude,
+    numericality: { greater_than_or_equal_to: -180, less_than_or_equal_to: 180 },
+    allow_nil: true
+
   # shortlist.data.md, Derived: none of the three is stored, and all three are
   # one owner's. A Restaurant is never visited in its own right, only visited by
   # somebody, so another owner's Experiences never show on my List item.
@@ -66,7 +77,13 @@ class Restaurant < ApplicationRecord
     super(options.except(:owner)).merge(
       "visited" => visited_by?(owner),
       "experience_count" => experience_count_for(owner),
-      "last_experienced_on" => last_experienced_on_for(owner)
+      "last_experienced_on" => last_experienced_on_for(owner),
+      # Decimal columns, for the precision; a BigDecimal serializes as the
+      # string "34.0901230", which would hand the frontend a string to parse
+      # back into the number shortlist.data.md already calls it. The same
+      # reason Experience sends its rating as a number.
+      "latitude" => latitude&.to_f,
+      "longitude" => longitude&.to_f
     )
   end
 end

@@ -108,6 +108,40 @@ RSpec.describe Restaurant do
     end
   end
 
+  # shortlist.data.md gained latitude and longitude for the map in
+  # seeing-my-list-on-a-map.scenarios.md: optional numbers, cached from Google
+  # like the seven short text values beside them.
+  describe "the coordinates" do
+    it "accepts a Restaurant with both of them" do
+      expect(build(:restaurant, :located, on_the_list_of: owner)).to be_valid
+    end
+
+    it "accepts a Restaurant with neither of them" do
+      expect(build(:restaurant, on_the_list_of: owner, latitude: nil, longitude: nil)).to be_valid
+    end
+
+    it "keeps them to seven decimal places" do
+      restaurant = create(:restaurant, on_the_list_of: owner, latitude: 34.0901234567)
+
+      expect(restaurant.reload.latitude).to eq(BigDecimal("34.0901235"))
+    end
+
+    # A number is only a coordinate inside its own range.
+    it "rejects a latitude off the end of the globe" do
+      restaurant = build(:restaurant, on_the_list_of: owner, latitude: 91)
+
+      expect(restaurant).not_to be_valid
+      expect(restaurant.errors[:latitude]).to be_present
+    end
+
+    it "rejects a longitude off the end of the globe" do
+      restaurant = build(:restaurant, on_the_list_of: owner, longitude: -181)
+
+      expect(restaurant).not_to be_valid
+      expect(restaurant.errors[:longitude]).to be_present
+    end
+  end
+
   # shortlist.data.md, Ownership: nothing erases restaurants. A Restaurant
   # outlives every List item that points at it, and the foreign key is what
   # refuses — there is no application path that tries.

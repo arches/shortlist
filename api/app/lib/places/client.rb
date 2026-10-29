@@ -15,7 +15,7 @@ module Places
 
     # Only what shortlist.data.md stores. Asking for more would be paid for and
     # thrown away — ADR 0001 notes the free tier is finite.
-    DETAILS_FIELDS = "id,displayName,addressComponents,primaryTypeDisplayName".freeze
+    DETAILS_FIELDS = "id,displayName,addressComponents,primaryTypeDisplayName,location".freeze
 
     TIMEOUT_SECONDS = 5
 
@@ -73,7 +73,9 @@ module Places
           state: component(components, "administrative_area_level_1", short: true),
           postal_code: component(components, "postal_code"),
           country: component(components, "country"),
-          cuisine: body.dig("primaryTypeDisplayName", "text")
+          cuisine: body.dig("primaryTypeDisplayName", "text"),
+          latitude: body.dig("location", "latitude"),
+          longitude: body.dig("location", "longitude")
         )
       end
 
