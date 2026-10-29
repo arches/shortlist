@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SessionEnded, signOut } from "@/session/session";
 
 import { AddRestaurantDialog } from "./AddRestaurantDialog";
-import { RestaurantCard } from "./RestaurantCard";
+import { RestaurantList } from "./RestaurantList";
 import { TakeOffListDialog } from "./TakeOffListDialog";
 import { useRestaurants } from "./queries";
 
@@ -36,6 +36,10 @@ export function ListScreen() {
     }
   }
 
+  // A session that has ended is being navigated away from, so it is not
+  // something the list reads out. Every other refusal is.
+  const refusal = error && !(error instanceof SessionEnded) ? error.message : undefined;
+
   return (
     <main className="mx-auto w-full max-w-2xl p-6">
       <header className="mb-6 flex items-center justify-between gap-4">
@@ -50,32 +54,15 @@ export function ListScreen() {
         </div>
       </header>
 
-      {isPending && <p className="text-muted-foreground text-sm">Opening your list…</p>}
-
-      {error && !(error instanceof SessionEnded) && (
-        <p role="alert" className="text-destructive text-sm">
-          {error.message}
-        </p>
-      )}
-
-      {restaurants && restaurants.length === 0 && (
-        <p className="text-muted-foreground text-sm">
-          Nothing on your list yet.
-        </p>
-      )}
+      <RestaurantList
+        restaurants={restaurants}
+        isPending={isPending}
+        error={refusal}
+        onTakeOff={setTakingOff}
+      />
 
       <AddRestaurantDialog open={adding} onOpenChange={setAdding} />
       <TakeOffListDialog restaurant={takingOff} onClose={() => setTakingOff(undefined)} />
-
-      {restaurants && restaurants.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {restaurants.map((restaurant) => (
-            <li key={restaurant.id}>
-              <RestaurantCard restaurant={restaurant} onTakeOff={setTakingOff} />
-            </li>
-          ))}
-        </ul>
-      )}
     </main>
   );
 }
