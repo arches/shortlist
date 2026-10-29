@@ -104,9 +104,22 @@ export function Map({ children, className, ...props }: MapProps) {
   );
 }
 
-// A button, so a test can click a pin the way an owner does. The real marker is
-// clickable too; this is the handle on it.
+// A marker Shortlist wired a click to is a button, so a test can click a pin
+// the way an owner does. The real marker is clickable too; this is the handle
+// on it.
+//
+// A marker with no click is not that. It is something on the map to look at
+// rather than something to point at, so it renders as a plain element and keeps
+// the "pin" handle meaning one restaurant.
 export function AdvancedMarker({ children, position, title, onClick }: MarkerProps) {
+  if (onClick === undefined) {
+    return (
+      <div data-testid="marker" data-title={title} data-position={attribute(position)}>
+        {children}
+      </div>
+    );
+  }
+
   return (
     <button
       type="button"
