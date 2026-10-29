@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
-  onEdit: (restaurant: Restaurant) => void;
   onTakeOff: (restaurant: Restaurant) => void;
 }
 
@@ -32,14 +31,14 @@ export function subtitleOf(restaurant: Restaurant): string {
   return parts.join(" · ");
 }
 
-export function RestaurantCard({ restaurant, onEdit, onTakeOff }: RestaurantCardProps) {
+export function RestaurantCard({ restaurant, onTakeOff }: RestaurantCardProps) {
   return (
     <Card className="flex flex-row items-center justify-between gap-4 p-4">
       <div className="min-w-0">
         {/*
           managing-experiences.wireframe.drawio.svg draws the restaurant's own
           screen with a "‹ My list" back link, but this wireframe draws no way
-          into it — the card has only Edit and Remove. The name is the link,
+          into it — the card has only Remove. The name is the link,
           because it is the one thing on the card that identifies the restaurant
           and "When I open 'Joe's Pizza'" reads as opening the thing named.
         */}
@@ -56,9 +55,6 @@ export function RestaurantCard({ restaurant, onEdit, onTakeOff }: RestaurantCard
       </div>
 
       <div className="flex shrink-0 gap-2">
-        <Button variant="outline" size="sm" onClick={() => onEdit(restaurant)}>
-          Edit
-        </Button>
         <Button variant="outline" size="sm" onClick={() => onTakeOff(restaurant)}>
           Remove
         </Button>

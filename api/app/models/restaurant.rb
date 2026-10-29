@@ -2,9 +2,11 @@
 # owns one. Not a place, a venue or a listing — see shortlist.glossary.md.
 class Restaurant < ApplicationRecord
   SHORT_TEXT_LENGTH = 255
-  URL_ATTRIBUTES = %i[url google_maps_url yelp_url].freeze
+
+  # Every one of them cached from Google. There is nothing on a Restaurant an
+  # owner sets, so there is nothing here an owner can get wrong.
   SHORT_TEXT_ATTRIBUTES = %i[
-    address_line_1 address_line_2 city state postal_code country cuisine specialty
+    address_line_1 address_line_2 city state postal_code country cuisine
   ].freeze
 
   # shortlist.data.md, Ownership: nothing erases restaurants. A Restaurant
@@ -27,7 +29,6 @@ class Restaurant < ApplicationRecord
   # rather than typed, so it is no longer an identity — two Places may share it.
   validates :name, presence: true, length: { maximum: SHORT_TEXT_LENGTH }
 
-  validates(*URL_ATTRIBUTES, http_url: true)
   validates(*SHORT_TEXT_ATTRIBUTES, length: { maximum: SHORT_TEXT_LENGTH })
 
   # shortlist.data.md, Derived: none of the three is stored, and all three are

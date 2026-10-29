@@ -5,7 +5,7 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { PlaceSuggestion, Restaurant, RestaurantDraft } from "@/api/types";
+import type { PlaceSuggestion, Restaurant } from "@/api/types";
 import { authenticated } from "@/session/session";
 
 // There is exactly one List per owner, so nothing identifies it in the key.
@@ -46,19 +46,6 @@ export function useAddRestaurant() {
       authenticated<Restaurant>("/list/restaurants", {
         method: "POST",
         body: { restaurant: { google_place_id: googlePlaceId } },
-      }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
-  });
-}
-
-export function useChangeRestaurant() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, draft }: { id: number; draft: RestaurantDraft }) =>
-      authenticated<Restaurant>(`/restaurants/${id}`, {
-        method: "PATCH",
-        body: { restaurant: draft },
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
   });

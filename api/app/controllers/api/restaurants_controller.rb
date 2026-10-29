@@ -9,7 +9,7 @@ module Api
     NEEDS_A_PLACE = "Pick a restaurant from the suggestions.".freeze
 
     before_action :authenticate_owner!
-    before_action :find_restaurant, only: [ :update, :destroy ]
+    before_action :find_restaurant, only: [ :destroy ]
 
     # The List is the set of Restaurants my List items point at. There is
     # exactly one List per owner, so nothing identifies it in the URL.
@@ -30,17 +30,6 @@ module Api
       add_to_my_list(restaurant)
     rescue ::Places::Error
       render_error(UNAVAILABLE, status: :bad_gateway)
-    end
-
-    # Changing one detail leaves the others alone: this is what rules out having
-    # to restate a whole restaurant to correct one field of it. Clearing a detail
-    # is a distinct act from leaving it alone, and sending null is how it is said.
-    def update
-      if @restaurant.update(update_params)
-        render json: @restaurant.as_json(owner: current_owner)
-      else
-        render_invalid(@restaurant)
-      end
     end
 
     # Taking a restaurant off the list destroys that List item and nothing else.
@@ -79,17 +68,6 @@ module Api
       # Restaurant is cached from Google, so there is nothing else to send.
       def create_params
         params.expect(restaurant: [ :google_place_id ])
-      end
-
-      def update_params
-        params.expect(
-          restaurant: [
-            :name,
-            :url, :google_maps_url, :yelp_url,
-            :address_line_1, :address_line_2, :city, :state, :postal_code, :country,
-            :cuisine, :specialty, :notes
-          ]
-        )
       end
   end
 end

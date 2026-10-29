@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { SessionEnded, signOut } from "@/session/session";
 
 import { AddRestaurantDialog } from "./AddRestaurantDialog";
-import { EditRestaurantDialog } from "./EditRestaurantDialog";
 import { RestaurantCard } from "./RestaurantCard";
 import { TakeOffListDialog } from "./TakeOffListDialog";
 import { useRestaurants } from "./queries";
@@ -21,7 +20,6 @@ export function ListScreen() {
   const navigate = useNavigate();
   const { data: restaurants, isPending, error } = useRestaurants();
   const [adding, setAdding] = useState(false);
-  const [editing, setEditing] = useState<Restaurant | undefined>();
   const [takingOff, setTakingOff] = useState<Restaurant | undefined>();
 
   // Scenario: My session ends in the middle of what I am doing. Only a refused
@@ -67,18 +65,13 @@ export function ListScreen() {
       )}
 
       <AddRestaurantDialog open={adding} onOpenChange={setAdding} />
-      <EditRestaurantDialog restaurant={editing} onClose={() => setEditing(undefined)} />
       <TakeOffListDialog restaurant={takingOff} onClose={() => setTakingOff(undefined)} />
 
       {restaurants && restaurants.length > 0 && (
         <ul className="flex flex-col gap-3">
           {restaurants.map((restaurant) => (
             <li key={restaurant.id}>
-              <RestaurantCard
-                restaurant={restaurant}
-                onEdit={setEditing}
-                onTakeOff={setTakingOff}
-              />
+              <RestaurantCard restaurant={restaurant} onTakeOff={setTakingOff} />
             </li>
           ))}
         </ul>

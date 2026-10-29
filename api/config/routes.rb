@@ -34,7 +34,7 @@ Rails.application.routes.draw do
     # the restaurant's own screen. An Experience has no name and so cannot be
     # picked out by one — the only handle on it is the Restaurant it happened
     # at, which is what nests it here.
-    resources :restaurants, only: [ :update ] do
+    resources :restaurants, only: [] do
       resources :experiences, only: [ :index, :create, :update, :destroy ]
     end
   end

@@ -93,46 +93,6 @@ RSpec.describe Restaurant do
     end
   end
 
-  # Scenario Outline: Giving a restaurant a link that is not a web address
-  describe "links" do
-    Restaurant::URL_ATTRIBUTES.each do |attribute|
-      context "on #{attribute}" do
-        [
-          [ "javascript:alert(1)", "not a web address, and it gets rendered" ],
-          [ "data:text/html,<h1>hi</h1>", "same" ],
-          [ "mailto:hi@lilianewyork.com", "a web address is what this field means" ]
-        ].each do |link, why|
-          it "rejects #{link} — #{why}" do
-            restaurant = build(:restaurant, on_the_list_of: owner, attribute => link)
-
-            expect(restaurant).not_to be_valid
-            expect(restaurant.errors[attribute]).to be_present
-          end
-        end
-
-        it "rejects a value longer than 2048 characters" do
-          long = "https://example.com/#{'a' * 2048}"
-          restaurant = build(:restaurant, on_the_list_of: owner, attribute => long)
-
-          expect(restaurant).not_to be_valid
-          expect(restaurant.errors[attribute]).to be_present
-        end
-
-        it "accepts an http address" do
-          expect(build(:restaurant, on_the_list_of: owner, attribute => "http://lilianewyork.com")).to be_valid
-        end
-
-        it "accepts an https address" do
-          expect(build(:restaurant, on_the_list_of: owner, attribute => "https://lilianewyork.com/menu")).to be_valid
-        end
-
-        it "accepts no value at all" do
-          expect(build(:restaurant, on_the_list_of: owner, attribute => nil)).to be_valid
-        end
-      end
-    end
-  end
-
   describe "the optional short text attributes" do
     Restaurant::SHORT_TEXT_ATTRIBUTES.each do |attribute|
       it "accepts #{attribute} being absent" do
@@ -145,10 +105,6 @@ RSpec.describe Restaurant do
         expect(restaurant).not_to be_valid
         expect(restaurant.errors[attribute]).to be_present
       end
-    end
-
-    it "accepts notes of any length" do
-      expect(build(:restaurant, on_the_list_of: owner, notes: "a" * 10_000)).to be_valid
     end
   end
 

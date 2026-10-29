@@ -9,9 +9,6 @@ export interface Restaurant {
   // ASSUMPTIONS.md, "A Restaurant's surrogate id".
   google_place_id: string;
   name: string;
-  url: string | null;
-  google_maps_url: string | null;
-  yelp_url: string | null;
   address_line_1: string | null;
   address_line_2: string | null;
   city: string | null;
@@ -19,8 +16,6 @@ export interface Restaurant {
   postal_code: string | null;
   country: string | null;
   cuisine: string | null;
-  specialty: string | null;
-  notes: string | null;
   created_at: string;
   updated_at: string;
 
@@ -30,27 +25,6 @@ export interface Restaurant {
   experience_count: number;
   last_experienced_on: string | null;
 }
-
-// Everything an owner can still set through editing. Adding sets none of it:
-// a restaurant arrives as a Google Place and its details are Google's.
-export type RestaurantDraft = Partial<
-  Pick<
-    Restaurant,
-    | "name"
-    | "url"
-    | "google_maps_url"
-    | "yelp_url"
-    | "address_line_1"
-    | "address_line_2"
-    | "city"
-    | "state"
-    | "postal_code"
-    | "country"
-    | "cuisine"
-    | "specialty"
-    | "notes"
-  >
->;
 
 // The shape the API sends back, from shortlist.data.md's Experience attribute
 // table. rating is a number rather than a string: the column is a decimal, and

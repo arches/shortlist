@@ -100,13 +100,15 @@ describe("my list", () => {
     expect(await screen.findByText("Nothing on your list yet.")).toBeInTheDocument();
   });
 
-  it("offers an Edit and a Remove for each restaurant", async () => {
+  // There is nothing on a Restaurant an owner set, so there is nothing to
+  // correct: the card offers a Remove and no Edit.
+  it("offers a Remove for each restaurant, and no Edit", async () => {
     fetchMock.mockResolvedValue(respond(200, [aRestaurant({ name: "Lilia" })]));
 
     renderApp("/");
 
-    expect(await screen.findByRole("button", { name: "Edit" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Remove" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
   });
 
   // Scenario: My session ends in the middle of what I am doing — reached only

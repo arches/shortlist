@@ -16,17 +16,16 @@ FactoryBot.define do
       create(:list_item, list: evaluator.on_the_list_of.lists.sole, restaurant: restaurant)
     end
 
+    # Everything Google sends back about a Place.
     trait :with_everything do
       name { "Tacos El Bronco" }
       cuisine { "Mexican" }
-      specialty { "Suadero tacos" }
       address_line_1 { "4324 4th Ave" }
+      address_line_2 { "Suite 2" }
       city { "Brooklyn" }
       state { "NY" }
       postal_code { "11232" }
       country { "USA" }
-      url { "https://tacoselbronco.com" }
-      notes { "Cash only, closes early" }
     end
   end
 end

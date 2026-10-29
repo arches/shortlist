@@ -53,7 +53,7 @@ RSpec.describe "GET /api/list/restaurants" do
       )
     end
 
-    it "carries every detail an owner filled in" do
+    it "carries every detail Google sent back" do
       create(:restaurant, :with_everything, on_the_list_of: owner)
 
       get_the_list
@@ -61,23 +61,24 @@ RSpec.describe "GET /api/list/restaurants" do
       expect(response.parsed_body.sole).to include(
         "name" => "Tacos El Bronco",
         "cuisine" => "Mexican",
-        "specialty" => "Suadero tacos",
         "address_line_1" => "4324 4th Ave",
+        "address_line_2" => "Suite 2",
         "city" => "Brooklyn",
         "state" => "NY",
         "postal_code" => "11232",
-        "url" => "https://tacoselbronco.com",
-        "notes" => "Cash only, closes early"
+        "country" => "USA"
       )
     end
 
-    # shortlist.data.md: removed_at never leaves the system in any response.
-    it "never reveals removed_at" do
-      create(:restaurant, on_the_list_of: owner, name: "Lilia")
+    # There is nothing on a Restaurant an owner set, so nothing here was ever
+    # theirs to correct.
+    it "carries no detail an owner could have set" do
+      create(:restaurant, :with_everything, on_the_list_of: owner)
 
       get_the_list
 
-      expect(response.body).not_to include("removed_at")
+      expect(response.parsed_body.sole.keys)
+        .not_to include("url", "google_maps_url", "yelp_url", "specialty", "notes")
     end
   end
 

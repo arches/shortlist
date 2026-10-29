@@ -10,9 +10,6 @@ export function aRestaurant(attributes: Partial<Restaurant> = {}): Restaurant {
     id: 1,
     google_place_id: "ChIJrTLr-GyuEmsRBfy61i59si0",
     name: "Lilia",
-    url: null,
-    google_maps_url: null,
-    yelp_url: null,
     address_line_1: null,
     address_line_2: null,
     city: null,
@@ -20,8 +17,6 @@ export function aRestaurant(attributes: Partial<Restaurant> = {}): Restaurant {
     postal_code: null,
     country: null,
     cuisine: null,
-    specialty: null,
-    notes: null,
     created_at: "2026-10-01T00:00:00.000Z",
     updated_at: "2026-10-01T00:00:00.000Z",
     visited: false,
@@ -31,8 +26,8 @@ export function aRestaurant(attributes: Partial<Restaurant> = {}): Restaurant {
   };
 }
 
-// Driving the two dialogs from the outside: open one, fill a field, press a
-// button inside it. Shared so the Add and Edit suites read the same way.
+// Driving a dialog from the outside: open one, type into it, press a button
+// inside it.
 
 export async function openDialog(trigger: string, heading: string): Promise<void> {
   await userEvent.click(screen.getByRole("button", { name: trigger }));
@@ -43,12 +38,8 @@ export async function typeInto(label: string, value: string): Promise<void> {
   await userEvent.type(screen.getByLabelText(label), value);
 }
 
-export async function clearField(label: string): Promise<void> {
-  await userEvent.clear(screen.getByLabelText(label));
-}
-
-// The two forms the dialogs take: the Add and Edit forms are dialogs, the
-// removal confirmation is an alertdialog.
+// The two forms a dialog takes: the Add dialog is a dialog, the removal
+// confirmation is an alertdialog.
 export async function pressInDialog(name: string): Promise<void> {
   const dialog = screen.queryByRole("dialog") ?? screen.getByRole("alertdialog");
 
