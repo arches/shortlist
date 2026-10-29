@@ -3,10 +3,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { aRestaurant } from "@/features/managing-my-list/testing";
 import { forgetSession, rememberSession } from "@/session/store";
+import {
+  declinesLocation,
+  forgetGeolocation,
+  locationPromptUnanswered,
+  locationRefused,
+  POSITION_UNAVAILABLE,
+  sharesLocation,
+} from "@/test/geolocation";
 import { requestAt, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
-import { BACARI, theConfiguration } from "./testing";
+import { BACARI, SILVERLAKE, theConfiguration } from "./testing";
 import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
@@ -18,6 +26,11 @@ import type { Mock } from "vitest";
 // The Maps JS API is stood in for suite-wide — see src/test/google-maps.tsx.
 // Nothing below proves Google drew a map; what it proves is which restaurants
 // Shortlist asked it to draw, and what it told the map it may not do.
+//
+// jsdom implements no Geolocation API, so every test in this block runs as an
+// owner who shares nothing, and the map falls back to the first restaurant the
+// way Scenario: Location not shared requires. Where the owner's own location
+// goes is the block at the foot of this file.
 describe("my list on a map", () => {
   let fetchMock: Mock;
 
@@ -69,9 +82,10 @@ describe("my list on a map", () => {
     expect(await screen.findByTestId("standard-google-pin")).toBeInTheDocument();
   });
 
-  // "And the map is at zoom level 10. And the map is centered around the first
-  // restaurant on my list" — Bacari is first, and Lilia being a continent away
-  // does not widen the view. Both still get a pin.
+  // Scenario: Location not shared — "the map is centered on the first
+  // restaurant in the list", at the zoom level the scenario above it names.
+  // Bacari is first, and Lilia being a continent away does not widen the view.
+  // Both still get a pin.
   it("opens centred on the first restaurant on the list, at zoom 10", async () => {
     serve([
       aRestaurant({ ...BACARI, id: 1 }),
@@ -259,5 +273,149 @@ describe("scrolling the list", () => {
     // The cards are outside what is pinned, which is what lets them scroll past.
     const card = screen.getByRole("heading", { name: "Bacari" });
     expect(pinned?.contains(card)).toBe(false);
+  });
+});
+
+// Scenario: See restaurants from my list, and Scenario: Location not shared.
+// The feature's Background has the owner already asked — "I have been asked to
+// share my browser location" — so what varies between these is only the answer.
+//
+// What a real browser does with a permission prompt is the End-to-end tests row
+// shortlist.stack.md leaves TBD. What is checked here is where Shortlist opens
+// the map once it has an answer.
+describe("where the map opens", () => {
+  let fetchMock: Mock;
+
+  function serve(restaurants: unknown[]) {
+    fetchMock.mockImplementation((path: string) =>
+      Promise.resolve(
+        path.endsWith("/configuration")
+          ? respond(200, theConfiguration())
+          : respond(200, restaurants),
+      ),
+    );
+  }
+
+  beforeEach(() => {
+    fetchMock = stubFetch();
+    window.localStorage.clear();
+    forgetSession();
+    rememberSession({ access_token: "access-one", refresh_token: "refresh-one", expires_in: 900 });
+  });
+
+  afterEach(() => {
+    forgetGeolocation();
+    vi.unstubAllGlobals();
+  });
+
+  // "Given I shared my location in Silverlake ... Then I see a map centered
+  // around my location at zoom level 10. And I see a pin for Bacari on the map.
+  // And I see Bacari in the list"
+  it("centres on the owner's location, with Bacari pinned and listed", async () => {
+    sharesLocation(SILVERLAKE);
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    const map = await screen.findByTestId("map");
+    expect(map).toHaveAttribute("data-center", JSON.stringify(SILVERLAKE));
+    expect(map).toHaveAttribute("data-zoom", String(OPENING_ZOOM));
+
+    expect(screen.getByTestId("pin")).toHaveAttribute("data-title", "Bacari");
+    expect(screen.getByRole("heading", { name: "Bacari" })).toBeInTheDocument();
+  });
+
+  // The scenario centres the map on the owner and never shows them. The
+  // wireframe draws no marker for them either — see ASSUMPTIONS.md, "Whether
+  // the owner's location is drawn". So the pins are the restaurants, and Bacari
+  // is the only one.
+  it("draws no pin for the owner themselves", async () => {
+    sharesLocation(SILVERLAKE);
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+
+    expect(screen.getAllByTestId("pin")).toHaveLength(1);
+  });
+
+  // Nothing on the list to fall back to, and the owner's location is the centre
+  // regardless.
+  it("centres there even with nothing on the list", async () => {
+    sharesLocation(SILVERLAKE);
+    serve([]);
+
+    renderApp("/");
+
+    expect(await screen.findByTestId("map")).toHaveAttribute(
+      "data-center",
+      JSON.stringify(SILVERLAKE),
+    );
+  });
+
+  // "Given I declined to share my location ... Then the map is centered on the
+  // first restaurant in the list"
+  it("centres on the first restaurant when the owner declined", async () => {
+    declinesLocation();
+    serve([
+      aRestaurant(BACARI),
+      aRestaurant({ id: 2, name: "Lilia", latitude: 40.7128, longitude: -73.9542 }),
+    ]);
+
+    renderApp("/");
+
+    const map = await screen.findByTestId("map");
+    expect(map).toHaveAttribute(
+      "data-center",
+      JSON.stringify({ lat: BACARI.latitude, lng: BACARI.longitude }),
+    );
+    expect(map).toHaveAttribute("data-zoom", String(OPENING_ZOOM));
+  });
+
+  // One fallback for every cause — see ASSUMPTIONS.md, "Anything other than a
+  // decline". A browser that could not fix the position is not a browser the
+  // owner refused with, and the map does the same thing with both.
+  it("centres on the first restaurant when the position cannot be fixed", async () => {
+    locationRefused(POSITION_UNAVAILABLE);
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    expect(await screen.findByTestId("map")).toHaveAttribute(
+      "data-center",
+      JSON.stringify({ lat: BACARI.latitude, lng: BACARI.longitude }),
+    );
+  });
+
+  // The prompt is open and the owner has answered neither way. The map opens
+  // once and cannot take its centre back, so it waits — see ASSUMPTIONS.md,
+  // "When the map waits for the owner's location". The list is not waiting with
+  // it.
+  it("waits while the prompt is still open, and lists the restaurants anyway", async () => {
+    locationPromptUnanswered();
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    expect(await screen.findByRole("heading", { name: "Bacari" })).toBeInTheDocument();
+    expect(screen.getByText("Opening the map…")).toBeInTheDocument();
+    expect(screen.queryByTestId("map")).not.toBeInTheDocument();
+  });
+
+  // shortlist.context.d2 draws the location as one flow, user to Shortlist, and
+  // nothing carrying it onward — see ASSUMPTIONS.md, "Where the owner's
+  // location goes". No request mentions it.
+  it("sends the owner's location nowhere", async () => {
+    sharesLocation(SILVERLAKE);
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+
+    const sent = fetchMock.mock.calls.map((call) => JSON.stringify(call)).join(" ");
+    expect(sent).not.toContain(String(SILVERLAKE.lat));
+    expect(sent).not.toContain(String(SILVERLAKE.lng));
   });
 });

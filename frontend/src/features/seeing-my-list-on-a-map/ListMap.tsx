@@ -5,6 +5,7 @@ import type { Restaurant } from "@/api/types";
 
 import { located, pointOf, viewOf } from "./view";
 import type { Point } from "./view";
+import { useOwnerLocation } from "./location";
 import { useConfiguration } from "./queries";
 
 interface ListMapProps {
@@ -80,6 +81,10 @@ function PanTo({ point }: { point: Point | undefined }) {
 export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
   const { data: configuration, error } = useConfiguration();
 
+  // Scenario: See restaurants from my list opens the map on the owner's own
+  // location, so where it opens is not known until the browser has answered.
+  const { data: shared, isPending: asking } = useOwnerLocation();
+
   // Neither state is in an artifact — see ASSUMPTIONS.md, "What stands in for
   // the map before it can be drawn".
   if (error) {
@@ -90,11 +95,17 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
     );
   }
 
-  if (!configuration) {
+  // The same line covers both waits. The map opens once, at a centre it cannot
+  // take back — `defaultCenter` is read on the first draw and the camera is the
+  // owner's after that — so drawing before the answer arrives would mean either
+  // showing a centre the scenario does not ask for, or panning away from one
+  // the owner may already have moved. See ASSUMPTIONS.md, "When the map waits
+  // for the owner's location".
+  if (!configuration || asking) {
     return <p className="text-muted-foreground text-sm">Opening the map…</p>;
   }
 
-  const view = viewOf(restaurants);
+  const view = viewOf(restaurants, shared);
   const pins = located(restaurants);
 
   // Nothing is chosen until the owner chooses something, and until then the map
@@ -109,8 +120,9 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         mapId={configuration.google_maps_map_id}
         className={`${HEIGHT} w-full overflow-hidden rounded-lg`}
         {...THE_OWNER_S_TO_MOVE}
-        // "the map is at zoom level 10. And the map is centered around the
-        // first restaurant on my list" — where it opens, not where it stays.
+        // "I see a map centered around my location at zoom level 10", or the
+        // first restaurant on the list when the owner shared nothing — where it
+        // opens, not where it stays.
         defaultCenter={view.centre}
         defaultZoom={view.zoom}
       >
