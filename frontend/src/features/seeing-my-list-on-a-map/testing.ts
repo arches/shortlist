@@ -1,3 +1,5 @@
+import { screen } from "@testing-library/react";
+
 import type { Configuration, Restaurant } from "@/api/types";
 import { aRestaurant } from "@/features/managing-my-list/testing";
 
@@ -32,3 +34,16 @@ export const BACARI = {
   latitude: 34.0901,
   longitude: -118.2765,
 } as const;
+
+// The two halves of the page, picked out the way an owner points at them: a
+// card by the restaurant it names, a pin by the same.
+export function cardFor(name: string): HTMLElement {
+  const card = screen.getByRole("heading", { name }).closest("[data-slot='card']");
+  if (card === null) throw new Error(`no card for ${name}`);
+
+  return card as HTMLElement;
+}
+
+export function pinFor(name: string): HTMLElement {
+  return screen.getByRole("button", { name });
+}

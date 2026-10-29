@@ -7,6 +7,8 @@ import { useConfiguration } from "./queries";
 
 interface ListMapProps {
   restaurants: Restaurant[] | undefined;
+  selected: number | undefined;
+  onSelect: (id: number) => void;
 }
 
 // seeing-my-list-on-a-map.drawio draws the map 323px tall at the top of the
@@ -21,6 +23,16 @@ const HEIGHT = "h-80";
 // build the out-of-scope thing by accident. Everything the owner could use to
 // move the map themselves is off; the map still moves when they pick a
 // restaurant, which is the main path rather than a gesture.
+// seeing-my-list-on-a-map.drawio highlights the chosen pin in yellow, and its
+// own note says the highlight is colour-based. Border and glyph are set with
+// the background rather than left to a default, so the pin stays readable
+// against it.
+const HIGHLIGHT = {
+  background: "#ffff33",
+  borderColor: "#8a6d1f",
+  glyphColor: "#8a6d1f",
+} as const;
+
 const NOT_THE_OWNER_S_TO_MOVE = {
   gestureHandling: "none",
   disableDefaultUI: true,
@@ -33,7 +45,7 @@ const NOT_THE_OWNER_S_TO_MOVE = {
 // The map half of the list screen. shortlist.context.d2 has Google Maps feeding
 // Shortlist map tiles and functionality, and shortlist.principles.md is why the
 // key it needs arrives from the API rather than from the bundle.
-export function ListMap({ restaurants }: ListMapProps) {
+export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
   const { data: configuration, error } = useConfiguration();
 
   // Neither state is in an artifact — see ASSUMPTIONS.md, "What stands in for
@@ -53,6 +65,12 @@ export function ListMap({ restaurants }: ListMapProps) {
   const view = viewOf(restaurants);
   const pins = located(restaurants);
 
+  // Scenario: Selecting a restaurant on the list — "the map pans to show Bacari
+  // in the center". The centre is controlled only once something is chosen, so
+  // until then the map keeps the view it opened at. Nothing changes the zoom:
+  // the scenario asks for a pan.
+  const chosen = pins.find((restaurant) => restaurant.id === selected);
+
   return (
     <APIProvider apiKey={configuration.google_maps_api_key}>
       <Map
@@ -64,6 +82,7 @@ export function ListMap({ restaurants }: ListMapProps) {
         {...(view.fit === "bounds"
           ? { defaultBounds: view.bounds }
           : { defaultCenter: view.centre, defaultZoom: view.zoom })}
+        {...(chosen === undefined ? {} : { center: pointOf(chosen) })}
       >
         {pins.map((restaurant) => (
           // "Markers should be standard google pins", per the wireframe's own
@@ -72,8 +91,9 @@ export function ListMap({ restaurants }: ListMapProps) {
             key={restaurant.id}
             position={pointOf(restaurant)}
             title={restaurant.name}
+            onClick={() => onSelect(restaurant.id)}
           >
-            <Pin />
+            <Pin {...(restaurant.id === selected ? HIGHLIGHT : {})} />
           </AdvancedMarker>
         ))}
       </Map>

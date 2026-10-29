@@ -6,6 +6,8 @@ interface RestaurantListProps {
   restaurants: Restaurant[] | undefined;
   isPending: boolean;
   error?: string | undefined;
+  selected: number | undefined;
+  onSelect: (id: number) => void;
   onTakeOff: (restaurant: Restaurant) => void;
 }
 
@@ -23,6 +25,8 @@ export function RestaurantList({
   restaurants,
   isPending,
   error,
+  selected,
+  onSelect,
   onTakeOff,
 }: RestaurantListProps) {
   return (
@@ -43,7 +47,12 @@ export function RestaurantList({
         <ul className="flex flex-col gap-3">
           {restaurants.map((restaurant) => (
             <li key={restaurant.id}>
-              <RestaurantCard restaurant={restaurant} onTakeOff={onTakeOff} />
+              <RestaurantCard
+                restaurant={restaurant}
+                selected={restaurant.id === selected}
+                onSelect={onSelect}
+                onTakeOff={onTakeOff}
+              />
             </li>
           ))}
         </ul>

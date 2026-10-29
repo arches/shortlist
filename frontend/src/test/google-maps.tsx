@@ -16,6 +16,7 @@ interface MapProps {
   defaultBounds?: { north: number; south: number; east: number; west: number };
   defaultCenter?: { lat: number; lng: number };
   defaultZoom?: number;
+  center?: { lat: number; lng: number };
   gestureHandling?: string;
   zoomControl?: boolean;
   scrollwheel?: boolean;
@@ -29,6 +30,13 @@ interface MarkerProps {
   children?: ReactNode;
   position: { lat: number; lng: number };
   title?: string;
+  onClick?: () => void;
+}
+
+interface PinProps {
+  background?: string;
+  borderColor?: string;
+  glyphColor?: string;
 }
 
 function attribute(value: unknown): string | undefined {
@@ -43,6 +51,8 @@ export function APIProvider({ children, apiKey }: { children?: ReactNode; apiKey
   );
 }
 
+// data-center is where the map opened; data-panned-to is where it has been sent
+// since, which is what the selection scenarios turn on.
 export function Map({ children, className, ...props }: MapProps) {
   return (
     <div
@@ -55,6 +65,7 @@ export function Map({ children, className, ...props }: MapProps) {
       data-map-id={props.mapId}
       data-bounds={attribute(props.defaultBounds)}
       data-center={attribute(props.defaultCenter)}
+      data-panned-to={attribute(props.center)}
       data-zoom={attribute(props.defaultZoom)}
       data-gesture-handling={props.gestureHandling}
       data-zoom-control={attribute(props.zoomControl)}
@@ -68,14 +79,32 @@ export function Map({ children, className, ...props }: MapProps) {
   );
 }
 
-export function AdvancedMarker({ children, position, title }: MarkerProps) {
+// A button, so a test can click a pin the way an owner does. The real marker is
+// clickable too; this is the handle on it.
+export function AdvancedMarker({ children, position, title, onClick }: MarkerProps) {
   return (
-    <div data-testid="pin" data-title={title} data-position={attribute(position)}>
+    <button
+      type="button"
+      aria-label={title}
+      data-testid="pin"
+      data-title={title}
+      data-position={attribute(position)}
+      onClick={onClick}
+    >
       {children}
-    </div>
+    </button>
   );
 }
 
-export function Pin() {
-  return <span data-testid="standard-google-pin" />;
+// Nothing set is the standard Google pin. A background set is the highlight,
+// which is what "Highlight is color-based" in the wireframe comes to.
+export function Pin({ background, borderColor, glyphColor }: PinProps) {
+  return (
+    <span
+      data-testid={background === undefined ? "standard-google-pin" : "highlighted-google-pin"}
+      data-background={background}
+      data-border-color={borderColor}
+      data-glyph-color={glyphColor}
+    />
+  );
 }

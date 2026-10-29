@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 
 import type { Restaurant } from "@/api/types";
 import { Button } from "@/components/ui/button";
@@ -6,8 +7,17 @@ import { Card } from "@/components/ui/card";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
+  selected: boolean;
+  onSelect: (id: number) => void;
   onTakeOff: (restaurant: Restaurant) => void;
 }
+
+// seeing-my-list-on-a-map.drawio fills the chosen card pale yellow, and its own
+// note says the highlight is colour-based. The text colour is set in the same
+// breath as the fill: the page has a dark mode, and a fill without a text
+// colour is how light text ends up on a light background.
+const HIGHLIGHT = "bg-yellow-100 text-yellow-950 ring-2 ring-yellow-400";
+const HIGHLIGHT_DETAIL = "text-yellow-900";
 
 // managing-my-list.wireframe.drawio: each card shows the name, then two lines
 // under it — "Italian - 12 Main St, New York NY" and "Visited 1 time".
@@ -36,9 +46,36 @@ export function visitsOf(restaurant: Restaurant): string {
     : `Visited ${restaurant.experience_count} times`;
 }
 
-export function RestaurantCard({ restaurant, onTakeOff }: RestaurantCardProps) {
+export function RestaurantCard({
+  restaurant,
+  selected,
+  onSelect,
+  onTakeOff,
+}: RestaurantCardProps) {
+  const card = useRef<HTMLDivElement>(null);
+
+  // Scenario: Selecting a restaurant on the map — "the list scrolls so Bacari is
+  // in view". "nearest" is what makes this the same code for both scenarios: a
+  // card chosen from the list is already in view, so nothing moves.
+  useEffect(() => {
+    if (selected) card.current?.scrollIntoView({ block: "nearest" });
+  }, [selected]);
+
+  const detail = selected ? HIGHLIGHT_DETAIL : "text-muted-foreground";
+
+  // Scenario: Selecting a restaurant on the list — "When I click on Bacari in
+  // the list". The card is what is clicked; the name inside it is still the way
+  // into the restaurant's own screen. See ASSUMPTIONS.md, "What clicking a card
+  // does".
   return (
-    <Card className="flex flex-row items-center justify-between gap-4 p-4">
+    <Card
+      ref={card}
+      onClick={() => onSelect(restaurant.id)}
+      aria-current={selected ? "true" : undefined}
+      className={`flex cursor-pointer flex-row items-center justify-between gap-4 p-4 ${
+        selected ? HIGHLIGHT : ""
+      }`}
+    >
       <div className="min-w-0">
         {/*
           managing-experiences.wireframe.drawio.svg draws the restaurant's own
@@ -56,8 +93,8 @@ export function RestaurantCard({ restaurant, onTakeOff }: RestaurantCardProps) {
             {restaurant.name}
           </Link>
         </h2>
-        <p className="text-muted-foreground truncate text-sm">{detailsOf(restaurant)}</p>
-        <p className="text-muted-foreground text-sm">{visitsOf(restaurant)}</p>
+        <p className={`${detail} truncate text-sm`}>{detailsOf(restaurant)}</p>
+        <p className={`${detail} text-sm`}>{visitsOf(restaurant)}</p>
       </div>
 
       <div className="flex shrink-0 gap-2">

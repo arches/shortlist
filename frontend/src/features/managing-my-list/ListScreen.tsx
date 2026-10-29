@@ -28,6 +28,12 @@ export function ListScreen() {
   const [adding, setAdding] = useState(false);
   const [takingOff, setTakingOff] = useState<Restaurant | undefined>();
 
+  // seeing-my-list-on-a-map.scenarios.md: "map and list together comprise a
+  // single page", and both of its selection scenarios move the other half. So
+  // which restaurant is chosen belongs to the page that holds both, not to
+  // either one of them. Nothing is chosen until the owner chooses it.
+  const [selected, setSelected] = useState<number | undefined>();
+
   // Scenario: My session ends in the middle of what I am doing. Only a refused
   // renewal reaches here, and the answer to it is to ask for a sign-in.
   useEffect(() => {
@@ -67,13 +73,15 @@ export function ListScreen() {
         than transparent, for the same reason.
       */}
       <div className="bg-background sticky top-0 z-10 mb-3 pb-3">
-        <ListMap restaurants={restaurants} />
+        <ListMap restaurants={restaurants} selected={selected} onSelect={setSelected} />
       </div>
 
       <RestaurantList
         restaurants={restaurants}
         isPending={isPending}
         error={refusal}
+        selected={selected}
+        onSelect={setSelected}
         onTakeOff={setTakingOff}
       />
 
