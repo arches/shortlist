@@ -31,6 +31,14 @@ const HIGHLIGHT = {
   glyphColor: "#8a6d1f",
 } as const;
 
+// Scenario: See restaurants from my list — "And I see a blue dot showing my
+// location". The phrase borrows Google's own convention, and so does this: a
+// small blue circle, ringed in white so it reads against whatever map tile sits
+// under it. The shade, the size and the ring are not in any artifact, and nor
+// is the accuracy circle a real blue dot usually carries — see ASSUMPTIONS.md,
+// "What the blue dot is drawn as".
+const MY_LOCATION_DOT = "block size-3.5 rounded-full border-2 border-white bg-blue-600 shadow-md";
+
 // Manually panning and zooming is no longer out of scope in
 // seeing-my-list-on-a-map.scenarios.md, so the map is the owner's to move.
 // Which affordances that comes to is not stated — see ASSUMPTIONS.md, "What
@@ -127,6 +135,17 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         defaultZoom={view.zoom}
       >
         <PanTo point={chosen === undefined ? undefined : pointOf(chosen)} />
+
+        {/* The owner, where they are standing, when they shared it. Nothing is
+            drawn when there is nothing to draw — "And there is no blue dot
+            showing my location", which Scenario: Location not shared says in so
+            many words. The dot is not a restaurant, so nothing happens when it
+            is clicked. */}
+        {shared ? (
+          <AdvancedMarker position={shared} title="My location">
+            <span data-testid="my-location-dot" className={MY_LOCATION_DOT} />
+          </AdvancedMarker>
+        ) : null}
 
         {pins.map((restaurant) => (
           // "Markers should be standard google pins", per the wireframe's own

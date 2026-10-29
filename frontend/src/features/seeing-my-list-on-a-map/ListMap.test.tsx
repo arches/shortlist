@@ -323,21 +323,41 @@ describe("where the map opens", () => {
 
     expect(screen.getByTestId("pin")).toHaveAttribute("data-title", "Bacari");
     expect(screen.getByRole("heading", { name: "Bacari" })).toBeInTheDocument();
+
+    // "And I see a blue dot showing my location"
+    expect(screen.getByTestId("my-location-dot")).toBeInTheDocument();
   });
 
-  // The scenario centres the map on the owner and never shows them. The
-  // wireframe draws no marker for them either — see ASSUMPTIONS.md, "Whether
-  // the owner's location is drawn". So the pins are the restaurants, and Bacari
-  // is the only one.
-  it("draws no pin for the owner themselves", async () => {
+  // The dot is blue, which is the whole of what the scenario says about how it
+  // looks — the rest of it is ASSUMPTIONS.md, "What the blue dot is drawn as".
+  // It sits where the owner is standing, which is close enough to Bacari's own
+  // address to be worth checking apart from it.
+  it("draws the dot blue, where the owner is standing", async () => {
     sharesLocation(SILVERLAKE);
     serve([aRestaurant(BACARI)]);
 
     renderApp("/");
 
-    await screen.findByTestId("map");
+    expect(await screen.findByTestId("my-location-dot")).toHaveClass("bg-blue-600");
 
-    expect(screen.getAllByTestId("pin")).toHaveLength(1);
+    const me = screen.getByTestId("marker");
+    expect(me).toHaveAttribute("data-position", JSON.stringify(SILVERLAKE));
+    expect(me).toHaveAttribute("data-title", "My location");
+  });
+
+  // The owner is not a restaurant, so the dot is neither a pin nor something to
+  // click. Bacari is still the only pin on the map.
+  it("draws the owner as a dot rather than as a pin", async () => {
+    sharesLocation(SILVERLAKE);
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    await screen.findByTestId("my-location-dot");
+
+    const pins = screen.getAllByTestId("pin");
+    expect(pins).toHaveLength(1);
+    expect(pins[0]).toHaveAttribute("data-title", "Bacari");
   });
 
   // Nothing on the list to fall back to, and the owner's location is the centre
@@ -371,11 +391,15 @@ describe("where the map opens", () => {
       JSON.stringify({ lat: BACARI.latitude, lng: BACARI.longitude }),
     );
     expect(map).toHaveAttribute("data-zoom", String(OPENING_ZOOM));
+
+    // "And there is no blue dot showing my location"
+    expect(screen.queryByTestId("my-location-dot")).not.toBeInTheDocument();
   });
 
   // One fallback for every cause — see ASSUMPTIONS.md, "Anything other than a
   // decline". A browser that could not fix the position is not a browser the
-  // owner refused with, and the map does the same thing with both.
+  // owner refused with, and the map does the same thing with both, dot
+  // included: there is no location to show either way.
   it("centres on the first restaurant when the position cannot be fixed", async () => {
     locationRefused(POSITION_UNAVAILABLE);
     serve([aRestaurant(BACARI)]);
@@ -386,6 +410,20 @@ describe("where the map opens", () => {
       "data-center",
       JSON.stringify({ lat: BACARI.latitude, lng: BACARI.longitude }),
     );
+    expect(screen.queryByTestId("my-location-dot")).not.toBeInTheDocument();
+  });
+
+  // The third of the same fallback: a browser with no Geolocation API at all
+  // was never asked, so it has nothing to show either.
+  it("shows no dot in a browser that cannot locate anybody", async () => {
+    forgetGeolocation();
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+
+    expect(screen.queryByTestId("my-location-dot")).not.toBeInTheDocument();
   });
 
   // The prompt is open and the owner has answered neither way. The map opens
