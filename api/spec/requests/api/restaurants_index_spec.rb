@@ -3,11 +3,11 @@ require "rails_helper"
 # Derived from managing-my-list.scenarios.md and the wireframe's list screen:
 # each card reads a name, a cuisine, whether it is visited, and how many
 # experiences it has.
-RSpec.describe "GET /api/restaurants" do
+RSpec.describe "GET /api/list/restaurants" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }
 
   def get_the_list(headers = headers_for(owner))
-    get "/api/restaurants", headers: headers, as: :json
+    get "/api/list/restaurants", headers: headers, as: :json
   end
 
   describe "when I am signed in" do

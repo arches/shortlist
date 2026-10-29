@@ -75,7 +75,7 @@ describe("taking a restaurant off my list", () => {
 
     await waitFor(() => {
       const { path } = requestAt(fetchMock, 1);
-      expect(path).toBe("/api/restaurants/4");
+      expect(path).toBe("/api/list/restaurants/4");
     });
   });
 

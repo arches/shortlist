@@ -89,7 +89,7 @@ describe("adding a restaurant", () => {
 
     await waitFor(() => {
       expect(lastRequestWith(fetchMock, "POST")).toMatchObject({
-        path: "/api/restaurants",
+        path: "/api/list/restaurants",
         body: { restaurant: { google_place_id: "ChIJTacos" } },
       });
     });

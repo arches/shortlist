@@ -144,7 +144,7 @@ describe("removing an experience", () => {
       await waitFor(() => {
         const paths = fetchMock.mock.calls.map((call) => String(call.at(0)));
 
-        expect(paths.filter((path) => path === "/api/restaurants").length).toBeGreaterThan(1);
+        expect(paths.filter((path) => path === "/api/list/restaurants").length).toBeGreaterThan(1);
         expect(paths.filter((path) => path === "/api/restaurants/4/experiences").length)
           .toBeGreaterThan(1);
       });

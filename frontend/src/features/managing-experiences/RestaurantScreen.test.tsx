@@ -39,7 +39,7 @@ describe("a restaurant's own screen", () => {
   // frontend runs rather than injected into the bundle.
   function listIs(restaurants: ReturnType<typeof aRestaurant>[]) {
     fetchMock.mockImplementation((path: string) =>
-      Promise.resolve(path === "/api/restaurants" ? respond(200, restaurants) : respond(200, [])),
+      Promise.resolve(path === "/api/list/restaurants" ? respond(200, restaurants) : respond(200, [])),
     );
   }
 

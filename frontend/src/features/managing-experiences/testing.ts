@@ -32,7 +32,7 @@ export function screenShows(
   { restaurants, experiences }: { restaurants: Restaurant[]; experiences: Experience[] },
 ) {
   fetchMock.mockImplementation((path: string) => {
-    if (path === "/api/restaurants") return Promise.resolve(respond(200, restaurants));
+    if (path === "/api/list/restaurants") return Promise.resolve(respond(200, restaurants));
     if (path.endsWith("/experiences")) return Promise.resolve(respond(200, experiences));
 
     return Promise.resolve(respond(200, null));

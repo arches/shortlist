@@ -32,7 +32,7 @@ export function usePlaceSuggestions(query: string) {
 export function useRestaurants(): UseQueryResult<Restaurant[]> {
   return useQuery({
     queryKey: restaurantsKey,
-    queryFn: () => authenticated<Restaurant[]>("/restaurants"),
+    queryFn: () => authenticated<Restaurant[]>("/list/restaurants"),
   });
 }
 
@@ -43,7 +43,7 @@ export function useAddRestaurant() {
 
   return useMutation({
     mutationFn: (googlePlaceId: string) =>
-      authenticated<Restaurant>("/restaurants", {
+      authenticated<Restaurant>("/list/restaurants", {
         method: "POST",
         body: { restaurant: { google_place_id: googlePlaceId } },
       }),
@@ -69,7 +69,7 @@ export function useTakeRestaurantOffTheList() {
 
   return useMutation({
     mutationFn: (id: number) =>
-      authenticated<null>(`/restaurants/${id}`, { method: "DELETE" }),
+      authenticated<null>(`/list/restaurants/${id}`, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
   });
 }

@@ -3,11 +3,11 @@ require "rails_helper"
 # Derived from managing-my-list.scenarios.md, its three add paths, and the
 # sequence diagram that routes them. Background: I am signed in as the owner of
 # my list.
-RSpec.describe "POST /api/restaurants" do
+RSpec.describe "POST /api/list/restaurants" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }
 
   def add(google_place_id, headers = headers_for(owner))
-    post "/api/restaurants",
+    post "/api/list/restaurants",
       params: { restaurant: { google_place_id: google_place_id } },
       headers: headers,
       as: :json

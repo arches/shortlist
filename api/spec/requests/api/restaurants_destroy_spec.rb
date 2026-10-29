@@ -3,11 +3,11 @@ require "rails_helper"
 # Derived from shortlist.data.md's Ownership statements — removing a list item
 # destroys that row and nothing else — and from the Remove confirmation in
 # managing-my-list.wireframe.drawio. The refusals match RestaurantScope.
-RSpec.describe "DELETE /api/restaurants/:id" do
+RSpec.describe "DELETE /api/list/restaurants/:id" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }
 
   def take_off(id, headers = headers_for(owner))
-    delete "/api/restaurants/#{id}", headers: headers, as: :json
+    delete "/api/list/restaurants/#{id}", headers: headers, as: :json
   end
 
   describe "a restaurant I have visited" do
@@ -66,7 +66,7 @@ RSpec.describe "DELETE /api/restaurants/:id" do
       create(:experience, restaurant: restaurant, user: owner)
 
       take_off(restaurant.id)
-      post "/api/restaurants",
+      post "/api/list/restaurants",
         params: { restaurant: { google_place_id: "ChIJJoes" } },
         headers: headers_for(owner), as: :json
 
