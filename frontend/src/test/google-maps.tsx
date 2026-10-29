@@ -1,3 +1,4 @@
+import { createContext, useContext, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 // The Google Maps JS API cannot run under jsdom: it loads a script, draws into
@@ -15,7 +16,6 @@ interface MapProps {
   mapId?: string;
   defaultCenter?: { lat: number; lng: number };
   defaultZoom?: number;
-  center?: { lat: number; lng: number };
   gestureHandling?: string;
   zoomControl?: boolean;
   scrollwheel?: boolean;
@@ -38,6 +38,26 @@ interface PinProps {
   glyphColor?: string;
 }
 
+interface Point {
+  lat: number;
+  lng: number;
+}
+
+// The handful of the real map instance's methods Shortlist calls. panTo is the
+// whole of it: the selection scenarios are the only thing that moves the map,
+// and everything else about the camera is the owner's now.
+interface FakeMap {
+  panTo: (point: Point) => void;
+}
+
+const MapInstance = createContext<FakeMap | null>(null);
+
+// The real hook returns the map once it has loaded, to anything inside the
+// provider. Null before then, which is why ListMap guards on it.
+export function useMap(): FakeMap | null {
+  return useContext(MapInstance);
+}
+
 function attribute(value: unknown): string | undefined {
   return value === undefined ? undefined : JSON.stringify(value);
 }
@@ -50,30 +70,37 @@ export function APIProvider({ children, apiKey }: { children?: ReactNode; apiKey
   );
 }
 
-// data-center is where the map opened; data-panned-to is where it has been sent
-// since, which is what the selection scenarios turn on.
+// data-center is where the map opened; data-panned-to is where panTo has sent it
+// since, which is what the selection scenarios turn on. The two are separate
+// because the owner can now move the map between them, and a pan has to be
+// distinguishable from the view it opened at.
 export function Map({ children, className, ...props }: MapProps) {
+  const [pannedTo, setPannedTo] = useState<Point | undefined>();
+  const instance = useMemo<FakeMap>(() => ({ panTo: setPannedTo }), []);
+
   return (
-    <div
-      // The map is the one thing on the page an owner looks at rather than
-      // reads, so it is named for anybody who cannot see it.
-      role="application"
-      aria-label="My list on a map"
-      data-testid="map"
-      className={className}
-      data-map-id={props.mapId}
-      data-center={attribute(props.defaultCenter)}
-      data-panned-to={attribute(props.center)}
-      data-zoom={attribute(props.defaultZoom)}
-      data-gesture-handling={props.gestureHandling}
-      data-zoom-control={attribute(props.zoomControl)}
-      data-scrollwheel={attribute(props.scrollwheel)}
-      data-default-ui-disabled={attribute(props.disableDefaultUI)}
-      data-double-click-zoom-disabled={attribute(props.disableDoubleClickZoom)}
-      data-keyboard-shortcuts={attribute(props.keyboardShortcuts)}
-    >
-      {children}
-    </div>
+    <MapInstance.Provider value={instance}>
+      <div
+        // The map is the one thing on the page an owner looks at rather than
+        // reads, so it is named for anybody who cannot see it.
+        role="application"
+        aria-label="My list on a map"
+        data-testid="map"
+        className={className}
+        data-map-id={props.mapId}
+        data-center={attribute(props.defaultCenter)}
+        data-panned-to={attribute(pannedTo)}
+        data-zoom={attribute(props.defaultZoom)}
+        data-gesture-handling={props.gestureHandling}
+        data-zoom-control={attribute(props.zoomControl)}
+        data-scrollwheel={attribute(props.scrollwheel)}
+        data-default-ui-disabled={attribute(props.disableDefaultUI)}
+        data-double-click-zoom-disabled={attribute(props.disableDoubleClickZoom)}
+        data-keyboard-shortcuts={attribute(props.keyboardShortcuts)}
+      >
+        {children}
+      </div>
+    </MapInstance.Provider>
   );
 }
 

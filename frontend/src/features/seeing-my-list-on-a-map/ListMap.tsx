@@ -1,8 +1,10 @@
-import { AdvancedMarker, APIProvider, Map, Pin } from "@vis.gl/react-google-maps";
+import { AdvancedMarker, APIProvider, Map, Pin, useMap } from "@vis.gl/react-google-maps";
+import { useEffect } from "react";
 
 import type { Restaurant } from "@/api/types";
 
 import { located, pointOf, viewOf } from "./view";
+import type { Point } from "./view";
 import { useConfiguration } from "./queries";
 
 interface ListMapProps {
@@ -42,6 +44,32 @@ const NOT_THE_OWNER_S_TO_MOVE = {
   keyboardShortcuts: false,
 } as const;
 
+// Scenario: Selecting a restaurant on the list — "the map pans to show Bacari
+// in the center" — and the same pan from the other side, on the map.
+//
+// The pan goes through the map instance rather than a controlled `center` prop.
+// A controlled centre is re-asserted on every render, so any move the owner
+// made themselves would be undone by the next one — a refetch of the list is
+// enough. Keyed on the coordinates, so choosing a different restaurant pans and
+// a re-render does not.
+//
+// Nothing changes the zoom: the scenario asks for a pan, and the zoom is now
+// the owner's. See ASSUMPTIONS.md, "Whether choosing a restaurant changes the
+// zoom".
+function PanTo({ point }: { point: Point | undefined }) {
+  const map = useMap();
+  const lat = point?.lat;
+  const lng = point?.lng;
+
+  useEffect(() => {
+    if (map === null || lat === undefined || lng === undefined) return;
+
+    map.panTo({ lat, lng });
+  }, [map, lat, lng]);
+
+  return null;
+}
+
 // The map half of the list screen. shortlist.context.d2 has Google Maps feeding
 // Shortlist map tiles and functionality, and shortlist.principles.md is why the
 // key it needs arrives from the API rather than from the bundle.
@@ -65,10 +93,8 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
   const view = viewOf(restaurants);
   const pins = located(restaurants);
 
-  // Scenario: Selecting a restaurant on the list — "the map pans to show Bacari
-  // in the center". The centre is controlled only once something is chosen, so
-  // until then the map keeps the view it opened at. Nothing changes the zoom:
-  // the scenario asks for a pan.
+  // Nothing is chosen until the owner chooses something, and until then the map
+  // keeps the view it opened at.
   const chosen = pins.find((restaurant) => restaurant.id === selected);
 
   return (
@@ -83,8 +109,9 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         // first restaurant on my list" — where it opens, not where it stays.
         defaultCenter={view.centre}
         defaultZoom={view.zoom}
-        {...(chosen === undefined ? {} : { center: pointOf(chosen) })}
       >
+        <PanTo point={chosen === undefined ? undefined : pointOf(chosen)} />
+
         {pins.map((restaurant) => (
           // "Markers should be standard google pins", per the wireframe's own
           // note — which is what Pin draws when nothing overrides it.
