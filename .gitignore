@@ -1,6 +1,13 @@
 docs/DIRECTIVES.md
 docs/ASSUMPTIONS.md
 
+# The frontend build output, copied into the production image. public/ holds the
+# digest-stamped assets and frontend/ the document that boots them; both are
+# produced by the image build, per shortlist.deployment.md.
+/api/public/*
+!/api/public/.keep
+/api/frontend/
+
 # Ruby
 /api/.bundle/
 /api/log/*

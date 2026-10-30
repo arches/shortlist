@@ -54,4 +54,21 @@ Rails.application.routes.draw do
       resources :experiences, only: [ :index, :create, :update, :destroy ]
     end
   end
+
+  # shortlist.deployment.md: the app machine serves the built frontend as well as
+  # the API, so a path the API does not claim is the frontend's. Its routes are
+  # real URLs — a signed-out owner is redirected to /sign-in, and a restaurant's
+  # own screen is /restaurants/:id — and a reload on one of those has to reach
+  # the document that boots the router rather than a 404.
+  #
+  # Two prefixes are not the frontend's and are excluded rather than caught: /api
+  # is the JSON API, where an unclaimed path is a 404 and must say so in JSON,
+  # and /assets holds the digest-stamped build output the static middleware
+  # serves, where a missing file is a missing file.
+  get "*path",
+      to: "frontend#show",
+      format: false,
+      constraints: ->(request) { !request.path.start_with?("/api", "/assets") }
+
+  root to: "frontend#show"
 end
