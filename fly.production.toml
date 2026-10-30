@@ -1,0 +1,56 @@
+# shortlist.deployment.md, Configuration: what differs per environment is this
+# file, checked in, so a configuration change is reviewed in a pull request
+# rather than applied by hand. `flyctl deploy --config fly.production.toml`
+# reconciles the running app to it.
+#
+# One-time provisioning is deliberately not here. Creating the app, the volume,
+# Postgres, the Tigris bucket and the certificate is `make provision`, and the
+# secrets this app reads are set with `flyctl secrets set` — their names are in
+# .env.example and their values live only in Fly.
+
+app = "shortlist-production"
+primary_region = "lax"
+
+# No [build] section: every deploy names an image that already exists, built by
+# the pipeline and tagged with the git SHA. shortlist.deployment.md — nothing is
+# rebuilt to promote, so what is approved is the artifact the tests passed
+# against.
+
+[deploy]
+  # Fly runs this before new machines take traffic and fails the release if it
+  # exits non-zero, so a failed migration is a failed deploy. The previous
+  # machines serve throughout, which is why every migration has to be safe
+  # against the code that is already running.
+  release_command = "bin/rails db:migrate"
+
+[env]
+  # Non-secret only. Anything with a credential in it is a Fly secret, including
+  # DATABASE_URL, which carries the database password.
+  RAILS_ENV = "production"
+  RAILS_LOG_LEVEL = "info"
+
+[http_service]
+  # config/puma.rb reads PORT and defaults to 3000. One service for both halves:
+  # the app machine serves the JSON API and the built frontend on one origin.
+  internal_port = 3000
+  force_https = true
+
+  # shortlist.stack.md: always-on, for first-request latency. This is the one
+  # line that makes Production cost money while nobody is using it, and the one
+  # line staging deliberately sets differently.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  # The health check Fly stops routing traffic on. The path is
+  # Shortlist::HEALTH_CHECK_PATH, which config/routes.rb answers.
+  [[http_service.checks]]
+    method = "GET"
+    path = "/up"
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "10s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

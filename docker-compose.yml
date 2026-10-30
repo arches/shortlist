@@ -23,8 +23,16 @@ services:
   api:
     build: ./api
     env_file: .env
+    environment:
+      # The suite checks the checked-in deployment configuration — the forbidden
+      # connections in shortlist.deployment.md are facts about what must never be
+      # wired up, so the files are what hold them. api/ is the working directory
+      # in here, so the repository is mounted read-only and named. Nothing but
+      # the examples reads it, and nothing can write to it.
+      SHORTLIST_REPOSITORY_ROOT: /repo
     volumes:
       - ./api:/app
+      - .:/repo:ro
     ports:
       - "${SHORTLIST_API_PORT:-3000}:3000"
     depends_on:
