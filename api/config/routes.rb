@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  # shortlist.deployment.md: every fly.<env>.toml carries a health check, and Fly
+  # stops sending traffic to a machine that fails one. Rails' own health
+  # controller is the whole answer — it reports that the process is up, which is
+  # all the proxy asks. Outside the api namespace: this is the platform's
+  # endpoint, not one the frontend ever calls.
+  get Shortlist::HEALTH_CHECK_PATH, to: "rails/health#show", as: :health_check
+
   namespace :api do
     # shortlist.principles.md: what the frontend cannot infer, the API serves,
     # unauthenticated, because the frontend needs it before anybody has signed

@@ -19,6 +19,12 @@ require "action_view/railtie"
 Bundler.require(*Rails.groups)
 
 module Shortlist
+  # shortlist.deployment.md gives every environment's fly.<env>.toml a health
+  # check. Fly's proxy makes it over plain HTTP on the private network, and the
+  # path is one decision read in three places — the route, the SSL redirect
+  # exemption below, and production's log silencing — so it is named once here.
+  HEALTH_CHECK_PATH = "/up".freeze
+
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
@@ -40,5 +46,14 @@ module Shortlist
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # Production forces SSL, and an http-to-https redirect is not the 200 Fly's
+    # health check asks for, so an exempt path is what keeps a healthy machine
+    # readable as one. The exemption sits here rather than in
+    # config/environments/production.rb so that every environment can read it,
+    # and it is inert wherever force_ssl is off.
+    config.ssl_options = {
+      redirect: { exclude: ->(request) { request.path == HEALTH_CHECK_PATH } }
+    }
   end
 end

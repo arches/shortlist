@@ -24,8 +24,8 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
 
-  # Skip http-to-https redirect for the default health check endpoint.
-  # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
+  # The http-to-https redirect skips the health check endpoint. That exemption is
+  # set in config/application.rb, beside the path itself.
 
   # Log to STDOUT with the current request id as a default log tag.
   config.log_tags = [ :request_id ]
@@ -35,7 +35,7 @@ Rails.application.configure do
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
 
   # Prevent health checks from clogging up the logs.
-  config.silence_healthcheck_path = "/up"
+  config.silence_healthcheck_path = Shortlist::HEALTH_CHECK_PATH
 
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
