@@ -36,6 +36,7 @@ This is not the dependency list. Nothing here arrived as a dependency of somethi
 | Package manager           | Bundler                  |         |                                                                                                  |
 | Configuration and secrets | Environment variables    |         | Read through `ENV.fetch`. Rails encrypted credentials are not used — see **Naming** below        |
 | HTTP Client               | Net::HTTP                |         |                                                                                                  |
+| S3 Client                 | aws-sdk-s3               |         | Use S3 tooling for Tigris access                                                                 |
 
 ## Backend - Testing
 
@@ -55,10 +56,14 @@ An environment variable keeps the name Rails or a library already reads it under
 | ----------------------------- | ----------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Relational database           | PostgreSQL        | 18      |                                                                                                                        |
 | API hosting                   | Fly.io            |         | Always-on, for first-request latency                                                                                   |
-| Frontend hosting              | S3                |         | Static assets                                                                                                          |
+| Database hosting              | Fly.io            |         | Self-managed postgres container alongside the app container                                                            |
+| Frontend hosting              | Fly.io            |         | Built assets are copied into the API image and served by the same container                                            |
 | Local development environment | Docker Compose    |         | Runs the API, the frontend dev server and Postgres, so nothing is external                                             |
 | Task runner                   | Make              |         |                                                                                                                        |
 | Restaurant Details            | Google Places API | (New)   | Autocomplete (New) and Place Details (New). Called by the API, never the browser; the key is server-side configuration |
+| Object storage                | Tigris            |         | Fly.io's S3-compatible storage                                                                                         |
+| Infrastructure management     | flyctl            |         | `fly.<env>.toml` checked in, provisioning through Make                                                                 |
+| CI/CD                         | GitHub Actions    |         |                                                                                                                        |
 
 ## Categories with no answer yet
 
@@ -66,14 +71,10 @@ Each of these is a real slot, left empty rather than unnamed, because an empty s
 
 | Category                  | Status |
 | ------------------------- | ------ |
-| Database hosting          | TBD    |
 | Transactional email       | TBD    |
 | End-to-end tests          | TBD    |
-| CI                        | TBD    |
 | Logging and observability | TBD    |
 | Error tracking            | TBD    |
 | Background work           | TBD    |
-
-**Database hosting** and **Transactional email** are newly empty rather than newly noticed. Locally Postgres comes out of Docker Compose, so nothing needs answering to develop; where it lives in production is undecided. Nothing in Shortlist mails anybody at all today — recovery is out of scope in `signing-in.scenarios.md` — so the email slot is unanswered rather than unneeded, and a recovery link is the thing that will fill it.
 
 <!-- alloy: technology-standards -->
