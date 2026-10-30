@@ -1,6 +1,7 @@
 # Development image. shortlist.stack.md names Docker Compose as the local
-# development environment, so this is the only image Shortlist has — production
-# hosting is Fly.io and is deliberately unbuilt for now.
+# development environment, so this is what Compose builds and what every local
+# command runs in. The production image is the Dockerfile at the repository root,
+# which builds both halves of Shortlist into the one image Fly.io runs.
 FROM ruby:3.4.12-slim
 
 RUN apt-get update -qq && \

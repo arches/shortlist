@@ -1,0 +1,19 @@
+# The production image is built from the repository root. What it needs is the
+# two halves' sources and manifests; everything below is either rebuilt inside
+# the build, local to a developer's machine, or a secret.
+
+.git
+.github
+**/node_modules
+frontend/dist
+api/.bundle
+api/log
+api/tmp
+api/public/assets
+api/frontend
+api/spec
+.env
+docs
+docker-compose.yml
+Makefile
+TODO
