@@ -190,7 +190,7 @@ provision-database: provision-database-app ## Create this environment's Postgres
 			--port 5432:5432/tcp $(POSTGRES_IDLE)
 
 provision-bucket: check-environment ## Create this environment's Tigris backup bucket
-	@flyctl storage list --app $(APP) | grep -q $(BUCKET) || \
+	@flyctl storage list --org $(ORG) | grep -q $(BUCKET) || \
 		flyctl storage create --name $(BUCKET) --app $(APP) --yes
 	@echo "Fly injects this bucket's credentials into $(APP) as secrets."
 	@echo "Apply its retention rule once the app is deployed:"
