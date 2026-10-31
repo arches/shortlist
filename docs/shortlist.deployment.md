@@ -22,29 +22,31 @@ Each environment is one Fly organization app plus a scheduled machine:
 
 Per environment:
 
-| Environment | App                    | VM size                | `primary_region` | Auto-stop                                 | Volume size |
-| ----------- | ---------------------- | ---------------------- | ---------------- | ----------------------------------------- | ----------- |
-| Production  | `shortlist-production` | shared-cpu-1x / 512 MB | TBD              | No — always-on, for first-request latency | TBD         |
-| Staging     | `shortlist-staging`    | shared-cpu-1x / 512 MB | TBD              | Yes — app and Postgres stop when idle     | TBD         |
+| Environment | App                           | VM size                | `primary_region` | Auto-stop                                 | Volume size |
+| ----------- | ----------------------------- | ---------------------- | ---------------- | ----------------------------------------- | ----------- |
+| Production  | `arches-shortlist-production` | shared-cpu-1x / 512 MB | TBD              | No — always-on, for first-request latency | TBD         |
+| Staging     | `arches-shortlist-staging`    | shared-cpu-1x / 512 MB | TBD              | Yes — app and Postgres stop when idle     | TBD         |
+
+Fly app names and Tigris bucket names are both unique across all of Fly, not just within our organization, and the unprefixed names were already taken by accounts we cannot see. So every name Shortlist claims carries the `arches-` owner prefix, after the GitHub organization that owns the repository. A name is a decision like any other: it belongs here rather than in whichever file happened to need it first.
 
 ## Stateful resources
 
 Per environment, each in its own Fly app so nothing is shared:
 
-| Environment | Database                                        | Backup bucket                              |
-| ----------- | ----------------------------------------------- | ------------------------------------------ |
-| Production  | PostgreSQL 18, Fly machine with attached volume | `shortlist-db-backups-production` (Tigris) |
-| Staging     | PostgreSQL 18, Fly machine with attached volume | `shortlist-db-backups-staging` (Tigris)    |
+| Environment | Database app                     | Database                                        | Backup bucket                                     |
+| ----------- | -------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| Production  | `arches-shortlist-db-production` | PostgreSQL 18, Fly machine with attached volume | `arches-shortlist-db-backups-production` (Tigris) |
+| Staging     | `arches-shortlist-db-staging`    | PostgreSQL 18, Fly machine with attached volume | `arches-shortlist-db-backups-staging` (Tigris)    |
 
 Buckets are Tigris, Fly's S3-compatible object storage. The S3 API and tooling apply but the bucket is not in AWS.
 
 The only thing shared by both environments:
 
-| Resource                           | What it holds                                                       |
-| ---------------------------------- | ------------------------------------------------------------------- |
-| `registry.fly.io/shortlist-images` | Container images tagged by git SHA. The artifact that gets promoted |
+| Resource                                  | What it holds                                                       |
+| ----------------------------------------- | ------------------------------------------------------------------- |
+| `registry.fly.io/arches-shortlist-images` | Container images tagged by git SHA. The artifact that gets promoted |
 
-`shortlist-images` is a Fly app that exists only as a registry namespace and runs nothing. Both environment apps pull from it, so we can promote a specific image from staging to production.
+`arches-shortlist-images` is a Fly app that exists only as a registry namespace and runs nothing. Both environment apps pull from it, so we can promote a specific image from staging to production.
 
 The frontend has no stateful resource of its own: assets are baked into the container image and served by the app machine.
 
@@ -63,13 +65,13 @@ flowchart LR
   end_user[End User]
   internal_user[Internal User]
   actions["GitHub Actions"]
-  registry[("registry.fly.io/shortlist-images")]
+  registry[("registry.fly.io/arches-shortlist-images")]
 
   subgraph Production["Production - Fly.io"]
     prod_app["App Machine - Rails 8 / Puma"]
     prod_backup["Backup Machine - daily"]
-    prod_db[("shortlist-production Postgres")]
-    prod_bucket[("shortlist-db-backups-production")]
+    prod_db[("arches-shortlist-db-production")]
+    prod_bucket[("arches-shortlist-db-backups-production")]
     prod_app -->|"TCP 5432"| prod_db
     prod_backup -->|"TCP 5432, pg_dump"| prod_db
     prod_backup -->|"S3 API over HTTPS"| prod_bucket
@@ -78,8 +80,8 @@ flowchart LR
   subgraph Staging["Staging - Fly.io"]
     staging_app["App Machine - Rails 8 / Puma"]
     staging_backup["Backup Machine - daily"]
-    staging_db[("shortlist-staging Postgres")]
-    staging_bucket[("shortlist-db-backups-staging")]
+    staging_db[("arches-shortlist-db-staging")]
+    staging_bucket[("arches-shortlist-db-backups-staging")]
     staging_app -->|"TCP 5432"| staging_db
     staging_backup -->|"TCP 5432, pg_dump"| staging_db
     staging_backup -->|"S3 API over HTTPS"| staging_bucket
@@ -133,7 +135,7 @@ CI/CD is GitHub Actions. Every commit landing on the `main` branch starts the pi
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | `test-backend`      | RSpec against a Postgres service container, plus RuboCop                                                                                                                                       | —                                           |
 | `test-frontend`     | vitest and oxlint                                                                                                                                                                              | —                                           |
-| `build`             | Builds the image — frontend assets compiled in an earlier stage and copied into `public/` — tags it with the git SHA, pushes to `registry.fly.io/shortlist-images`. Layer cache via `type=gha` | Both test jobs pass                         |
+| `build`             | Builds the image — frontend assets compiled in an earlier stage and copied into `public/` — tags it with the git SHA, pushes to `registry.fly.io/arches-shortlist-images`. Layer cache via `type=gha` | Both test jobs pass                         |
 | `deploy-staging`    | `flyctl deploy --config fly.staging.toml --image …:$SHA`, bound to the `staging` GitHub Environment                                                                                            | `build` passes; `main` only                 |
 | `deploy-production` | `flyctl deploy --config fly.production.toml --image …:$SHA`, bound to the `production` GitHub Environment                                                                                      | A required reviewer approves the deployment |
 
