@@ -1,0 +1,181 @@
+# shortlist.deployment.md, Promotion Path: CI/CD is GitHub Actions, every commit
+# landing on main starts the pipeline, and pull requests run the two test jobs
+# only.
+#
+# The repository is public, so the test jobs must never be able to read
+# FLY_API_TOKEN. Two things hold that, and both are load-bearing rather than
+# incidental: a workflow triggered by a pull request from a fork gets no secrets
+# at all, and every job that holds a credential is bound to a GitHub Environment
+# that only main can reach. A test job has no `environment:`, so there is nothing
+# for it to read.
+name: Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+# Least privilege: nothing here writes to the repository.
+permissions:
+  contents: read
+
+# One pipeline per ref. A pull request's run is cancelled when it is superseded,
+# because only the latest commit's result matters; a run on main is not, because
+# cancelling it half way through a deploy is worse than finishing it.
+concurrency:
+  group: pipeline-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test-backend:
+    name: test-backend
+    runs-on: ubuntu-latest
+
+    # shortlist.deployment.md: RSpec against a Postgres service container.
+    # shortlist.stack.md: PostgreSQL 18 — the same major version the hosted
+    # environments run, so the suite never passes against a version production
+    # does not have.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: shortlist
+          POSTGRES_PASSWORD: shortlist
+          POSTGRES_DB: shortlist_test
+        ports: [ "5432:5432" ]
+        options: >-
+          --health-cmd "pg_isready -U shortlist"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://shortlist:shortlist@localhost:5432/shortlist_test
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # shortlist.stack.md: Ruby 3.4 and Bundler. The version comes from
+      # api/.ruby-version, so it is decided in one place.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version-file: api/.ruby-version
+          bundler-cache: true
+          working-directory: api
+
+      - run: bin/rails db:prepare
+
+      - run: bundle exec rspec
+
+      # shortlist.stack.md: RuboCop, rubocop-rails-omakase taken as it ships.
+      - run: bin/rubocop
+
+  test-frontend:
+    name: test-frontend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # The same mechanism frontend/Dockerfile uses, so CI and the development
+      # image resolve pnpm the same way.
+      - run: corepack enable
+
+      - run: pnpm install --frozen-lockfile
+
+      # shortlist.deployment.md: vitest and oxlint.
+      - run: pnpm test
+
+      - run: pnpm lint
+
+  build:
+    name: build
+    needs: [ test-backend, test-frontend ]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    # The registry is a Fly app of its own, and shortlist.deployment.md scopes a
+    # token per app, so pushing an image reads the token on the environment that
+    # matches the registry rather than either deployment's.
+    environment: images
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: registry.fly.io
+          username: x
+          password: ${{ secrets.FLY_API_TOKEN }}
+
+      # The Dockerfile at the repository root: the frontend is compiled in an
+      # earlier stage and copied into public/, so one image carries both halves.
+      # Tagged with the git SHA, which is what makes the promoted artifact the
+      # one the tests passed against.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: registry.fly.io/shortlist-images:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: deploy-staging
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # Nothing is rebuilt to promote: the image already exists and is named by
+      # tag. fly.staging.toml carries everything else, and the release command
+      # in it runs the migrations before new machines take traffic.
+      - run: flyctl deploy --config fly.staging.toml --image registry.fly.io/shortlist-images:${{ github.sha }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  deploy-production:
+    name: deploy-production
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    # There is no approval job. production is a protected environment with a
+    # required reviewer, so the run pauses here and resumes when it is approved —
+    # the gate is a property of the environment rather than a step in the
+    # workflow. The token this job reads is the production one and no other job
+    # can see it.
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # The same image reference deploy-staging used. What the reviewer approves
+      # is the artifact the tests passed against, so there is no SHA to
+      # re-verify.
+      - run: flyctl deploy --config fly.production.toml --image registry.fly.io/shortlist-images:${{ github.sha }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

@@ -109,6 +109,50 @@ RSpec.describe "The deployment configuration" do
     end
   end
 
+  # shortlist.deployment.md states two things about the pipeline as load-bearing
+  # rather than incidental, and both are checkable here: which jobs can read the
+  # deploy credential, and that promotion moves one image rather than building a
+  # second one.
+  describe "the pipeline" do
+    let(:pipeline) { YAML.load_file(REPOSITORY.join(".github/workflows/pipeline.yml")) }
+    let(:jobs) { pipeline.fetch("jobs") }
+
+    def deploy_command(environment)
+      jobs.fetch("deploy-#{environment}")
+        .fetch("steps")
+        .filter_map { |step| step["run"] }
+        .sole
+    end
+
+    # "The repo is public, so the test jobs must never be able to read it."
+    # Binding a job to a GitHub Environment is what gives it a credential, so a
+    # job with no environment has nothing to read — and the two test jobs are
+    # the only jobs that run on a pull request.
+    it "lets no job outside a deployment environment read the Fly token" do
+      unbound = jobs.reject { |_name, job| job.key?("environment") }
+
+      expect(unbound.keys).to eq([ "test-backend", "test-frontend" ])
+      expect(unbound.to_s).not_to include("FLY_API_TOKEN")
+    end
+
+    it "deploys each environment with its own configuration" do
+      ENVIRONMENTS.each_key do |environment|
+        expect(deploy_command(environment)).to include("--config fly.#{environment}.toml")
+      end
+    end
+
+    # "Nothing is rebuilt to promote. Both deploy jobs reference the same image
+    # tag, so what gets approved is the artifact the tests passed against."
+    it "promotes one image rather than building a second one" do
+      images = ENVIRONMENTS.keys.map { |environment| deploy_command(environment)[/--image (.+)\z/, 1] }
+
+      expect(images.uniq.length).to eq(1)
+      expect(images.first).to include(SHARED)
+      expect(jobs.values_at(*ENVIRONMENTS.keys.map { |e| "deploy-#{e}" }).to_s)
+        .not_to include("build-push")
+    end
+  end
+
   # shortlist.deployment.md: Local and Test never reach any hosted environment.
   # The local environment is docker-compose.yml and the variables .env.example
   # seeds, so neither may name a hosted resource or a Fly address.
