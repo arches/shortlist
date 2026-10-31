@@ -22,6 +22,12 @@ ENV["SHORTLIST_GOOGLE_PLACES_API_KEY"] ||= "test-places-key"
 ENV["SHORTLIST_GOOGLE_MAPS_API_KEY"] ||= "test-maps-key"
 ENV["SHORTLIST_GOOGLE_MAPS_MAP_ID"] ||= "test-map-id"
 
+# shortlist.stack.md: access tokens are signed HS256, keyed on SECRET_KEY_BASE.
+# The same reasoning as the keys above — the suite signs and verifies constantly
+# and the value itself means nothing, so the test environment carries one rather
+# than depending on whichever runner started it. See ASSUMPTIONS.md.
+ENV["SECRET_KEY_BASE"] ||= "test-secret-key-base-signs-nothing-that-leaves-the-suite"
+
 Rails.root.glob("spec/support/**/*.rb").sort_by(&:to_s).each { |f| require f }
 
 begin
