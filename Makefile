@@ -23,8 +23,9 @@ RUN_FRONTEND := $(COMPOSE) run --rm --no-deps frontend
 .DEFAULT_GOAL := help
 .PHONY: help up down build test test-api test-frontend lint lint-api lint-frontend \
 	typecheck migrate console shell shell-frontend user clean \
-	check-environment provision provision-app provision-database provision-bucket \
-	provision-backup backup-retention certificate secrets database-secrets
+	check-environment provision provision-registry provision-app \
+	provision-database-app provision-database provision-bucket provision-backup \
+	backup-retention certificate secrets database-secrets
 
 help: ## List the targets
 	@grep -hE '^[a-z][a-z-]*:.*?## ' $(MAKEFILE_LIST) \
@@ -86,18 +87,29 @@ clean: ## Stop everything and discard the database volume
 # of idempotent flyctl commands." Idempotent means running one twice is safe and
 # running one again after it failed half way finishes the job.
 #
-# The order, once per environment:
+# The registry is created once for the organization:
+#
+#   0. make provision-registry
+#
+# Then, per environment:
 #
 #   1. make database-secrets ENVIRONMENT=staging SECRETS_FILE=~/secrets/staging-db.env
 #   2. make secrets          ENVIRONMENT=staging SECRETS_FILE=~/secrets/staging.env
 #   3. make provision        ENVIRONMENT=staging
 #   4. push to main, and let the pipeline deploy
-#   5. make backup-retention ENVIRONMENT=staging
-#   6. make certificate      ENVIRONMENT=staging DOMAIN=...   (optional)
+#   5. make provision-backup ENVIRONMENT=staging
+#   6. make backup-retention ENVIRONMENT=staging
+#   7. make certificate      ENVIRONMENT=staging DOMAIN=...   (optional)
 #
-# Steps 5 and 6 come after a deploy: the retention rule is applied by a machine
-# in the environment, and a certificate is for a domain that resolves to a
-# running app.
+# A secret has to have an app to live in, so steps 1 and 2 create the app they
+# set secrets on. That is why they come before step 3 rather than after it: the
+# Postgres machine reads its password at startup, so the secret has to be there
+# before the machine is created.
+#
+# Steps 5 to 7 come after a deploy. The backup machine runs the app's image,
+# which does not exist in the registry until the pipeline has pushed it once;
+# the retention rule is applied by a machine in the environment; and a
+# certificate is for a domain that resolves to a running app.
 #
 # ENVIRONMENT rather than ENV, deliberately: ENV is exported in some shells, and
 # make takes an exported variable over a default. Provisioning the wrong
@@ -113,6 +125,11 @@ ENVIRONMENTS := staging production
 APP := shortlist-$(ENVIRONMENT)
 DATABASE_APP := shortlist-db-$(ENVIRONMENT)
 BUCKET := shortlist-db-backups-$(ENVIRONMENT)
+
+# shortlist.deployment.md: the registry is a Fly app that holds images only and
+# runs nothing. Both environments pull from it, so it belongs to the
+# organization rather than to an environment, and takes no ENVIRONMENT.
+REGISTRY := shortlist-images
 
 # Decided in fly.$(ENVIRONMENT).toml and read from it, so where an environment
 # runs has one answer rather than two.
@@ -144,14 +161,20 @@ check-environment:
 	@echo "$(ENVIRONMENTS)" | grep -qw "$(ENVIRONMENT)" || { \
 		echo "ENVIRONMENT must be one of: $(ENVIRONMENTS)"; exit 1; }
 
-provision: provision-app provision-database provision-bucket provision-backup ## Create an environment: make provision ENVIRONMENT=staging
+provision: provision-app provision-database provision-bucket ## Create an environment: make provision ENVIRONMENT=staging
+
+provision-registry: ## Create the shared image registry app, once per organization
+	@flyctl apps create $(REGISTRY) --org $(ORG) 2>/dev/null || echo "$(REGISTRY) exists already"
+	@echo "It holds images only. The pipeline's build job pushes them here."
 
 provision-app: check-environment ## Create the app that serves the API and the frontend
 	@flyctl apps create $(APP) --org $(ORG) 2>/dev/null || echo "$(APP) exists already"
 	@echo "Addresses are allocated by the first deploy, which the pipeline makes."
 
-provision-database: check-environment ## Create this environment's Postgres app, volume and machine
+provision-database-app: check-environment ## Create this environment's Postgres app, and nothing in it
 	@flyctl apps create $(DATABASE_APP) --org $(ORG) 2>/dev/null || echo "$(DATABASE_APP) exists already"
+
+provision-database: provision-database-app ## Create this environment's Postgres volume and machine
 	@flyctl secrets list --app $(DATABASE_APP) | grep -q POSTGRES_PASSWORD || { \
 		echo "Set this database's secrets first:"; \
 		echo "  make database-secrets ENVIRONMENT=$(ENVIRONMENT) SECRETS_FILE=..."; exit 1; }
@@ -169,7 +192,9 @@ provision-bucket: check-environment ## Create this environment's Tigris backup b
 	@echo "Apply its retention rule once the app is deployed:"
 	@echo "  make backup-retention ENVIRONMENT=$(ENVIRONMENT)"
 
-provision-backup: check-environment ## Create the machine that backs this environment up nightly
+# Separate from `provision`, because it runs the app's image: until the pipeline
+# has pushed that image once, there is nothing for this machine to run.
+provision-backup: check-environment ## Create the nightly backup machine, once the image is pushed
 	@flyctl machine list --app $(APP) | grep -q backup || \
 		flyctl machine run $(BACKUP_IMAGE) --app $(APP) --region $(REGION) \
 			--name backup --schedule daily $(POSTGRES_VM) bin/backup
@@ -185,10 +210,15 @@ certificate: check-environment ## Add a certificate: make certificate ENVIRONMEN
 # only in Fly. The names are in .env.example. Read from a file rather than taken
 # as arguments, so no value reaches the Makefile, the repository or a shell
 # history.
-secrets: check-environment ## Set the app's runtime secrets: make secrets ENVIRONMENT=staging SECRETS_FILE=...
+# Each depends on the app it writes to existing, because flyctl has nowhere to
+# put a secret otherwise. Creating the app is idempotent, so this is the step
+# that breaks what would otherwise be a cycle: the Postgres machine cannot be
+# created before its password is set, and the password cannot be set before
+# there is an app to set it on.
+secrets: provision-app ## Create the app if needed and set its runtime secrets: make secrets ENVIRONMENT=staging SECRETS_FILE=...
 	@test -n "$(SECRETS_FILE)" || { echo "SECRETS_FILE=... is required"; exit 1; }
 	flyctl secrets import --app $(APP) < $(SECRETS_FILE)
 
-database-secrets: check-environment ## Set the Postgres app's secrets: make database-secrets ENVIRONMENT=staging SECRETS_FILE=...
+database-secrets: provision-database-app ## Create the Postgres app if needed and set its secrets: make database-secrets ENVIRONMENT=staging SECRETS_FILE=...
 	@test -n "$(SECRETS_FILE)" || { echo "SECRETS_FILE=... is required"; exit 1; }
 	flyctl secrets import --app $(DATABASE_APP) < $(SECRETS_FILE)
