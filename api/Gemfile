@@ -10,6 +10,11 @@ gem "bcrypt", "~> 3.1.7"
 # Access token signing and verification. HS256, keyed on SECRET_KEY_BASE.
 gem "jwt", "~> 3.1"
 
+# shortlist.stack.md names aws-sdk-s3 as the S3 client, for Tigris: Fly's
+# S3-compatible object storage, where shortlist.deployment.md puts the database
+# backups. The S3 API and its tooling apply; the bucket is not in AWS.
+gem "aws-sdk-s3", "~> 1.0"
+
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Reduces boot times through caching; required in config/boot.rb

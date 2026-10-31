@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+# The backup machine's whole job, per shortlist.deployment.md: a nightly pg_dump
+# to that environment's Tigris bucket. The machine boots, runs this, and exits.
+#
+# It runs out of the same image as the app machine, which is why pg_dump is
+# installed there. Fly schedules it; nothing in the application does.
+
+require_relative "../config/environment"
+
+puts "Stored #{Backups::Snapshot.take}"
