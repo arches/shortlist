@@ -8,7 +8,7 @@
 # The container registry is the one resource both environments touch, and it
 # holds images only.
 
-app = "shortlist-staging"
+app = "arches-shortlist-staging"
 primary_region = "lax"
 
 # No [build] section, for the same reason as Production: the image is built once

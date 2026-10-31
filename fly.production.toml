@@ -8,7 +8,7 @@
 # secrets this app reads are set with `flyctl secrets set` — their names are in
 # .env.example and their values live only in Fly.
 
-app = "shortlist-production"
+app = "arches-shortlist-production"
 primary_region = "lax"
 
 # No [build] section: every deploy names an image that already exists, built by

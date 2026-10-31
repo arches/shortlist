@@ -19,21 +19,26 @@ RSpec.describe "The deployment configuration" do
   # whole checkout, the default is right.
   REPOSITORY = Pathname(ENV.fetch("SHORTLIST_REPOSITORY_ROOT", Rails.root.parent.to_s))
 
-  # Every Fly resource Shortlist names is `shortlist-` and then what it is, so
-  # one pattern finds all of them wherever they appear, in a comment as readily
-  # as in a value.
+  # Every Fly resource Shortlist names is the `arches-shortlist-` owner prefix
+  # and then what it is, so one pattern finds all of them wherever they appear,
+  # in a comment as readily as in a value.
   #
   # The lookahead is what tells a literal name from a derived one: the Makefile's
-  # `shortlist-db-$(ENVIRONMENT)` names no environment and is not a finding,
-  # while `shortlist-db-staging` written out is exactly what these examples look
-  # for. Possessive, so the pattern cannot backtrack into matching the prefix of
-  # an interpolated name.
-  RESOURCE = /shortlist-[a-z0-9-]++(?!\$)/
+  # `$(PREFIX)-db-$(ENVIRONMENT)` names no environment and is not a finding,
+  # while `arches-shortlist-db-staging` written out is exactly what these
+  # examples look for. Possessive, so the pattern cannot backtrack into matching
+  # the prefix of an interpolated name.
+  RESOURCE = /arches-shortlist-[a-z0-9-]++(?!\$)/
+
+  # The owner prefix every name carries, per shortlist.deployment.md: Fly app
+  # names and Tigris bucket names are unique across all of Fly, not within an
+  # organization, so the unprefixed names were never ours to claim.
+  PREFIX = "arches-shortlist".freeze
 
   # The one resource both environments touch. shortlist.deployment.md: it holds
   # images only, it is how the promoted artifact reaches Production, and no
   # environment ever reads another environment's data through it.
-  SHARED = "shortlist-images".freeze
+  SHARED = "#{PREFIX}-images".freeze
 
   ENVIRONMENTS = {
     "production" => REPOSITORY.join("fly.production.toml"),
@@ -58,7 +63,7 @@ RSpec.describe "The deployment configuration" do
       end
 
       it "deploys the app named for this environment" do
-        expect(config.read[/^app = "(.+)"$/, 1]).to eq("shortlist-#{environment}")
+        expect(config.read[/^app = "(.+)"$/, 1]).to eq("#{PREFIX}-#{environment}")
       end
 
       # Drift between the two is silent and total: the path answers, the check
@@ -95,9 +100,10 @@ RSpec.describe "The deployment configuration" do
     end
 
     it "derive every Fly resource from the environment they were given" do
-      expect(makefile).to include("APP := shortlist-$(ENVIRONMENT)")
-      expect(makefile).to include("DATABASE_APP := shortlist-db-$(ENVIRONMENT)")
-      expect(makefile).to include("BUCKET := shortlist-db-backups-$(ENVIRONMENT)")
+      expect(makefile).to include("PREFIX := arches-shortlist")
+      expect(makefile).to include("APP := $(PREFIX)-$(ENVIRONMENT)")
+      expect(makefile).to include("DATABASE_APP := $(PREFIX)-db-$(ENVIRONMENT)")
+      expect(makefile).to include("BUCKET := $(PREFIX)-db-backups-$(ENVIRONMENT)")
     end
 
     # A misspelled environment would otherwise create a stray app beside the real

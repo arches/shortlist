@@ -120,16 +120,20 @@ ORG ?= personal
 
 ENVIRONMENTS := staging production
 
-# Every Fly resource is derived from the one variable, so no target can be
-# pointed at one environment and act on another's resources.
-APP := shortlist-$(ENVIRONMENT)
-DATABASE_APP := shortlist-db-$(ENVIRONMENT)
-BUCKET := shortlist-db-backups-$(ENVIRONMENT)
+# shortlist.deployment.md: Fly app names and Tigris bucket names are unique
+# across all of Fly, so every name Shortlist claims carries this owner prefix.
+PREFIX := arches-shortlist
+
+# Every Fly resource is derived from the prefix and the one variable, so no
+# target can be pointed at one environment and act on another's resources.
+APP := $(PREFIX)-$(ENVIRONMENT)
+DATABASE_APP := $(PREFIX)-db-$(ENVIRONMENT)
+BUCKET := $(PREFIX)-db-backups-$(ENVIRONMENT)
 
 # shortlist.deployment.md: the registry is a Fly app that holds images only and
 # runs nothing. Both environments pull from it, so it belongs to the
 # organization rather than to an environment, and takes no ENVIRONMENT.
-REGISTRY := shortlist-images
+REGISTRY := $(PREFIX)-images
 
 # Decided in fly.$(ENVIRONMENT).toml and read from it, so where an environment
 # runs has one answer rather than two.
@@ -146,7 +150,7 @@ POSTGRES_VM := --vm-size shared-cpu-1x --vm-memory 512
 # The backup machine runs the same image as the app machine, per
 # shortlist.deployment.md. It is created once and not redeployed: all it needs is
 # pg_dump, which the image pins to the server's major version, and bin/backup.
-BACKUP_IMAGE ?= registry.fly.io/shortlist-images:$(shell git rev-parse HEAD)
+BACKUP_IMAGE ?= registry.fly.io/$(REGISTRY):$(shell git rev-parse HEAD)
 
 ifeq ($(ENVIRONMENT),staging)
 # shortlist.deployment.md: Staging's app and Postgres stop when idle. A machine

@@ -131,7 +131,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: registry.fly.io/shortlist-images:${{ github.sha }}
+          tags: registry.fly.io/arches-shortlist-images:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -151,7 +151,7 @@ jobs:
       # Nothing is rebuilt to promote: the image already exists and is named by
       # tag. fly.staging.toml carries everything else, and the release command
       # in it runs the migrations before new machines take traffic.
-      - run: flyctl deploy --config fly.staging.toml --image registry.fly.io/shortlist-images:${{ github.sha }}
+      - run: flyctl deploy --config fly.staging.toml --image registry.fly.io/arches-shortlist-images:${{ github.sha }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
@@ -176,6 +176,6 @@ jobs:
       # The same image reference deploy-staging used. What the reviewer approves
       # is the artifact the tests passed against, so there is no SHA to
       # re-verify.
-      - run: flyctl deploy --config fly.production.toml --image registry.fly.io/shortlist-images:${{ github.sha }}
+      - run: flyctl deploy --config fly.production.toml --image registry.fly.io/arches-shortlist-images:${{ github.sha }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
