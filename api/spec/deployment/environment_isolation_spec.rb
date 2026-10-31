@@ -22,7 +22,13 @@ RSpec.describe "The deployment configuration" do
   # Every Fly resource Shortlist names is `shortlist-` and then what it is, so
   # one pattern finds all of them wherever they appear, in a comment as readily
   # as in a value.
-  RESOURCE = /shortlist-[a-z0-9-]+/
+  #
+  # The lookahead is what tells a literal name from a derived one: the Makefile's
+  # `shortlist-db-$(ENVIRONMENT)` names no environment and is not a finding,
+  # while `shortlist-db-staging` written out is exactly what these examples look
+  # for. Possessive, so the pattern cannot backtrack into matching the prefix of
+  # an interpolated name.
+  RESOURCE = /shortlist-[a-z0-9-]++(?!\$)/
 
   # The one resource both environments touch. shortlist.deployment.md: it holds
   # images only, it is how the promoted artifact reaches Production, and no
@@ -73,6 +79,34 @@ RSpec.describe "The deployment configuration" do
   it "keeps Production always-on and lets Staging stop when idle" do
     expect(ENVIRONMENTS.fetch("production").read).to include('auto_stop_machines = "off"')
     expect(ENVIRONMENTS.fetch("staging").read).to include('auto_stop_machines = "stop"')
+  end
+
+  # shortlist.deployment.md: one-time provisioning is a Make target of idempotent
+  # flyctl commands. Its isolation is structural rather than asserted at run
+  # time — every resource name is built from the one environment the target was
+  # given — so these examples hold that shape in place.
+  describe "the provisioning targets" do
+    let(:makefile) { REPOSITORY.join("Makefile").read }
+
+    it "name no environment's resources literally" do
+      literal = makefile.scan(RESOURCE).uniq.reject { |resource| resource == SHARED }
+
+      expect(literal).to eq([])
+    end
+
+    it "derive every Fly resource from the environment they were given" do
+      expect(makefile).to include("APP := shortlist-$(ENVIRONMENT)")
+      expect(makefile).to include("DATABASE_APP := shortlist-db-$(ENVIRONMENT)")
+      expect(makefile).to include("BUCKET := shortlist-db-backups-$(ENVIRONMENT)")
+    end
+
+    # A misspelled environment would otherwise create a stray app beside the real
+    # ones, with a volume and a bucket of its own and nothing watching it.
+    it "provision only the environments that have a configuration" do
+      allowed = makefile[/^ENVIRONMENTS := (.+)$/, 1].split
+
+      expect(allowed.sort).to eq(ENVIRONMENTS.keys.sort)
+    end
   end
 
   # shortlist.deployment.md: Local and Test never reach any hosted environment.
