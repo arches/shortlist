@@ -2,12 +2,9 @@
 
 **Goal:** Get to my own list, and leave it behind when I am done.
 
-**Actor:** The list owner — the same single role as `managing-my-list.scenarios.md`. There is no administrator role inside Shortlist; the one administrative act, creating an account, happens outside it.
+**Actor:** The list owner.
 
 **Status:** draft.
-
-- An account is created by an administrator by hand
-- Shortlist sends no email at all, so the account is provided to the user by hand
 
 Shortlist sees the password. The owner types a password into Shortlist, Shortlist compares it against a bcrypt digest it stores, and Shortlist issues the token that every later request carries.
 
@@ -15,10 +12,12 @@ A session is renewed rather than held open. Signing in returns two things: a sho
 
 Signing out is not instant on other devices, and the scenarios below say so rather than pretending otherwise. Signing out destroys every refresh token the owner has, so no device can renew again — but a device already holding an unexpired access token keeps working until it expires. Fifteen minutes is the worst case, and that is the reason the number is small.
 
+Sign-in form should have a link "No account? Sign up" and the signup form should have a link "Already have an account? Sign in"
+
 Background:
 
 ```gherkin
-Given an administrator has created an account for "sam.reed@fastmail.com"
+Given an account has been created for "sam.reed@fastmail.com"
 And I am signed out
 ```
 
@@ -56,6 +55,18 @@ Scenario: Staying on my list longer than an access token lasts
 
 The renewal is the thing being specified here: an owner who stays longer than fifteen minutes notices nothing. A failure of this path looks like being thrown out mid-sentence, which is why it is a named scenario rather than left to the prose.
 
+```gherkin
+Scenario: Signing up
+  Given no account exists for "nora.vance@fastmail.com"
+  When I sign up as "Nora Vance" with "nora.vance@fastmail.com" and "quiet-lemon-garden-fence"
+  Then my list opens
+  And it is called "My List"
+  And nothing is on it
+  And I am not asked to sign in
+```
+
+TBD: Email verification
+
 ## Failure paths
 
 ```gherkin
@@ -75,6 +86,30 @@ Scenario Outline: Credentials that do not match an account
 One outcome, three causes, deliberately. Telling the three apart would turn the sign-in form into a way to ask whether an address has an account.
 
 ```gherkin
+Scenario: Signing up with an address that already has an account
+  When I try to sign up as "Sam Reed" with "sam.reed@fastmail.com" and "quiet-lemon-garden-fence"
+  Then I am told that address already has an account
+  And I am invited to sign in instead
+  And the password on that account still works
+```
+
+A sign-up that reset the password of the account it collided with would be a way to take somebody's list from them knowing only their address.
+
+```gherkin
+Scenario Outline: Details Shortlist will not accept
+  When I try to sign up as <name> with <email> and <password>
+  Then I am told what to fix
+  And no account is created
+  And I am not signed in
+
+  Examples:
+    | name         | email                     | password                   | why                            |
+    | "Nora Vance" | "nora.vance@fastmail.com" | "lemon"                    | shorter than twelve characters |
+    | "Nora Vance" | "nora.vance"              | "quiet-lemon-garden-fence" | not an email address           |
+    | ""           | "nora.vance@fastmail.com" | "quiet-lemon-garden-fence" | no name given                  |
+```
+
+```gherkin
 Scenario: Coming back after my refresh token has expired
   Given I signed in as "sam.reed@fastmail.com" thirty-one days ago
   And I have not used Shortlist since
@@ -88,8 +123,9 @@ Thirty days is a ceiling on a session, not an idle timer — each renewal issues
 ## Out of scope
 
 - **Recovering a forgotten password.** Out for now, because Shortlist sends no email. Until then an administrator sets a new password by hand.
-- **Being given an account in the first place.** Out for now, because Shortlist sends no email. Until then an administrator creates new accounts by hand.
 - **Changing my password while signed in.**
+- **Verifying an email address.** Out because Shortlist sends no email. The address is a sign-in identifier, and Shortlist never has to trust it.
+- **Closing my own account.** Anybody can create an account and nobody can remove one, including its owner.
 - Anything about the list itself
 - Sharing a list, or signing in to see somebody else's
 
