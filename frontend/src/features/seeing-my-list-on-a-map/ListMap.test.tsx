@@ -14,7 +14,7 @@ import {
 import { requestAt, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
-import { BACARI, SILVERLAKE, theConfiguration } from "./testing";
+import { BACARI, cardFor, SILVERLAKE, theConfiguration } from "./testing";
 import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
@@ -235,11 +235,14 @@ describe("my list on a map", () => {
   });
 });
 
-// Scenario: Scrolling the list — "the map stays pinned to the top of the screen
-// so it's always visible". jsdom has no layout and no scrolling, so what can be
-// checked here is that the map is placed to stick and the list is not. Whether
-// it actually stays put is the End-to-end tests row shortlist.stack.md leaves
-// TBD.
+// Scenario: Scrolling the list — "the restaurants move within the list panel.
+// And the map stays fully visible, unchanged in size and position. And no
+// restaurant passes behind the map."
+//
+// jsdom has no layout and no scrolling, so what can be checked here is where
+// the two halves are placed and which of them is the one that scrolls. Whether
+// a real viewport then behaves is the End-to-end tests row shortlist.stack.md
+// leaves TBD. One test per clause below.
 describe("scrolling the list", () => {
   let fetchMock: Mock;
 
@@ -261,18 +264,55 @@ describe("scrolling the list", () => {
     vi.unstubAllGlobals();
   });
 
-  it("keeps the map pinned to the top while the cards travel under it", async () => {
+  // "the restaurants move within the list panel"
+  it("scrolls the restaurants inside a panel of their own", async () => {
+    renderApp("/");
+
+    await screen.findByTestId("map");
+
+    const panel = cardFor("Bacari").closest("div.overflow-y-auto");
+
+    expect(panel).not.toBeNull();
+    // flex-1 and min-h-0 together are what bound the panel: it takes the room
+    // the map leaves and overflows inside it rather than growing the column.
+    expect(panel).toHaveClass("overflow-y-auto", "flex-1", "min-h-0");
+  });
+
+  // "the map stays fully visible, unchanged in size and position"
+  it("keeps the map at its own size, in a column the page cannot outgrow", async () => {
     renderApp("/");
 
     const map = await screen.findByTestId("map");
-    const pinned = map.closest("div.sticky");
 
-    expect(pinned).not.toBeNull();
-    expect(pinned).toHaveClass("sticky", "top-0");
+    // Outside the one thing that scrolls, so nothing can scroll it away.
+    expect(map.closest("div.overflow-y-auto")).toBeNull();
 
-    // The cards are outside what is pinned, which is what lets them scroll past.
-    const card = screen.getByRole("heading", { name: "Bacari" });
-    expect(pinned?.contains(card)).toBe(false);
+    // And nothing can squash it either: the panel is the flexible half.
+    expect(map.closest("main > div")).toHaveClass("shrink-0");
+
+    // The page is the height of the viewport, so there is no page scroll for
+    // the map to have a position within.
+    expect(screen.getByRole("main")).toHaveClass("h-dvh", "flex", "flex-col");
+  });
+
+  // "no restaurant passes behind the map"
+  it("leaves nothing over the map for a restaurant to pass behind", async () => {
+    renderApp("/");
+
+    const map = await screen.findByTestId("map");
+    const band = map.closest("main > div");
+    const panel = cardFor("Bacari").closest("div.overflow-y-auto");
+
+    // Siblings in the column rather than one over the other, so the edge the
+    // cards are clipped at is below the map instead of underneath it.
+    expect(band?.parentElement).toBe(panel?.parentElement);
+    expect(band?.contains(cardFor("Bacari"))).toBe(false);
+
+    // Nothing is lifted out of the column's flow to sit over anything else,
+    // which is what the map used to be.
+    const column = screen.getByRole("main");
+    expect(column.querySelector(".sticky")).toBeNull();
+    expect(column.querySelector(".fixed")).toBeNull();
   });
 });
 
