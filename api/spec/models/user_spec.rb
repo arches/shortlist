@@ -71,16 +71,25 @@ RSpec.describe User do
     end
   end
 
+  # signing-in.scenarios.md, "Details Shortlist will not accept": shorter than
+  # twelve characters is one of the three rows.
   describe "password" do
-    it "rejects a password shorter than eight characters" do
-      user = build(:user, password: "hunter2")
+    it "rejects a password shorter than twelve characters" do
+      user = build(:user, password: "lemon")
 
       expect(user).not_to be_valid
       expect(user.errors[:password]).to be_present
     end
 
-    it "accepts a password of exactly eight characters" do
-      expect(build(:user, password: "12345678")).to be_valid
+    it "rejects a password one character short of twelve" do
+      user = build(:user, password: "lemon-garde")
+
+      expect(user).not_to be_valid
+      expect(user.errors[:password]).to be_present
+    end
+
+    it "accepts a password of exactly twelve characters" do
+      expect(build(:user, password: "lemon-garden")).to be_valid
     end
 
     # shortlist.data.md: the hash of the password. Never the password.

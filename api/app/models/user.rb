@@ -1,7 +1,12 @@
 class User < ApplicationRecord
-  # shortlist.data.md: the password the owner is handed is at least 8
-  # characters, and that is the only rule Shortlist states about one.
-  MINIMUM_PASSWORD_LENGTH = 8
+  # signing-in.scenarios.md, "Details Shortlist will not accept": a password
+  # shorter than twelve characters is refused, and that outline is the only rule
+  # any artifact states about one. Nothing checks it against a breach list,
+  # requires a mix of character classes, expires it, or remembers previous ones.
+  #
+  # A rule on a User rather than on signing up, so an account created by hand
+  # obeys it too. See ASSUMPTIONS.md, "How long a password has to be".
+  MINIMUM_PASSWORD_LENGTH = 12
 
   has_secure_password
 

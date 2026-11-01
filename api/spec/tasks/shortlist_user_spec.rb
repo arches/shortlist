@@ -23,9 +23,11 @@ RSpec.describe "shortlist:user:create" do
     expect(owner.authenticate("correct-horse-battery-staple")).to eq(owner)
   end
 
+  # The twelve-character minimum is a rule on a User, so an account created by
+  # hand obeys it too — see ASSUMPTIONS.md, "How long a password has to be".
   it "refuses an account it cannot create, and says why" do
-    expect { task.invoke("sam.reed@fastmail.com", "Sam Reed", "hunter2") }
-      .to raise_error(SystemExit, /minimum is 8 characters/)
+    expect { task.invoke("sam.reed@fastmail.com", "Sam Reed", "lemon") }
+      .to raise_error(SystemExit, /minimum is 12 characters/)
 
     expect(User.count).to eq(0)
   end
