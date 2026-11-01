@@ -8,6 +8,8 @@ module Api
     # even when no User was found.
     REFUSAL = "The email or password is wrong.".freeze
 
+    include IssuesSessions
+
     before_action :authenticate_owner!, only: :destroy
 
     def create
@@ -32,14 +34,6 @@ module Api
         {
           email: params[:email].to_s,
           password: params[:password].to_s
-        }
-      end
-
-      def issued_session(user)
-        {
-          access_token: AccessToken.issue(user: user),
-          refresh_token: RefreshToken.issue(user: user).token,
-          expires_in: AccessToken::LIFETIME.to_i
         }
       end
   end
