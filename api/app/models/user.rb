@@ -27,7 +27,16 @@ class User < ApplicationRecord
   normalizes :email, with: ->(email) { email.to_s.strip.downcase }
   normalizes :name, with: ->(name) { name.to_s.strip }
 
-  validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  # signing-in.scenarios.md, "Signing up with an address that already has an
+  # account": the owner is told that address already has one. This is the one
+  # place Shortlist discloses whether an address is on file — signing in
+  # refuses to, and the scenario set gives that up here deliberately, because
+  # an owner typing an address they already hold needs sending to the sign-in
+  # form rather than leaving to guess.
+  validates :email,
+    presence: true,
+    uniqueness: { message: "already has an account" },
+    format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :name, presence: true
   validates :password, length: { minimum: MINIMUM_PASSWORD_LENGTH }, allow_nil: true
 

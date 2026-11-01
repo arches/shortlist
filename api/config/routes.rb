@@ -16,6 +16,12 @@ Rails.application.routes.draw do
     # controller rather than letting the pluralization pick a wrong one.
     resource :configuration, only: [ :show ], controller: "configuration"
 
+    # signing-in.scenarios.md, "Signing up": an account is created by whoever
+    # wants one. A User is an entity, so this is the ordinary create of one —
+    # and the only one, because nothing in Shortlist reads, changes or removes
+    # a User through the API.
+    resources :users, only: [ :create ]
+
     # A Session is not an entity — see shortlist.glossary.md. What this creates
     # is a token pair; what destroys it is signing out.
     resource :session, only: [ :create, :destroy ] do
