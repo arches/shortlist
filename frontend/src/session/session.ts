@@ -23,6 +23,18 @@ export async function signIn(email: string, password: string): Promise<void> {
   rememberSession(issued);
 }
 
+// signing-in.scenarios.md: "Signing up". The account and the session that
+// follows it are one act — "I am not asked to sign in" — so the pair comes back
+// with the account and is kept here exactly as signing in keeps it.
+export async function signUp(name: string, email: string, password: string): Promise<void> {
+  const issued = await request<IssuedSession>("/users", {
+    method: "POST",
+    body: { name, email, password },
+  });
+
+  rememberSession(issued);
+}
+
 // signing-in.scenarios.md: signing out destroys every refresh token the owner
 // has, so no device can renew again. The local tokens go whether or not the API
 // answered — an owner who pressed sign out is signed out here regardless.

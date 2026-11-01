@@ -10,7 +10,7 @@ import {
   respond,
 } from "@/test/http";
 
-import { authenticated, SessionEnded, signIn, signOut } from "./session";
+import { authenticated, SessionEnded, signIn, signOut, signUp } from "./session";
 import { couldBeSignedIn, currentAccessToken, forgetSession, storedRefreshToken } from "./store";
 
 // Derived from signing-in.scenarios.md: the main path, "Signing out when I am
@@ -51,6 +51,32 @@ describe("a session", () => {
       await expect(signIn("sam.reed@fastmail.com", "hunter2")).rejects.toThrow(
         "The email or password is wrong.",
       );
+
+      expect(couldBeSignedIn()).toBe(false);
+    });
+  });
+
+  // Scenario: Signing up — "And I am not asked to sign in". The pair comes back
+  // with the account, so signing up ends in the same state signing in does.
+  describe("signing up", () => {
+    it("keeps the pair the new account was issued", async () => {
+      fetchMock.mockResolvedValueOnce(issuedPair("nora"));
+
+      await signUp("Nora Vance", "nora.vance@fastmail.com", "quiet-lemon-garden-fence");
+
+      expect(currentAccessToken()).toBe("access-nora");
+      expect(storedRefreshToken()).toBe("refresh-nora");
+      expect(couldBeSignedIn()).toBe(true);
+    });
+
+    it("keeps nothing when the details are refused", async () => {
+      fetchMock.mockResolvedValueOnce(
+        respond(422, { errors: { email: ["Email already has an account"] } }),
+      );
+
+      await expect(
+        signUp("Sam Reed", "sam.reed@fastmail.com", "quiet-lemon-garden-fence"),
+      ).rejects.toThrow("Email already has an account");
 
       expect(couldBeSignedIn()).toBe(false);
     });

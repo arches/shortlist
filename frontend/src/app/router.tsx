@@ -9,6 +9,7 @@ import {
 import { RestaurantScreen } from "@/features/managing-experiences/RestaurantScreen";
 import { ListScreen } from "@/features/managing-my-list/ListScreen";
 import { SignInScreen } from "@/features/signing-in/SignInScreen";
+import { SignUpScreen } from "@/features/signing-in/SignUpScreen";
 import { couldBeSignedIn } from "@/session/store";
 
 // shortlist.stack.md: TanStack Router with code-based route definitions, not
@@ -24,6 +25,18 @@ const signInRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/sign-in",
   component: SignInRoute,
+  beforeLoad: () => {
+    if (couldBeSignedIn()) throw redirect({ to: "/" });
+  },
+});
+
+// signing-in.scenarios.md, "Signing up": an account is created by whoever wants
+// one. The guard is the sign-in screen's — an owner who already has a session
+// that could be continued has nothing to sign up for.
+const signUpRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/sign-up",
+  component: SignUpRoute,
   beforeLoad: () => {
     if (couldBeSignedIn()) throw redirect({ to: "/" });
   },
@@ -62,9 +75,17 @@ function SignInRoute() {
   return <SignInScreen onSignedIn={() => void navigate({ to: "/" })} />;
 }
 
+// "Then my list opens ... And I am not asked to sign in." The same landing as
+// signing in, because signing up has already opened the session.
+function SignUpRoute() {
+  const navigate = signUpRoute.useNavigate();
+
+  return <SignUpScreen onSignedUp={() => void navigate({ to: "/" })} />;
+}
+
 export function createAppRouter() {
   return createRouter({
-    routeTree: rootRoute.addChildren([listRoute, restaurantRoute, signInRoute]),
+    routeTree: rootRoute.addChildren([listRoute, restaurantRoute, signInRoute, signUpRoute]),
     defaultPreload: false,
   });
 }

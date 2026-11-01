@@ -64,6 +64,24 @@ describe("where the owner lands", () => {
     expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
   });
 
+  // signing-in.scenarios.md, "Signing up". An owner holding a session that
+  // could still be continued has nothing to sign up for.
+  it("sends a signed-in owner away from the sign-up screen", async () => {
+    signedIn();
+    fetchMock.mockResolvedValue(respond(200, []));
+
+    renderApp("/sign-up");
+
+    expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+  });
+
+  it("offers the sign-up form to a signed-out owner who asks for it", async () => {
+    renderApp("/sign-up");
+
+    expect(await screen.findByRole("button", { name: "Sign up" })).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   // Scenario: Signing out when I am done — "Then I am asked to sign in"
   describe("signing out", () => {
     it("asks me to sign in", async () => {
