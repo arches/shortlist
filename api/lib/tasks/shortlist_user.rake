@@ -1,11 +1,13 @@
-# shortlist.data.md: a User is created by an administrator, by hand, with a name,
-# an email and a password they then hand to the owner. Nothing in Shortlist
-# drives that — there is no sign-up, no invitation record and no email — so this
-# is the whole of it. signing-in.scenarios.md keeps "being given an account in
-# the first place" out of scope for the same reason.
+# An account created without a browser. signing-in.scenarios.md's "Signing up"
+# is how an owner gets one now, and this is not a second way in: it obeys the
+# same rules the sign-up path does, down to the twelve-character password, and
+# it is here for seeding an environment that has nothing in it yet.
+#
+# See ASSUMPTIONS.md, "Whether creating an account by hand survives" — the
+# artifact that used to call for this no longer says anything about it.
 namespace :shortlist do
   namespace :user do
-    desc "Create an account by hand: email, name, password"
+    desc "Create an account without a browser: email, name, password"
     task :create, [ :email, :name, :password ] => :environment do |_task, args|
       user = User.new(email: args[:email], name: args[:name], password: args[:password])
 

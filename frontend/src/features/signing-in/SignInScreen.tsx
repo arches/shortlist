@@ -15,7 +15,7 @@ interface SignInScreenProps {
 // nothing about which of the two was wrong.
 //
 // Recovering a forgotten password is deliberately absent. Shortlist sends no
-// email, so there is nothing to send — an administrator sets a new one by hand.
+// email, so there is nothing to send, and the artifact keeps it out of scope.
 export function SignInScreen({ onSignedIn }: SignInScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

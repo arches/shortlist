@@ -3,7 +3,7 @@ require "rails_helper"
 # Derived from signing-in.scenarios.md: the main path, and the Scenario Outline
 # "Credentials that do not match an account" with all three of its rows.
 RSpec.describe "POST /api/session" do
-  # Background: an administrator has created an account for this address.
+  # Background: an account has been created for this address.
   let(:password) { "correct-horse-battery-staple" }
   let!(:owner) { create(:user, email: "sam.reed@fastmail.com", password: password) }
 

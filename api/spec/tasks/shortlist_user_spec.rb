@@ -1,9 +1,10 @@
 require "rails_helper"
 require "rake"
 
-# shortlist.data.md: an administrator creates a User by hand, with a name, an
-# email and a password. This task is the whole of that act — there is no
-# sign-up flow that could create one half-finished.
+# An account created without a browser, with the same name, address and
+# password signing up asks for. signing-in.scenarios.md's "Signing up" is the
+# way in for an owner; this is the way in for an environment that has nothing
+# in it yet, and it obeys the same rules.
 RSpec.describe "shortlist:user:create" do
   before(:all) do
     Rails.application.load_tasks if Rake::Task.tasks.empty?
