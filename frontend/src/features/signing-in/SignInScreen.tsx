@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,18 @@ export function SignInScreen({ onSignedIn }: SignInScreenProps) {
           {signingIn ? "Signing in…" : "Sign in"}
         </Button>
       </form>
+
+      {/*
+        signing-in.scenarios.md: the sign-in form carries a "No account? Sign
+        up" link. An account is created by whoever wants one, so this is the
+        way in for somebody who has never been here.
+      */}
+      <p className="text-muted-foreground text-sm">
+        No account?{" "}
+        <Link to="/sign-up" className="underline underline-offset-4">
+          Sign up
+        </Link>
+      </p>
     </main>
   );
 }
