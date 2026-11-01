@@ -163,10 +163,10 @@ describe("my list on a map", () => {
     expect(map).not.toHaveAttribute("data-keyboard-shortcuts");
   });
 
-  // Scenario: Scrolling the list depends on this one. A plain scroll has to
-  // keep scrolling the page, or the cards cannot travel under a map stuck to
-  // the top of it, which is what "cooperative" buys over "greedy".
-  it("leaves the page's own scrolling alone", async () => {
+  // What "cooperative" buys over "greedy": a plain wheel over the map does
+  // nothing rather than zooming. Nothing asks the wheel to zoom — see
+  // ASSUMPTIONS.md, "What a plain scroll over the map does".
+  it("leaves a plain scroll over the map alone", async () => {
     serve([aRestaurant(BACARI)]);
 
     renderApp("/");

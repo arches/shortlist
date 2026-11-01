@@ -26,9 +26,9 @@ interface ListMapProps {
 
 // seeing-my-list-on-a-map.drawio draws the map 323px tall at the top of the
 // column, roughly square at the width that wireframe is drawn at. The height is
-// what carries over rather than the squareness: the map has to stay visible
-// while the list scrolls under it, and a square map at this page's width would
-// take the whole screen.
+// what carries over rather than the squareness: the map is the half of the
+// column that keeps its size, so what it takes is what the list panel does not
+// get, and a square map at this page's width would leave no panel at all.
 const HEIGHT = "h-80";
 
 // seeing-my-list-on-a-map.drawio highlights the chosen pin in yellow, and its
@@ -61,9 +61,11 @@ const LOCATE_ME = "m-2.5 size-10 rounded-sm bg-background shadow-md hover:bg-bac
 // Which affordances that comes to is not stated — see ASSUMPTIONS.md, "What
 // moving the map themselves comes to".
 const THE_OWNER_S_TO_MOVE = {
-  // A drag pans and ctrl-scroll zooms, while a plain scroll still scrolls the
-  // page. "greedy" would swallow that scroll, and Scenario: Scrolling the list
-  // needs the cards to travel under a map stuck to the top of the page.
+  // A drag pans and ctrl-scroll zooms, and a plain scroll over the map does
+  // nothing — the page has no scrolling of its own any more, and the panel the
+  // cards scroll in is below the map rather than under it. "greedy" would zoom
+  // on a plain wheel instead, which nothing asks for — see ASSUMPTIONS.md,
+  // "What a plain scroll over the map does".
   gestureHandling: "cooperative",
 
   // The zoom buttons, and nothing else the default UI would bring with them:
