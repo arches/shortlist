@@ -31,7 +31,9 @@ Scenario: See restaurants from my list
 ```gherkin
 Scenario: Scrolling the list
   When I scroll the list
-  Then the map stays pinned to the top of the screen so it's always visible
+  Then the restaurants move within the list panel
+  And the map stays fully visible, unchanged in size and position
+  And no restaurant passes behind the map
 ```
 
 ```gherkin
