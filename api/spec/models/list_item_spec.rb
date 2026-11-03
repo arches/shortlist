@@ -37,6 +37,59 @@ RSpec.describe ListItem do
     end
   end
 
+  # shortlist.data.md, Invariants: a List item's note is trimmed, and one that is
+  # empty or nothing but whitespace is stored as absent. The note is why the
+  # Restaurant is on the List, in the owner's words, and it is optional.
+  describe "note" do
+    it "accepts a List item carrying no note" do
+      item = create(:list_item)
+
+      expect(item).to be_valid
+      expect(item.note).to be_nil
+    end
+
+    it "keeps what the owner wrote" do
+      item = create(:list_item, note: "Famous for their bibimbap")
+
+      expect(item.note).to eq("Famous for their bibimbap")
+    end
+
+    it "trims what the owner wrote" do
+      item = create(:list_item, note: "  Famous for their bibimbap\n")
+
+      expect(item.note).to eq("Famous for their bibimbap")
+    end
+
+    it "stores an empty note as absent" do
+      expect(create(:list_item, note: "").note).to be_nil
+    end
+
+    # "Clearing a note is emptying it; there is no separate act of deleting one."
+    it "stores a note of nothing but whitespace as absent" do
+      expect(create(:list_item, note: "   \t\n ").note).to be_nil
+    end
+
+    # shortlist.data.md types it as "long text, trimmed" and bounds it nowhere,
+    # where the same table bounds its short text at 255 — see ASSUMPTIONS.md,
+    # "How long a note may be".
+    it "accepts a note longer than any short text on the model" do
+      note = "a" * 5_000
+
+      expect(create(:list_item, note: note).note).to eq(note)
+    end
+
+    # "A List item's note belongs to that List item alone. Two owners holding
+    # the same Restaurant have independent notes, and neither reads the other's."
+    it "is independent of another owner's note at the same Restaurant" do
+      restaurant = create(:restaurant)
+      mine = create(:list_item, restaurant: restaurant, note: "Go for the plain slice")
+      theirs = create(:list_item, restaurant: restaurant, note: "Ask for it well done")
+
+      expect(mine.reload.note).to eq("Go for the plain slice")
+      expect(theirs.reload.note).to eq("Ask for it well done")
+    end
+  end
+
   # shortlist.data.md, Identity: a List item is its List and its Restaurant
   # together. One List never holds the same Restaurant twice.
   describe "identity" do
@@ -71,6 +124,19 @@ RSpec.describe ListItem do
 
       expect(ListItem.exists?(item.id)).to be(false)
       expect(item.restaurant.reload).to be_persisted
+    end
+
+    # shortlist.data.md, Ownership: removing a list item destroys that row and
+    # nothing else, its note included, and putting the Restaurant back on the
+    # List starts with no note.
+    it "takes the note with it, so the Restaurant goes back on with none" do
+      item = create(:list_item, note: "Famous for their bibimbap")
+      list = item.list
+      restaurant = item.restaurant
+
+      item.destroy!
+
+      expect(create(:list_item, list: list, restaurant: restaurant).note).to be_nil
     end
   end
 end
