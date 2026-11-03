@@ -42,6 +42,22 @@ class Restaurant < ApplicationRecord
     numericality: { greater_than_or_equal_to: -180, less_than_or_equal_to: 180 },
     allow_nil: true
 
+  # The note the asking owner wrote about this Place, which lives on their List
+  # item rather than here. Not derived — it is a stored column — but owner-scoped
+  # for the same reason the three below are: the Restaurant row is shared by
+  # every List that holds it, so a note on it would be one note for everybody.
+  #
+  # Absent when the Restaurant is on their List with no note, and absent in the
+  # same way when it is on nobody's. The caller reaches a Restaurant through
+  # their own List, so the second case does not arise through the API.
+  def list_item_for(owner)
+    list_items.joins(:list).find_by(lists: { user_id: owner.id })
+  end
+
+  def note_for(owner)
+    list_item_for(owner)&.note
+  end
+
   # shortlist.data.md, Derived: none of the three is stored, and all three are
   # one owner's. A Restaurant is never visited in its own right, only visited by
   # somebody, so another owner's Experiences never show on my List item.
@@ -75,6 +91,11 @@ class Restaurant < ApplicationRecord
     raise ArgumentError, "a Restaurant is serialized for one owner" if owner.nil?
 
     super(options.except(:owner)).merge(
+      # managing-my-list.adding-a-restaurant.sequence.d2: the reply is "the
+      # Restaurant with address and cuisine, and the List item's note". One
+      # shape for both, so the card and the restaurant's own screen read the
+      # note from the response they already have.
+      "note" => note_for(owner),
       "visited" => visited_by?(owner),
       "experience_count" => experience_count_for(owner),
       "last_experienced_on" => last_experienced_on_for(owner),

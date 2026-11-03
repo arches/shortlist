@@ -27,6 +27,53 @@ RSpec.describe "GET /api/list/restaurants" do
       expect(response.parsed_body).to eq([])
     end
 
+    # managing-my-list.wireframe.drawio draws the note as a line on the card, so
+    # the list response is what has to carry it.
+    it "carries the note I wrote on each card" do
+      create(
+        :restaurant,
+        on_the_list_of: owner,
+        name: "Soban",
+        with_the_note: "Famous for their bibimbap"
+      )
+
+      get_the_list
+
+      expect(response.parsed_body.sole).to include(
+        "name" => "Soban",
+        "note" => "Famous for their bibimbap"
+      )
+    end
+
+    it "carries a null note for a restaurant I wrote nothing about" do
+      create(:restaurant, on_the_list_of: owner, name: "Lilia")
+
+      get_the_list
+
+      expect(response.parsed_body.sole["note"]).to be_nil
+    end
+
+    # The Restaurant row is shared, so the note has to be read through my own
+    # List item and never off the Place.
+    it "never carries another owner's note at the same Place" do
+      restaurant = create(
+        :restaurant,
+        on_the_list_of: owner,
+        name: "Joe's Pizza",
+        with_the_note: "Go for the plain slice"
+      )
+      create(
+        :list_item,
+        list: create(:user).lists.sole,
+        restaurant: restaurant,
+        note: "Ask for it well done"
+      )
+
+      get_the_list
+
+      expect(response.parsed_body.sole["note"]).to eq("Go for the plain slice")
+    end
+
     it "carries what the card shows for a restaurant only heard the name of" do
       create(:restaurant, on_the_list_of: owner, name: "Lilia", cuisine: "Italian")
 

@@ -8,12 +8,22 @@ FactoryBot.define do
     # what a spec nearly always means by naming an owner.
     transient do
       on_the_list_of { nil }
+
+      # The note goes on the List item the transient above creates, because
+      # that is where shortlist.data.md puts it. Naming it here keeps a spec
+      # saying "this Place is on their list, and this is what they wrote".
+      with_the_note { nil }
     end
 
     after(:create) do |restaurant, evaluator|
       next if evaluator.on_the_list_of.nil?
 
-      create(:list_item, list: evaluator.on_the_list_of.lists.sole, restaurant: restaurant)
+      create(
+        :list_item,
+        list: evaluator.on_the_list_of.lists.sole,
+        restaurant: restaurant,
+        note: evaluator.with_the_note
+      )
     end
 
     # Everything Google sends back about a Place.
