@@ -20,7 +20,7 @@ erDiagram
 
 - **Experience** — one occasion of eating at a Restaurant, and what the owner thought of it.
 - **List** - one group of restaurants, managed by the list owner
-- **List item** — one Restaurant's place on one List, and when the owner put it there. The thing a User adds and removes; the Restaurant itself is shared and outlives it.
+- **List item** — one Restaurant's place on one List, when the owner put it there, and whatever the owner wrote down about it. The thing a User adds and removes; the Restaurant itself is shared and outlives it.
 - **Refresh token** — one device's standing permission to keep renewing a **Session** without signing in again. Not the token the API authenticates requests with — see **Session** in the glossary.
 - **Restaurant** — one wrapper for a Google Place, shared by every List that holds it. Nobody owns one.
 - **User** — one list owner: who they are, how they sign in, and the hashed credential they sign in with. The whole of identity in Shortlist; there is no second record behind it.
@@ -85,6 +85,7 @@ A Restaurant represents one Google Place, and there is one row per Place for the
 | id         | identifier (bigint, generated) | no       |                                                 |
 | list       | reference (List)               | no       | Which List holds it.                            |
 | restaurant | reference (Restaurant)         | no       | Which Restaurant it puts on that List.          |
+| note       | long text, trimmed             | yes      | Why this Restaurant is on the List, in the owner's words. |
 | added at   | UTC timestamp                  | no       | When the owner put this Restaurant on the List. |
 | updated at | UTC timestamp                  | no       |                                                 |
 
@@ -126,7 +127,10 @@ A Restaurant represents one Google Place, and there is one row per Place for the
 - An Experience carries at least one of `rating`, `notes`, or `occurred_on`. All three absent is not an Experience.
 - An Experience's `occurred_on` is never later than the day it is recorded. A future date is a typo rather than a booking.
 - An Experience's `occurred_on` may be earlier than the `added_at` of the owner's List item for that Restaurant. Recording an Experience that happened long before the Restaurant went on the List is normal.
-- A List holds a given Restaurant at most once. A second add is the rejection in `managing-my-list.scenarios.md`, not a second List item.
+- A List holds a given Restaurant at most once. A second add is the rejection in `managing-my-list.scenarios.md`, not a second List item, and the note carried by the rejected add is discarded rather than written over the standing one.
+- A List item's `note` is trimmed, and one that is empty or nothing but whitespace is stored as absent. Clearing a note is emptying it; there is no separate act of deleting one.
+- A List item's `note` belongs to that List item alone. Two owners holding the same Restaurant have independent notes, and neither reads the other's.
+- A List item's `note` is independent of the owner's Experiences at that Restaurant. Recording, changing or removing an Experience neither fills nor clears it.
 - An Experience does not require a List item. Removing a Restaurant from a List leaves that owner's Experiences standing, out of reach until it goes back on.
 - A User's `email` is unique across all Users, compared lowercased and trimmed
 - A User always has a `password_digest`
@@ -151,7 +155,7 @@ Not stored.
 - Nothing erases restaurants. A Restaurant outlives every List item that points at it.
 - A user can manage their lists
 - A user can add and remove list items, which is how a restaurant goes on and comes off their list.
-- Removing a list item destroys that row and nothing else. The Restaurant stands, and so do the owner's Experiences at it.
+- Removing a list item destroys that row and nothing else, its note included. The Restaurant stands, and so do the owner's Experiences at it; putting the Restaurant back on the List starts with no note.
 - A user can manage their own experiences.
 - A user owns their refresh tokens.
 - Deleting a User deletes their lists, list items, experiences, and refresh tokens.

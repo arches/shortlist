@@ -4,7 +4,8 @@
 # Render: d2 docs/features/0001_managing-my-list/managing-my-list.adding-a-restaurant.sequence.d2 docs/features/0001_managing-my-list/managing-my-list.adding-a-restaurant.sequence.svg
 #
 # Covers the three add paths in managing-my-list.scenarios.md: the main path, the
-# restaurant already in the system, and the restaurant already on the list.
+# restaurant already in the system, and the restaurant already on the list. The
+# optional note the owner writes before adding rides along with the add.
 #
 # Labels use the quoted "line\nline" form, not |md| block strings: a markdown
 # label replaces the node's shape, which silently drops stroke and
@@ -116,7 +117,11 @@ seq: "" {
   app -> owner: "Shows the autocomplete suggestions" {class: reply}
 
   owner -> app: "Selects the right suggestion" {class: call}
-  app -> api: "POST /list/restaurants { google_place_id }" {class: call}
+  owner -> app: "Writes the note \"Famous for their bibimbap\",\nor leaves it empty" {class: call}
+  owner -> app: "Adds it to the List" {class: call}
+  app -> api: "POST /list/restaurants { google_place_id, note }" {class: call}
+
+  api."A note of nothing but whitespace arrives\nas no note at all." {class: note}
 
   api -> db: "Find the Restaurant for this Place ID" {class: call}
 
@@ -130,7 +135,7 @@ seq: "" {
   "Alt — Restaurant is already in the system": {
     db -> api: "The existing Restaurant" {class: reply}
 
-    api."Nothing is created. Two owners' lists\nshare one Restaurant row." {class: note}
+    api."Nothing is created. Two owners' lists\nshare one Restaurant row — and the note\ngoes on the List item, never on the\nshared Restaurant, so their notes\nare unrelated." {class: note}
   }
 
   api -> db: "Is this Restaurant already on my List?" {class: call}
@@ -139,12 +144,14 @@ seq: "" {
     db -> api: "Yes" {class: reply}
     api -> app: "422 — already on my list" {class: reply}
     app -> owner: "Rejects the add; the List still shows one entry" {class: reply}
+
+    api."The note in the rejected add is discarded.\nThe standing note is not written over." {class: note}
   }
 
   "Alt — Not yet on my list": {
     db -> api: "No" {class: reply}
-    api -> db: "Add the Restaurant to my List" {class: call}
-    api -> app: "201 — the Restaurant, with address and cuisine" {class: reply}
-    app -> owner: "It appears on the List: not visited, no Experiences" {class: reply}
+    api -> db: "Add the Restaurant to my List, with the note" {class: call}
+    api -> app: "201 — the Restaurant with address and cuisine,\nand the List item's note" {class: reply}
+    app -> owner: "It appears on the List with its note:\nnot visited, no Experiences" {class: reply}
   }
 }

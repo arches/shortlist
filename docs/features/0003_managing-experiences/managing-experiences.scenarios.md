@@ -52,6 +52,8 @@ Scenario: Recording something worth remembering without scoring it
 
 A note with no rating and a rating with no note are both complete experiences.
 
+The note on an experience is what the owner thought after eating. The note on a list item is why the restaurant is on the list in the first place. Writing one never touches the other.
+
 ```gherkin
 Scenario: Going back
   Given I recorded an experience at "Joe's Pizza" rated 3, on 2026-05-02
