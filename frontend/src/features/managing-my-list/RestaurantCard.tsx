@@ -20,7 +20,8 @@ const HIGHLIGHT = "bg-yellow-100 text-yellow-950 ring-2 ring-yellow-400";
 const HIGHLIGHT_DETAIL = "text-yellow-900";
 
 // managing-my-list.wireframe.drawio: each card shows the name, then two lines
-// under it — "Italian - 12 Main St, New York NY" and "Visited 1 time".
+// under it — "Italian - 12 Main St, New York NY" and "Visited 1 time" — and the
+// note under those.
 //
 // The first is what the restaurant is and where: the cuisine, then the street
 // and the town. Both halves are Google's and either can be absent, so the
@@ -95,6 +96,24 @@ export function RestaurantCard({
         </h2>
         <p className={`${detail} truncate text-sm`}>{detailsOf(restaurant)}</p>
         <p className={`${detail} text-sm`}>{visitsOf(restaurant)}</p>
+
+        {/*
+          The wireframe draws the note italic, and darker and a shade larger
+          than the two lines above it: it is the owner's own words rather than
+          Google's, so it does not read as detail. No colour of its own, which
+          is deliberate — it inherits the card's, so the highlight carries it
+          with everything else and there is no second place for a fill and a
+          text colour to come apart.
+
+          Absent when the owner wrote none, which is the line simply not being
+          there rather than an empty one holding space.
+
+          Truncated like the details line above it. A note has no length limit,
+          and the card is one line per thing.
+        */}
+        {restaurant.note !== null && (
+          <p className="truncate text-sm italic">{restaurant.note}</p>
+        )}
       </div>
 
       <div className="flex shrink-0 gap-2">

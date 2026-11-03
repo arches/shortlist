@@ -98,6 +98,48 @@ describe("my list", () => {
     expect(screen.getByText("New York NY")).toBeInTheDocument();
   });
 
+  // managing-my-list.wireframe.drawio draws the note on the card, under the
+  // details and the visit count.
+  it("shows the note I wrote on a card", async () => {
+    fetchMock.mockResolvedValue(
+      respond(200, [aRestaurant({ name: "Soban", note: "Famous for their bibimbap" })]),
+    );
+
+    renderApp("/");
+
+    expect(await screen.findByRole("heading", { name: "Soban" })).toBeInTheDocument();
+    expect(screen.getByText("Famous for their bibimbap")).toBeInTheDocument();
+  });
+
+  // Absent is the line not being there, rather than an empty one holding space.
+  // The note is the one italic line on a card, so counting them is what says
+  // the card has none — there is no text to look for when the point is that
+  // nothing was rendered.
+  it("shows no note line for a restaurant I wrote nothing about", async () => {
+    fetchMock.mockResolvedValue(respond(200, [aRestaurant({ name: "Lilia", note: null })]));
+
+    renderApp("/");
+
+    expect(await screen.findByRole("heading", { name: "Lilia" })).toBeInTheDocument();
+    expect(document.querySelectorAll("p.italic")).toHaveLength(0);
+  });
+
+  // The note is one owner's, read off their own List item. Two cards, two
+  // notes, and neither is the other's.
+  it("shows each restaurant its own note", async () => {
+    fetchMock.mockResolvedValue(
+      respond(200, [
+        aRestaurant({ id: 1, name: "Soban", note: "Famous for their bibimbap" }),
+        aRestaurant({ id: 2, name: "Joe's Pizza", note: "Go for the plain slice" }),
+      ]),
+    );
+
+    renderApp("/");
+
+    expect(await screen.findByText("Famous for their bibimbap")).toBeInTheDocument();
+    expect(screen.getByText("Go for the plain slice")).toBeInTheDocument();
+  });
+
   it("shows every restaurant on the list", async () => {
     fetchMock.mockResolvedValue(
       respond(200, [
