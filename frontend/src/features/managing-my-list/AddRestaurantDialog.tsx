@@ -9,6 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 import { PlaceSearch } from "./PlaceSearch";
 import { useAddRestaurant } from "./queries";
@@ -19,8 +21,9 @@ interface AddRestaurantDialogProps {
 }
 
 // managing-my-list.wireframe.drawio: a dialog headed "Add a restaurant", with
-// the name field and the Google Places suggestions under it, and "Add to list"
-// and "Cancel" at the foot.
+// the name field and the Google Places suggestions under it, a "Note" field
+// under those, and "Add to list" and "Cancel" at the foot. Its own annotation:
+// "Note is optional, and editable on the restaurant detail later".
 //
 // So picking a suggestion is no longer the add. The wireframe draws a button
 // for that, which is what gives the owner a moment between choosing the
@@ -33,6 +36,7 @@ interface AddRestaurantDialogProps {
 export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogProps) {
   const add = useAddRestaurant();
   const [picked, setPicked] = useState<PlaceSuggestion | undefined>();
+  const [note, setNote] = useState("");
 
   // "Then it is rejected as already on my list." The owner is told, and is not
   // shown the restaurant already there.
@@ -46,17 +50,25 @@ export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogP
   function addToList() {
     if (picked === undefined) return;
 
-    add.mutate(picked.google_place_id, {
-      onSuccess: () => {
-        reset();
-        onOpenChange(false);
+    // An emptied field is sent as null, the same way the experience form says
+    // it. The API trims and stores blank as absent either way; sending null is
+    // what makes "I wrote no note" the thing the request says, rather than
+    // leaving the column to work it out from an empty string.
+    add.mutate(
+      { googlePlaceId: picked.google_place_id, note: note.trim().length > 0 ? note.trim() : null },
+      {
+        onSuccess: () => {
+          reset();
+          onOpenChange(false);
+        },
       },
-    });
+    );
   }
 
   function reset() {
     add.reset();
     setPicked(undefined);
+    setNote("");
   }
 
   function close() {
@@ -73,6 +85,25 @@ export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogP
 
         <div className="flex flex-col gap-4">
           <PlaceSearch onPick={setPicked} disabled={add.isPending} />
+
+          {/*
+            Optional, and nothing turns an empty one away: the restaurant is
+            what the owner came to add, and the note is why they bothered. The
+            wireframe draws no "optional" beside the label the way the
+            experience form's three fields carry one, so neither does this.
+          */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="note">Note</Label>
+
+            <Textarea
+              id="note"
+              name="note"
+              placeholder="Why is it on your list?"
+              value={note}
+              disabled={add.isPending}
+              onChange={(event) => setNote(event.target.value)}
+            />
+          </div>
 
           {messages.map((message) => (
             <p key={message} role="alert" className="text-destructive text-sm">

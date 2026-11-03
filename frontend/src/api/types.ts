@@ -26,6 +26,15 @@ export interface Restaurant {
   created_at: string;
   updated_at: string;
 
+  // Mine rather than the Restaurant's: why I put this Place on my list, in my
+  // own words. It lives on my List item, so another owner holding the same
+  // Place has an unrelated note and neither of us reads the other's. Absent
+  // when I wrote none, and absent in the same way when it was emptied —
+  // clearing a note is emptying it.
+  //
+  // Not the notes on an Experience, which are what I thought after eating.
+  note: string | null;
+
   // Derived, not stored, and mine rather than the Restaurant's. Visited is my
   // experience count here being above zero; another owner's never show.
   visited: boolean;

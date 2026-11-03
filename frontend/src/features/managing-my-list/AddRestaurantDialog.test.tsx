@@ -98,7 +98,7 @@ describe("adding a restaurant", () => {
     await waitFor(() => {
       expect(lastRequestWith(fetchMock, "POST")).toMatchObject({
         path: "/api/list/restaurants",
-        body: { restaurant: { google_place_id: "ChIJTacos" } },
+        body: { restaurant: { google_place_id: "ChIJTacos", note: null } },
       });
     });
   });
@@ -140,6 +140,58 @@ describe("adding a restaurant", () => {
     expect(screen.getByRole("button", { name: "Add to list" })).toBeDisabled();
   });
 
+  // Scenario Outline: Adding a restaurant — "And I add it to my list with the
+  // note \"Famous for their bibimbap\"".
+  it("sends the note I wrote with the add", async () => {
+    await openTheDialog();
+    fetchMock.mockResolvedValue(respond(200, [suggestion]));
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+
+    await typeInto("Note", "Famous for their bibimbap");
+
+    fetchMock.mockResolvedValueOnce(respond(201, aRestaurant({ name: "Tacos El Bronco" })));
+    await addToList();
+
+    await waitFor(() => {
+      expect(lastRequestWith(fetchMock, "POST")).toMatchObject({
+        body: { restaurant: { google_place_id: "ChIJTacos", note: "Famous for their bibimbap" } },
+      });
+    });
+  });
+
+  // "A note of nothing but whitespace arrives as no note at all." The API
+  // settles it too; saying it here keeps the request honest about what the
+  // owner wrote.
+  it("sends no note when I typed nothing but spaces", async () => {
+    await openTheDialog();
+    fetchMock.mockResolvedValue(respond(200, [suggestion]));
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+
+    await typeInto("Note", "   ");
+
+    fetchMock.mockResolvedValueOnce(respond(201, aRestaurant({ name: "Tacos El Bronco" })));
+    await addToList();
+
+    await waitFor(() => {
+      expect(lastRequestWith(fetchMock, "POST")).toMatchObject({
+        body: { restaurant: { note: null } },
+      });
+    });
+  });
+
+  // The note is optional, so an empty one never stands between the owner and
+  // the restaurant they came to add.
+  it("adds with no note written", async () => {
+    await openTheDialog();
+    fetchMock.mockResolvedValue(respond(200, [suggestion]));
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+
+    expect(screen.getByRole("button", { name: "Add to list" })).toBeEnabled();
+  });
+
   // The owner is part-way through typing, so a short query asks for nothing.
   it("asks Google nothing until two characters are typed", async () => {
     await openTheDialog();
@@ -164,6 +216,25 @@ describe("adding a restaurant", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("already on your list");
     expect(screen.getByRole("heading", { name: "Add a restaurant" })).toBeVisible();
+  });
+
+  // The API discards the note a rejected add carried, and the dialog keeps
+  // showing it so the owner can read the refusal without losing what they
+  // wrote — see ASSUMPTIONS.md, "What a refused add keeps".
+  it("keeps the note I typed when the add is refused", async () => {
+    await openTheDialog();
+    fetchMock.mockResolvedValue(respond(200, [suggestion]));
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+    await typeInto("Note", "Ask for it well done");
+
+    fetchMock.mockResolvedValueOnce(
+      invalid({ restaurant_id: ["Restaurant is already on your list"] }),
+    );
+    await addToList();
+
+    expect(await screen.findByRole("alert")).toBeVisible();
+    expect(screen.getByLabelText("Note")).toHaveValue("Ask for it well done");
   });
 
   it("closes once the restaurant is on the list", async () => {

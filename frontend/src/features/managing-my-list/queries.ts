@@ -36,16 +36,20 @@ export function useRestaurants(): UseQueryResult<Restaurant[]> {
   });
 }
 
-// A restaurant arrives as a Google Place. The Place ID is all Shortlist is
-// sent; every other detail is Google's and the API caches it.
+// A restaurant arrives as a Google Place, and the note arrives with it. The
+// Place ID and the note are all Shortlist is sent; every other detail is
+// Google's and the API caches it.
+//
+// managing-my-list.adding-a-restaurant.sequence.d2:
+// POST /list/restaurants { google_place_id, note }.
 export function useAddRestaurant() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (googlePlaceId: string) =>
+    mutationFn: ({ googlePlaceId, note }: { googlePlaceId: string; note: string | null }) =>
       authenticated<Restaurant>("/list/restaurants", {
         method: "POST",
-        body: { restaurant: { google_place_id: googlePlaceId } },
+        body: { restaurant: { google_place_id: googlePlaceId, note: note } },
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
   });
