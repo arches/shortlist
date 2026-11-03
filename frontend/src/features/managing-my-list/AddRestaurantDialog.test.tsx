@@ -7,6 +7,7 @@ import {
   invalid,
   lastRequestWith,
   pathsRequested,
+  requestsWith,
   respond,
   stubFetch,
 } from "@/test/http";
@@ -32,6 +33,12 @@ const suggestion = {
 
 async function pick(description: string) {
   await userEvent.click(await screen.findByRole("button", { name: description }));
+}
+
+// Picking is no longer the add. managing-my-list.wireframe.drawio draws "Add to
+// list" at the foot of the dialog, so the add is the button.
+async function addToList() {
+  await userEvent.click(screen.getByRole("button", { name: "Add to list" }));
 }
 
 async function type(text: string) {
@@ -77,15 +84,16 @@ describe("adding a restaurant", () => {
     );
   });
 
-  it("sends only the place id when I pick a suggestion", async () => {
+  it("sends the place id of the suggestion I picked", async () => {
     await openTheDialog();
     fetchMock.mockResolvedValue(respond(200, [suggestion]));
     await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
 
     fetchMock.mockResolvedValueOnce(
       respond(201, aRestaurant({ name: "Tacos El Bronco", google_place_id: "ChIJTacos" })),
     );
-    await pick(suggestion.description);
+    await addToList();
 
     await waitFor(() => {
       expect(lastRequestWith(fetchMock, "POST")).toMatchObject({
@@ -93,6 +101,43 @@ describe("adding a restaurant", () => {
         body: { restaurant: { google_place_id: "ChIJTacos" } },
       });
     });
+  });
+
+  // The button is what adds, so there is nothing to add before a suggestion is
+  // picked: the Place ID is the whole of what Shortlist is told.
+  it("cannot add before I have picked a suggestion", async () => {
+    await openTheDialog();
+    fetchMock.mockResolvedValue(respond(200, [suggestion]));
+    await typeAndSeeSuggestions("Tacos El Bronco");
+
+    expect(screen.getByRole("button", { name: "Add to list" })).toBeDisabled();
+  });
+
+  it("adds nothing on picking a suggestion alone", async () => {
+    await openTheDialog();
+    fetchMock.mockResolvedValue(respond(200, [suggestion]));
+    await typeAndSeeSuggestions("Tacos El Bronco");
+
+    await pick(suggestion.description);
+
+    expect(screen.getByRole("heading", { name: "Add a restaurant" })).toBeVisible();
+    expect(requestsWith(fetchMock, "POST")).toEqual([]);
+  });
+
+  // One field, holding what was picked. Typing again is searching again, so
+  // there is nothing chosen to add until the owner picks once more — which is
+  // the way back from a wrong pick.
+  it("unpicks when I type over what I picked", async () => {
+    await openTheDialog();
+    fetchMock.mockResolvedValue(respond(200, [suggestion]));
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+
+    expect(screen.getByLabelText("Name *")).toHaveValue(suggestion.description);
+
+    await typeInto("Name *", "J");
+
+    expect(screen.getByRole("button", { name: "Add to list" })).toBeDisabled();
   });
 
   // The owner is part-way through typing, so a short query asks for nothing.
@@ -110,10 +155,12 @@ describe("adding a restaurant", () => {
     fetchMock.mockResolvedValue(respond(200, [suggestion]));
     await typeAndSeeSuggestions("Tacos El Bronco");
 
+    await pick(suggestion.description);
+
     fetchMock.mockResolvedValueOnce(
       invalid({ restaurant_id: ["Restaurant is already on your list"] }),
     );
-    await pick(suggestion.description);
+    await addToList();
 
     expect(await screen.findByRole("alert")).toHaveTextContent("already on your list");
     expect(screen.getByRole("heading", { name: "Add a restaurant" })).toBeVisible();
@@ -124,8 +171,10 @@ describe("adding a restaurant", () => {
     fetchMock.mockResolvedValue(respond(200, [suggestion]));
     await typeAndSeeSuggestions("Tacos El Bronco");
 
-    fetchMock.mockResolvedValueOnce(respond(201, aRestaurant({ name: "Tacos El Bronco" })));
     await pick(suggestion.description);
+
+    fetchMock.mockResolvedValueOnce(respond(201, aRestaurant({ name: "Tacos El Bronco" })));
+    await addToList();
 
     await waitFor(() => {
       expect(screen.queryByRole("heading", { name: "Add a restaurant" })).toBeNull();

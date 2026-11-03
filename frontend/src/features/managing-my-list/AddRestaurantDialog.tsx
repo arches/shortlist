@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { ApiError } from "@/api/client";
 import type { PlaceSuggestion } from "@/api/types";
 import { Button } from "@/components/ui/button";
@@ -17,11 +19,20 @@ interface AddRestaurantDialogProps {
 }
 
 // managing-my-list.wireframe.drawio: a dialog headed "Add a restaurant", with
-// one field and the Google Places suggestions under it. There is no Add button
-// — picking a suggestion is the add, because the Place ID is the whole of what
-// Shortlist is told.
+// the name field and the Google Places suggestions under it, and "Add to list"
+// and "Cancel" at the foot.
+//
+// So picking a suggestion is no longer the add. The wireframe draws a button
+// for that, which is what gives the owner a moment between choosing the
+// restaurant and committing to it — the moment the note is written in.
+//
+// "Add to list" sits before "Cancel" and the pair is left-aligned, which is
+// where this wireframe draws them. The experiences dialogs put Cancel first
+// and the pair on the right; two artifacts draw two things, and each screen
+// follows the one that draws it.
 export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogProps) {
   const add = useAddRestaurant();
+  const [picked, setPicked] = useState<PlaceSuggestion | undefined>();
 
   // "Then it is rejected as already on my list." The owner is told, and is not
   // shown the restaurant already there.
@@ -32,17 +43,24 @@ export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogP
         ? [add.error.message]
         : [];
 
-  function pick(suggestion: PlaceSuggestion) {
-    add.mutate(suggestion.google_place_id, {
+  function addToList() {
+    if (picked === undefined) return;
+
+    add.mutate(picked.google_place_id, {
       onSuccess: () => {
-        add.reset();
+        reset();
         onOpenChange(false);
       },
     });
   }
 
-  function close() {
+  function reset() {
     add.reset();
+    setPicked(undefined);
+  }
+
+  function close() {
+    reset();
     onOpenChange(false);
   }
 
@@ -54,7 +72,7 @@ export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogP
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
-          <PlaceSearch onPick={pick} disabled={add.isPending} />
+          <PlaceSearch onPick={setPicked} disabled={add.isPending} />
 
           {messages.map((message) => (
             <p key={message} role="alert" className="text-destructive text-sm">
@@ -62,8 +80,17 @@ export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogP
             </p>
           ))}
 
-          <div className="flex justify-end">
-            <Button type="button" variant="ghost" onClick={close}>
+          <div className="flex gap-2">
+            {/*
+              Nothing to add until a suggestion is picked. The Place ID is the
+              whole of what Shortlist is told about a restaurant, so there is no
+              add to make without one.
+            */}
+            <Button type="button" onClick={addToList} disabled={picked === undefined || add.isPending}>
+              Add to list
+            </Button>
+
+            <Button type="button" variant="outline" onClick={close}>
               Cancel
             </Button>
           </div>
