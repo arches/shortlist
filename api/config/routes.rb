@@ -38,14 +38,20 @@ Rails.application.routes.draw do
     end
 
     # managing-my-list.adding-a-restaurant.sequence.d2 names the list's own
-    # collection: POST /list/restaurants { google_place_id }. An owner has
+    # collection: POST /list/restaurants { google_place_id, note }. An owner has
     # exactly one List, so nothing identifies it in the path.
+    #
+    # update is the note being changed afterwards, which no artifact gives a
+    # shape — see ASSUMPTIONS.md, "How the note on a restaurant already on my
+    # list is changed". It belongs to this collection rather than to the
+    # restaurants resource below: what it changes is the List item, which is
+    # mine, and not the Restaurant, which is nobody's.
     #
     # A scope rather than a namespace, for two reasons: the controller is the
     # same one, and an Api::List:: module would shadow the List model for every
     # constant lookup inside it.
     scope :list, as: :list do
-      resources :restaurants, only: [ :index, :create, :destroy ]
+      resources :restaurants, only: [ :index, :create, :update, :destroy ]
     end
 
     # A Restaurant itself, and the experiences at it. Not under the list: an

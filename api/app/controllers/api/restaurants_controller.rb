@@ -9,7 +9,7 @@ module Api
     NEEDS_A_PLACE = "Pick a restaurant from the suggestions.".freeze
 
     before_action :authenticate_owner!
-    before_action :find_restaurant, only: [ :destroy ]
+    before_action :find_restaurant, only: [ :update, :destroy ]
 
     # The List is the set of Restaurants my List items point at. There is
     # exactly one List per owner, so nothing identifies it in the URL.
@@ -31,6 +31,25 @@ module Api
       add_to_my_list(restaurant, create_params[:note])
     rescue ::Places::Error
       render_error(UNAVAILABLE, status: :bad_gateway)
+    end
+
+    # managing-my-list.scenarios.md, "Changing the note on a restaurant on my
+    # list": the owner sets the note to something, to something else, or to
+    # nothing, and the restaurant stays on the list with the day it went on it
+    # unchanged. An edit overwrites, and no earlier version is kept anywhere.
+    #
+    # What this changes is my List item, not the Restaurant — which is why
+    # there is nothing here an owner could change about a Place that somebody
+    # else also holds. The route shape is an assumption; see ASSUMPTIONS.md,
+    # "How the note on a restaurant already on my list is changed".
+    def update
+      item = my_list.list_items.find_by!(restaurant: @restaurant)
+
+      if item.update(update_params)
+        render json: @restaurant.as_json(owner: current_owner)
+      else
+        render_invalid(item)
+      end
     end
 
     # Taking a restaurant off the list destroys that List item and nothing else.
@@ -77,6 +96,17 @@ module Api
       # arrives here as typed and is stored as absent.
       def create_params
         params.expect(restaurant: [ :google_place_id, :note ])
+      end
+
+      # The note and nothing else. A Place ID is identity — ADR 0001 — so
+      # changing one would be a different restaurant rather than a changed one,
+      # and everything beside it is Google's.
+      #
+      # fetch rather than expect, because clearing the note is emptying it: the
+      # owner who sends an empty note is saying something the scenario names,
+      # and a required parameter would turn it away.
+      def update_params
+        params.fetch(:restaurant, {}).permit(:note)
       end
   end
 end
