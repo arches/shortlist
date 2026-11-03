@@ -55,6 +55,27 @@ export function useAddRestaurant() {
   });
 }
 
+// Changing the note on a restaurant already on the list. The note is the only
+// thing on a List item an owner sets, so it is the whole of what this sends.
+// The route shape is an assumption — see ASSUMPTIONS.md, "How the note on a
+// restaurant already on my list is changed".
+//
+// The list is what holds the note, so invalidating it is what makes the card
+// and the restaurant's own screen agree: the screen reads the restaurant out
+// of the same response the list does.
+export function useSetTheNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, note }: { id: number; note: string | null }) =>
+      authenticated<Restaurant>(`/list/restaurants/${id}`, {
+        method: "PATCH",
+        body: { restaurant: { note: note } },
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: restaurantsKey }),
+  });
+}
+
 export function useTakeRestaurantOffTheList() {
   const queryClient = useQueryClient();
 

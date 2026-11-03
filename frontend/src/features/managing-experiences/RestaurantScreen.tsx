@@ -7,6 +7,7 @@ import { useRestaurants } from "@/features/managing-my-list/queries";
 import { SessionEnded } from "@/session/session";
 
 import { ExperienceList } from "./ExperienceList";
+import { ListNote } from "./ListNote";
 import { RecordExperienceDialog } from "./RecordExperienceDialog";
 import { subtitleOf } from "./subtitle";
 
@@ -70,6 +71,13 @@ export function RestaurantScreen({ restaurantId }: { restaurantId: number }) {
               Record an experience
             </Button>
           </header>
+
+          {/*
+            The wireframe puts the LIST NOTE block between the header and the
+            experiences: why the restaurant is on the list comes before what
+            the owner thought of the meals, which is the order they happened in.
+          */}
+          <ListNote restaurant={restaurant} />
 
           <RecordExperienceDialog
             restaurant={restaurant}
