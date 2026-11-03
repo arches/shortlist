@@ -12,7 +12,7 @@ import { aRestaurant } from "./testing";
 import type { Mock } from "vitest";
 
 // Derived from managing-my-list.scenarios.md and the list screen in
-// managing-my-list.wireframe.drawio.svg, whose cards read "Italian · not
+// managing-my-list.wireframe.drawio, whose cards read "Italian · not
 // "Italian - 12 Main St, New York NY" over "Visited 1 time".
 describe("my list", () => {
   let fetchMock: Mock;

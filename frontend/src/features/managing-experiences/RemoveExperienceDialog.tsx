@@ -20,7 +20,7 @@ interface RemoveExperienceDialogProps {
   onClose: () => void;
 }
 
-// managing-experiences.wireframe.drawio.svg: "The dialog names the experience,
+// managing-experiences.wireframe.drawio: "The dialog names the experience,
 // which is the only way to tell apart several recorded at the same restaurant."
 // It draws that name as the note and the date — "Queue out the door · no date"
 // — in lower case, unlike the row's own "No date" field marker.

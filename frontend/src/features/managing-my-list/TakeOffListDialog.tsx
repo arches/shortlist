@@ -25,7 +25,7 @@ interface TakeOffListDialogProps {
 // Pizza". That line is not what the system does, and three artifacts say so:
 // shortlist.data.md has removing a list item destroy that row and nothing
 // else, its invariants leave the owner's Experiences standing, and
-// managing-experiences.wireframe.drawio.svg says in as many words that taking
+// managing-experiences.wireframe.drawio says in as many words that taking
 // a restaurant off the list keeps its experiences.
 //
 // So the behaviour follows the data model and the words follow the behaviour.

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Stars } from "./Stars";
 import { formatDay, formatInstant } from "./dates";
 
-// managing-experiences.wireframe.drawio.svg draws one row per experience: the
+// managing-experiences.wireframe.drawio draws one row per experience: the
 // stars and the number, the day it happened on the right, and the note beneath.
 // Each of the three optional attributes has its own absent-marker, because an
 // experience carrying only one of them is the ordinary case rather than a

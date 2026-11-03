@@ -7,7 +7,7 @@ function written(day: number, month: number, year: number): string {
   return `${day} ${MONTHS[month]} ${year}`;
 }
 
-// managing-experiences.wireframe.drawio.svg writes a date as "24 Oct 2026" and
+// managing-experiences.wireframe.drawio writes a date as "24 Oct 2026" and
 // "2 May 2026" — the day with no leading zero, the month abbreviated.
 //
 // occurred_on is a plain date, "2026-10-24", carrying no time and no zone. Its

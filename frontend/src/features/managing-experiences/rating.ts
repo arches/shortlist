@@ -1,7 +1,7 @@
 // shortlist.data.md, Enumerations: exactly one of nine values. Nine, no zero,
 // and can be empty — "no rating" is the absence of one, not a score of nought.
 //
-// managing-experiences.wireframe.drawio.svg draws the control that reaches them
+// managing-experiences.wireframe.drawio draws the control that reaches them
 // as five stars with a half each: "Nine values: 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5,
 // 5 — plus no rating, which is not nought."
 export const RATINGS = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5] as const;

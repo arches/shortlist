@@ -8,7 +8,7 @@ import { ExperienceRow } from "./ExperienceRow";
 import { RemoveExperienceDialog } from "./RemoveExperienceDialog";
 import { useExperiences } from "./queries";
 
-// managing-experiences.wireframe.drawio.svg heads the section "EXPERIENCES" and
+// managing-experiences.wireframe.drawio heads the section "EXPERIENCES" and
 // lists one row beneath it. The heading is written in sentence case and
 // uppercased in the styling, so a screen reader hears a word rather than
 // spelling one out.

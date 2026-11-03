@@ -17,7 +17,7 @@ interface RecordExperienceDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// managing-experiences.wireframe.drawio.svg draws this headed "Record an
+// managing-experiences.wireframe.drawio draws this headed "Record an
 // experience" with the restaurant's name beneath it — an experience has no name
 // of its own, so the restaurant is what says which one is being written down.
 export function RecordExperienceDialog({

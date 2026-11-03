@@ -51,7 +51,7 @@ const listRoute = createRoute({
   },
 });
 
-// managing-experiences.wireframe.drawio.svg puts a restaurant's experiences on
+// managing-experiences.wireframe.drawio puts a restaurant's experiences on
 // its own screen, reached from the list. The path mirrors the API's, which nests
 // experiences under the restaurant they happened at.
 const restaurantRoute = createRoute({

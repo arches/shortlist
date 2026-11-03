@@ -1,6 +1,6 @@
 import { STAR_POSITIONS, fillOf, ratingReads, type StarFill } from "./rating";
 
-// managing-experiences.wireframe.drawio.svg draws a rating as five stars with
+// managing-experiences.wireframe.drawio draws a rating as five stars with
 // the number beside them: "★★★★☆ 4", "★★★☆☆ 3", three-and-a-half as a half
 // star in the fourth position. An experience with no rating gets five empty
 // stars and the control's own words for that state, "No rating", which is how

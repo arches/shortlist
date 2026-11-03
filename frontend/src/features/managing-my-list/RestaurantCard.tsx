@@ -78,7 +78,7 @@ export function RestaurantCard({
     >
       <div className="min-w-0">
         {/*
-          managing-experiences.wireframe.drawio.svg draws the restaurant's own
+          managing-experiences.wireframe.drawio draws the restaurant's own
           screen with a "‹ My list" back link, but this wireframe draws no way
           into it — the card has only Remove. The name is the link,
           because it is the one thing on the card that identifies the restaurant

@@ -9,7 +9,7 @@ import { renderApp } from "@/test/router";
 
 import type { Mock } from "vitest";
 
-// Derived from managing-experiences.wireframe.drawio.svg, which settles that a
+// Derived from managing-experiences.wireframe.drawio, which settles that a
 // restaurant's experiences live on its own screen, and from "When I open
 // 'Joe's Pizza'" in managing-experiences.scenarios.md.
 describe("a restaurant's own screen", () => {

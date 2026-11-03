@@ -12,7 +12,7 @@ import type { Mock } from "vitest";
 
 // Derived from "Taking a restaurant off my list that I have visited" in
 // managing-my-list.scenarios.md, and the confirmation in
-// managing-my-list.wireframe.drawio.svg, whose words are reproduced exactly.
+// managing-my-list.wireframe.drawio, whose words are reproduced exactly.
 describe("taking a restaurant off my list", () => {
   let fetchMock: Mock;
 

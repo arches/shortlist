@@ -4,7 +4,7 @@ require "rails_helper"
 # the owner of my list, and today is 2026-10-27.
 #
 # The confirmation the scenario names — "And I acknowledge a confirmation
-# dialog" — is drawn in managing-experiences.wireframe.drawio.svg and belongs to
+# dialog" — is drawn in managing-experiences.wireframe.drawio and belongs to
 # the browser. By the time a request arrives here it has been acknowledged.
 RSpec.describe "DELETE /api/restaurants/:restaurant_id/experiences/:id" do
   let(:owner) { create(:user, email: "sam.reed@fastmail.com") }

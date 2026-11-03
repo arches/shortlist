@@ -1,6 +1,6 @@
 import type { Restaurant } from "@/api/types";
 
-// managing-experiences.wireframe.drawio.svg heads the restaurant's own screen
+// managing-experiences.wireframe.drawio heads the restaurant's own screen
 // with "Pizza · visited · 3 experiences". That wireframe did not change when
 // the list's did, so the two screens read differently on purpose: the card on
 // the list is an address and a visit count, and this is what the restaurant is

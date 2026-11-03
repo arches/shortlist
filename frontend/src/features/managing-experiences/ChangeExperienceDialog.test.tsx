@@ -18,7 +18,7 @@ function inTheDialog() {
 // Derived from "Correcting a rating I regret", "Clearing a date I was never
 // sure of" and "Clearing the last thing an experience says" in
 // managing-experiences.scenarios.md, and from the row's Edit control in
-// managing-experiences.wireframe.drawio.svg.
+// managing-experiences.wireframe.drawio.
 describe("changing an experience", () => {
   let fetchMock: Mock;
 

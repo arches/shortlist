@@ -27,7 +27,7 @@ RSpec.describe "DELETE /api/list/restaurants/:id" do
       expect(Restaurant.exists?(restaurant.id)).to be(true)
     end
 
-    # managing-experiences.wireframe.drawio.svg: taking a restaurant off the
+    # managing-experiences.wireframe.drawio: taking a restaurant off the
     # list keeps its experiences. They stand, out of reach until it goes back
     # on — shortlist.data.md, Invariants.
     it "leaves my experiences at it standing" do

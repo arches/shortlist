@@ -16,7 +16,7 @@ function rows() {
 }
 
 // Derived from the read-back scenarios in managing-experiences.scenarios.md and
-// the rows drawn in managing-experiences.wireframe.drawio.svg.
+// the rows drawn in managing-experiences.wireframe.drawio.
 describe("reading a restaurant's experiences back", () => {
   let fetchMock: Mock;
 

@@ -26,7 +26,7 @@ RSpec.describe "An Experience on the wire" do
     end
 
     # No rating at all is not a score of nought — see the rating control in
-    # managing-experiences.wireframe.drawio.svg.
+    # managing-experiences.wireframe.drawio.
     it "sends no rating as null rather than zero" do
       json = experience(rating: nil, notes: "Suadero sold out by 8pm").as_json
 

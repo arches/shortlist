@@ -52,7 +52,7 @@ Rails.application.routes.draw do
     # Experience is the owner's and the Restaurant's, and it outlives the List
     # item that used to put them in reach of each other.
     #
-    # managing-experiences.wireframe.drawio.svg settles where experiences live:
+    # managing-experiences.wireframe.drawio settles where experiences live:
     # the restaurant's own screen. An Experience has no name and so cannot be
     # picked out by one — the only handle on it is the Restaurant it happened
     # at, which is what nests it here.

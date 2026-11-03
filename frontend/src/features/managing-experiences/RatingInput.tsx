@@ -6,7 +6,7 @@ interface RatingInputProps {
   onChange: (rating: number | null) => void;
 }
 
-// managing-experiences.wireframe.drawio.svg: "One control, nine reachable
+// managing-experiences.wireframe.drawio: "One control, nine reachable
 // values, and no way to express 0, 3.7 or 5.5 — the three things the scenarios
 // reject. A slider or a number field would let the owner type all three."
 //

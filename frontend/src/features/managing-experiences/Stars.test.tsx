@@ -6,7 +6,7 @@ import { RATINGS, fillOf, type StarFill } from "./rating";
 
 // Derived from shortlist.data.md's Enumerations — nine values, no zero, and can
 // be empty — and from the rating control drawn in
-// managing-experiences.wireframe.drawio.svg.
+// managing-experiences.wireframe.drawio.
 describe("drawing a rating as stars", () => {
   // The wireframe's own legend: 1 is "the lowest there is", 2.5 shows "half
   // steps all the way up", 5 is "the top", and no rating is "the default, and

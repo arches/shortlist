@@ -16,7 +16,7 @@ function inTheDialog() {
 }
 
 // Derived from the recording scenarios in managing-experiences.scenarios.md and
-// the dialog drawn in managing-experiences.wireframe.drawio.svg.
+// the dialog drawn in managing-experiences.wireframe.drawio.
 describe("recording an experience", () => {
   let fetchMock: Mock;
 

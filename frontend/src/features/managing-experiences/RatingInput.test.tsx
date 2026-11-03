@@ -6,7 +6,7 @@ import { RatingInput } from "./RatingInput";
 import { RATINGS } from "./rating";
 
 // Derived from the rating control drawn in
-// managing-experiences.wireframe.drawio.svg and from the nine values fixed in
+// managing-experiences.wireframe.drawio and from the nine values fixed in
 // shortlist.data.md's Enumerations.
 // How the control announces one of the nine.
 function starsNamed(rating: number): string {

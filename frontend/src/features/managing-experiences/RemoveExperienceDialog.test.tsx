@@ -19,7 +19,7 @@ function inTheDialog() {
 // Derived from "Removing an experience I recorded against the wrong restaurant"
 // and "Removing one experience of several" in
 // managing-experiences.scenarios.md, and from the confirmation drawn in
-// managing-experiences.wireframe.drawio.svg, whose words are reproduced.
+// managing-experiences.wireframe.drawio, whose words are reproduced.
 describe("removing an experience", () => {
   let fetchMock: Mock;
 

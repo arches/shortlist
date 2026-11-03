@@ -12,7 +12,7 @@ import { RestaurantList } from "./RestaurantList";
 import { TakeOffListDialog } from "./TakeOffListDialog";
 import { useRestaurants } from "./queries";
 
-// managing-my-list.wireframe.drawio.svg: the screen is headed "My list", with a
+// managing-my-list.wireframe.drawio: the screen is headed "My list", with a
 // primary Add beside the heading and one card per restaurant below it.
 //
 // The wireframe shows no sign-out control. One has to exist — "Signing out when

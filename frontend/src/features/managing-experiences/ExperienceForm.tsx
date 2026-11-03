@@ -17,7 +17,7 @@ export interface ExperienceFormProps {
   onCancel: () => void;
 }
 
-// managing-experiences.wireframe.drawio.svg draws three fields, each labelled
+// managing-experiences.wireframe.drawio draws three fields, each labelled
 // optional: RATING, WHEN and NOTES. "At least one of the three. Save stays
 // disabled while all three are empty."
 //

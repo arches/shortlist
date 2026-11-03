@@ -10,7 +10,7 @@ import { ExperienceList } from "./ExperienceList";
 import { RecordExperienceDialog } from "./RecordExperienceDialog";
 import { subtitleOf } from "./subtitle";
 
-// managing-experiences.wireframe.drawio.svg settles where experiences live: the
+// managing-experiences.wireframe.drawio settles where experiences live: the
 // restaurant's own screen. It is headed with a "‹ My list" back link, the
 // restaurant's name, and "Pizza · visited · 3 experiences" under it. That is
 // not what the list's card reads any more — see ./subtitle.ts.
