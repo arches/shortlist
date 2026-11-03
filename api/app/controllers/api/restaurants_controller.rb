@@ -18,7 +18,8 @@ module Api
     end
 
     # managing-my-list.scenarios.md: the owner types, picks a Google Places
-    # result, and what Shortlist receives is its Place ID. Every other detail is
+    # result, and what Shortlist receives is its Place ID — plus the note they
+    # wrote, which is theirs rather than Google's. Every other detail is
     # Google's, so nothing else is settable on the way in.
     def create
       google_place_id = create_params[:google_place_id].to_s
@@ -27,7 +28,7 @@ module Api
       restaurant = restaurant_for(google_place_id)
       return render_invalid(restaurant) unless restaurant.persisted?
 
-      add_to_my_list(restaurant)
+      add_to_my_list(restaurant, create_params[:note])
     rescue ::Places::Error
       render_error(UNAVAILABLE, status: :bad_gateway)
     end
@@ -53,9 +54,13 @@ module Api
       end
 
       # A List holds a given Restaurant at most once, so a second add is the
-      # rejection rather than a second List item.
-      def add_to_my_list(restaurant)
-        item = my_list.list_items.new(restaurant: restaurant)
+      # rejection rather than a second List item — and the note carried by the
+      # rejected add is discarded rather than written over the standing one.
+      # Nothing here has to discard it: the note arrives on a List item that is
+      # never saved, and the standing one is a different row that is never
+      # loaded.
+      def add_to_my_list(restaurant, note)
+        item = my_list.list_items.new(restaurant: restaurant, note: note)
 
         if item.save
           render json: restaurant.as_json(owner: current_owner), status: :created
@@ -64,10 +69,14 @@ module Api
         end
       end
 
-      # The Place ID and nothing else. Everything the owner sees about a
+      # The Place ID and the note. Everything else the owner sees about a
       # Restaurant is cached from Google, so there is nothing else to send.
+      #
+      # The note is optional and a blank one means no note, which the model's
+      # normalization is what settles — so a note of nothing but whitespace
+      # arrives here as typed and is stored as absent.
       def create_params
-        params.expect(restaurant: [ :google_place_id ])
+        params.expect(restaurant: [ :google_place_id, :note ])
       end
   end
 end

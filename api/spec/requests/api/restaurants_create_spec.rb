@@ -13,6 +13,16 @@ RSpec.describe "POST /api/list/restaurants" do
       as: :json
   end
 
+  # managing-my-list.adding-a-restaurant.sequence.d2:
+  # POST /list/restaurants { google_place_id, note }. The note is the owner's
+  # own, so it rides along with the add rather than being written afterwards.
+  def add_with_note(google_place_id, note)
+    post "/api/list/restaurants",
+      params: { restaurant: { google_place_id: google_place_id, note: note } },
+      headers: headers_for(owner),
+      as: :json
+  end
+
   def stub_tacos_el_bronco
     stub_place_details(
       "ChIJTacos",
@@ -82,6 +92,48 @@ RSpec.describe "POST /api/list/restaurants" do
         expect(owner.lists.sole.list_items.sole.added_at).to eq(Time.current)
       end
     end
+
+    # Scenario Outline: Adding a restaurant — "And I add it to my list with the
+    # note \"Famous for their bibimbap\"", "And it reads \"Famous for their
+    # bibimbap\"".
+    it "keeps the note I wrote as I added it" do
+      add_with_note("ChIJTacos", "Famous for their bibimbap")
+
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["note"]).to eq("Famous for their bibimbap")
+      expect(owner.lists.sole.list_items.sole.note).to eq("Famous for their bibimbap")
+    end
+
+    # The note goes on the List item, never on the shared Restaurant, so two
+    # owners' notes are unrelated.
+    it "writes the note on the List item and not on the Place" do
+      add_with_note("ChIJTacos", "Famous for their bibimbap")
+
+      expect(Restaurant.sole.attributes).not_to have_key("note")
+    end
+
+    # "A note of nothing but whitespace arrives as no note at all."
+    it "stores a note of nothing but whitespace as absent" do
+      add_with_note("ChIJTacos", "   \n ")
+
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["note"]).to be_nil
+      expect(owner.lists.sole.list_items.sole.note).to be_nil
+    end
+
+    it "trims the note I wrote" do
+      add_with_note("ChIJTacos", "  Famous for their bibimbap  ")
+
+      expect(response.parsed_body["note"]).to eq("Famous for their bibimbap")
+    end
+
+    # The note is optional, so an add that carries none is an ordinary add.
+    it "adds it with no note when I wrote none" do
+      add("ChIJTacos")
+
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["note"]).to be_nil
+    end
   end
 
   # Scenario: Adding a restaurant that exists in the system but not on my list
@@ -105,6 +157,19 @@ RSpec.describe "POST /api/list/restaurants" do
       add("ChIJTacos")
 
       expect(a_request(:get, //)).not_to have_been_made
+    end
+
+    # "Nothing is created. Two owners' lists share one Restaurant row — and the
+    # note goes on the List item, never on the shared Restaurant, so their
+    # notes are unrelated."
+    it "gives me my own note without touching the other owner's" do
+      theirs = existing.list_items.sole
+      theirs.update!(note: "Ask for it well done")
+
+      add_with_note("ChIJTacos", "Famous for their bibimbap")
+
+      expect(response.parsed_body["note"]).to eq("Famous for their bibimbap")
+      expect(theirs.reload.note).to eq("Ask for it well done")
     end
 
     it "does not read as visited on mine, whatever the other owner has done" do
@@ -136,6 +201,19 @@ RSpec.describe "POST /api/list/restaurants" do
       expect { add("ChIJJoes") }.not_to change(ListItem, :count)
 
       expect(owner.restaurants.pluck(:name)).to eq([ "Joe's Pizza" ])
+    end
+
+    # "And it still reads \"Go for the plain slice\"." The note carried by the
+    # rejected add is discarded rather than written over the standing one —
+    # otherwise a refused add would be a way to overwrite a note by accident.
+    it "leaves the standing note alone and discards the one I just typed" do
+      standing = owner.lists.sole.list_items.sole
+      standing.update!(note: "Go for the plain slice")
+
+      add_with_note("ChIJJoes", "Ask for it well done")
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(standing.reload.note).to eq("Go for the plain slice")
     end
   end
 
