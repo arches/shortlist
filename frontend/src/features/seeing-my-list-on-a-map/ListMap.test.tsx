@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { aRestaurant } from "@/features/managing-my-list/testing";
@@ -14,7 +15,16 @@ import {
 import { requestAt, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
-import { BACARI, cardFor, pinColourFor, SILVERLAKE, theConfiguration } from "./testing";
+import {
+  aVisitedRestaurant,
+  BACARI,
+  cardFor,
+  PIN_COLOURS,
+  pinColourFor,
+  pinFor,
+  SILVERLAKE,
+  theConfiguration,
+} from "./testing";
 import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
@@ -234,6 +244,127 @@ describe("my list on a map", () => {
       await screen.findByText("The map is unavailable just now.", {}, { timeout: 5000 }),
     ).toBeInTheDocument();
     expect(screen.queryByTestId("map")).not.toBeInTheDocument();
+  });
+});
+
+// seeing-my-list-on-a-map.drawio: "Visited locations should have green
+// markers", against the standard Google pin its other note asks for. So the map
+// draws the same distinction the cards already read out in words, and
+// shortlist.glossary.md is what the distinction is: Visited is a restaurant the
+// owner has an Experience at.
+//
+// Bacari is the restaurant the feature's Background puts on the list. Lilia is
+// the second, so there is something for a green pin to be distinguished from.
+//
+// Every test here runs as an owner who shared nothing — jsdom implements no
+// Geolocation API — which has no bearing on what colour a pin is.
+describe("visited and not visited on the map", () => {
+  let fetchMock: Mock;
+
+  function serve(restaurants: unknown[]) {
+    fetchMock.mockImplementation((path: string) =>
+      Promise.resolve(
+        path.endsWith("/configuration")
+          ? respond(200, theConfiguration())
+          : respond(200, restaurants),
+      ),
+    );
+  }
+
+  beforeEach(() => {
+    fetchMock = stubFetch();
+    window.localStorage.clear();
+    forgetSession();
+    rememberSession({ access_token: "access-one", refresh_token: "refresh-one", expires_in: 900 });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("draws a visited restaurant's pin green", async () => {
+    serve([aVisitedRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+
+    expect(pinColourFor("Bacari")).toBe(PIN_COLOURS.visited);
+  });
+
+  // managing-my-list.scenarios.md, on a restaurant just added: "it does not
+  // read as visited. And it has no experiences". Nothing is overridden, so it
+  // is the standard Google pin.
+  it("leaves a restaurant the owner has not eaten at standard", async () => {
+    serve([aRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+
+    expect(pinColourFor("Bacari")).toBeUndefined();
+  });
+
+  // The two colours are what the wireframe added a marker to distinguish, so
+  // the case that matters is both of them on one map, each on the right pin.
+  it("tells the two apart on one map", async () => {
+    serve([
+      aVisitedRestaurant({ ...BACARI, id: 1 }),
+      aRestaurant({ id: 2, name: "Lilia", latitude: 40.7128, longitude: -73.9542 }),
+    ]);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+
+    expect(pinColourFor("Bacari")).toBe(PIN_COLOURS.visited);
+    expect(pinColourFor("Lilia")).toBeUndefined();
+  });
+
+  // Scenario: Selecting a restaurant on the map — "the Bacari pin is
+  // highlighted" — which exempts no restaurant, so the highlight wins over the
+  // green. A visited restaurant that answered a click with the colour it
+  // already had would answer it with nothing.
+  it("highlights a visited restaurant when it is chosen, rather than leaving it green", async () => {
+    serve([aVisitedRestaurant(BACARI)]);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+    await userEvent.click(pinFor("Bacari"));
+
+    expect(pinColourFor("Bacari")).toBe(PIN_COLOURS.highlighted);
+  });
+
+  // And it goes back to green when the choice moves on, rather than staying
+  // highlighted or dropping to the standard pin: visited is a standing property
+  // and the highlight is not.
+  it("gives the green back when the choice moves to another restaurant", async () => {
+    serve([
+      aVisitedRestaurant({ ...BACARI, id: 1 }),
+      aRestaurant({ id: 2, name: "Lilia", latitude: 40.7128, longitude: -73.9542 }),
+    ]);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+    await userEvent.click(pinFor("Bacari"));
+    await userEvent.click(pinFor("Lilia"));
+
+    expect(pinColourFor("Bacari")).toBe(PIN_COLOURS.visited);
+    expect(pinColourFor("Lilia")).toBe(PIN_COLOURS.highlighted);
+  });
+
+  // shortlist.data.md leaves latitude and longitude optional, so a visited
+  // restaurant Google had no point for has no pin to be green — it is on the
+  // list, where the card reads out the visit in words.
+  it("gives a visited restaurant with no coordinates no pin at all", async () => {
+    serve([aVisitedRestaurant({ name: "Lilia" })]);
+
+    renderApp("/");
+
+    expect(await screen.findByRole("heading", { name: "Lilia" })).toBeInTheDocument();
+    expect(screen.queryAllByTestId("google-pin")).toEqual([]);
   });
 });
 

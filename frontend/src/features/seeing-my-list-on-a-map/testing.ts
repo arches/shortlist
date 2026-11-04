@@ -14,6 +14,13 @@ export function aLocatedRestaurant(
   return { ...aRestaurant(attributes), ...attributes };
 }
 
+// A restaurant the owner has eaten at. shortlist.data.md derives Visited from
+// the owner's experience count being above zero and the API sends both, so a
+// fixture sets both — one experience is all it takes.
+export function aVisitedRestaurant(attributes: Partial<Restaurant> = {}): Restaurant {
+  return aRestaurant({ ...attributes, visited: true, experience_count: 1 });
+}
+
 // What GET /api/configuration answers with.
 export function theConfiguration(attributes: Partial<Configuration> = {}): Configuration {
   return {
@@ -64,6 +71,9 @@ export function pinFor(name: string): HTMLElement {
 export const PIN_COLOURS = {
   // "Highlight is color-based", drawn #FFFF33 on the chosen marker.
   highlighted: "#ffff33",
+
+  // "Visited locations should have green markers", drawn #99FF99.
+  visited: "#99ff99",
 } as const;
 
 // What colour one restaurant's pin was drawn in, or undefined for the standard
