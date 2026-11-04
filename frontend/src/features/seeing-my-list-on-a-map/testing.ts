@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 
 import type { Configuration, Restaurant } from "@/api/types";
 import { aRestaurant } from "@/features/managing-my-list/testing";
@@ -52,4 +52,28 @@ export function cardFor(name: string): HTMLElement {
 
 export function pinFor(name: string): HTMLElement {
   return screen.getByRole("button", { name });
+}
+
+// The colours seeing-my-list-on-a-map.drawio draws a marker in, each one taken
+// off the wireframe rather than read back off ListMap: a test that agrees with
+// the component proves only that the component agrees with itself.
+//
+// The standard Google pin has no entry. "Markers should be standard google
+// pins" is Google's own colour and nothing overriding it, so what a standard
+// pin reads as here is the absence of a colour.
+export const PIN_COLOURS = {
+  // "Highlight is color-based", drawn #FFFF33 on the chosen marker.
+  highlighted: "#ffff33",
+} as const;
+
+// What colour one restaurant's pin was drawn in, or undefined for the standard
+// Google pin.
+export function pinColourFor(name: string): string | undefined {
+  return within(pinFor(name)).getByTestId("google-pin").dataset.background;
+}
+
+// Every pin on the map, by its colour, in the order the map drew them. For
+// asking what the whole map looks like rather than one restaurant.
+export function pinColours(): (string | undefined)[] {
+  return screen.getAllByTestId("google-pin").map((pin) => pin.dataset.background);
 }

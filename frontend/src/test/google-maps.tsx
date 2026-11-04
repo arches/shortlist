@@ -173,12 +173,17 @@ export function MapControl({ children, position }: MapControlProps) {
   );
 }
 
-// Nothing set is the standard Google pin. A background set is the highlight,
-// which is what "Highlight is color-based" in the wireframe comes to.
+// One handle for every pin, and the colour it was drawn in beside it.
+//
+// seeing-my-list-on-a-map.drawio draws markers in more than one colour and says
+// what each means, so the colour is the thing a test has to be able to read.
+// Nothing set is the standard Google pin — "Markers should be standard google
+// pins" — and what a set background means is the wireframe's to say, not this
+// stand-in's: it records the instruction and leaves the reading to the test.
 export function Pin({ background, borderColor, glyphColor }: PinProps) {
   return (
     <span
-      data-testid={background === undefined ? "standard-google-pin" : "highlighted-google-pin"}
+      data-testid="google-pin"
       data-background={background}
       data-border-color={borderColor}
       data-glyph-color={glyphColor}

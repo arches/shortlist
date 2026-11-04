@@ -14,7 +14,7 @@ import {
 import { requestAt, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
-import { BACARI, cardFor, SILVERLAKE, theConfiguration } from "./testing";
+import { BACARI, cardFor, pinColourFor, SILVERLAKE, theConfiguration } from "./testing";
 import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
@@ -73,13 +73,15 @@ describe("my list on a map", () => {
     expect(screen.getByRole("heading", { name: "Bacari" })).toBeInTheDocument();
   });
 
-  // "Markers should be standard google pins", per the wireframe's own note.
+  // "Markers should be standard google pins", per the wireframe's own note —
+  // which is Google's own colour and nothing overriding it.
   it("draws the pin as a standard Google pin", async () => {
     serve([aRestaurant(BACARI)]);
 
     renderApp("/");
 
-    expect(await screen.findByTestId("standard-google-pin")).toBeInTheDocument();
+    expect(await screen.findByTestId("google-pin")).toBeInTheDocument();
+    expect(pinColourFor("Bacari")).toBeUndefined();
   });
 
   // Scenario: Location not shared — "the map is centered on the first

@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,7 +7,15 @@ import { forgetSession, rememberSession } from "@/session/store";
 import { respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
-import { BACARI, cardFor, pinFor, theConfiguration } from "./testing";
+import {
+  BACARI,
+  cardFor,
+  PIN_COLOURS,
+  pinColourFor,
+  pinColours,
+  pinFor,
+  theConfiguration,
+} from "./testing";
 import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
@@ -57,7 +65,7 @@ describe("choosing a restaurant", () => {
         JSON.stringify({ lat: BACARI.latitude, lng: BACARI.longitude }),
       );
 
-      expect(within(pinFor("Bacari")).getByTestId("highlighted-google-pin")).toBeInTheDocument();
+      expect(pinColourFor("Bacari")).toBe(PIN_COLOURS.highlighted);
     });
 
     // "the map pans to show Bacari in the center" names a pan and no zoom, and
@@ -80,7 +88,7 @@ describe("choosing a restaurant", () => {
       await screen.findByTestId("map");
       await userEvent.click(cardFor("Bacari"));
 
-      expect(within(pinFor("Lilia")).getByTestId("standard-google-pin")).toBeInTheDocument();
+      expect(pinColourFor("Lilia")).toBeUndefined();
     });
 
     it("highlights the card it was chosen from", async () => {
@@ -127,7 +135,7 @@ describe("choosing a restaurant", () => {
       await screen.findByTestId("map");
       await userEvent.click(pinFor("Bacari"));
 
-      expect(within(pinFor("Bacari")).getByTestId("highlighted-google-pin")).toBeInTheDocument();
+      expect(pinColourFor("Bacari")).toBe(PIN_COLOURS.highlighted);
     });
 
     it("pans the map to centre what was clicked" , async () => {
@@ -152,7 +160,7 @@ describe("choosing a restaurant", () => {
       const map = await screen.findByTestId("map");
 
       expect(map).not.toHaveAttribute("data-panned-to");
-      expect(screen.queryAllByTestId("highlighted-google-pin")).toEqual([]);
+      expect(pinColours()).toEqual([undefined, undefined]);
       expect(cardFor("Bacari")).not.toHaveAttribute("aria-current");
       expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
     });
