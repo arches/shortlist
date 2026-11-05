@@ -130,6 +130,13 @@ export function ListScreen() {
     setMenu(false);
   }
 
+  // list-screen.states.md, Add a restaurant. The dialog reports that one went
+  // on the list and this is what the screen does about it — which for now is
+  // what the dialog used to do for itself.
+  function added(_restaurant: Restaurant) {
+    setAdding(false);
+  }
+
   function locate() {
     setSelection(undefined);
     setMenu(false);
@@ -214,7 +221,7 @@ export function ListScreen() {
         />
       </ListSheet>
 
-      <AddRestaurantDialog open={adding} onOpenChange={setAdding} />
+      <AddRestaurantDialog open={adding} onOpenChange={setAdding} onAdded={added} />
       <TakeOffListDialog restaurant={takingOff} onClose={() => setTakingOff(undefined)} />
     </main>
   );

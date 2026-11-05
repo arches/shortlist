@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { ApiError } from "@/api/client";
-import type { PlaceSuggestion } from "@/api/types";
+import type { PlaceSuggestion, Restaurant } from "@/api/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,6 +18,12 @@ import { useAddRestaurant } from "./queries";
 interface AddRestaurantDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+
+  // list-screen.states.md has an Add a restaurant row that moves five of the
+  // screen's six regions, and none of them is this dialog's. So the add is
+  // reported rather than answered here: the dialog knows which restaurant went
+  // on the list, and the page knows what the screen does about it.
+  onAdded: (restaurant: Restaurant) => void;
 }
 
 // managing-my-list.wireframe.drawio: a dialog headed "Add a restaurant", with
@@ -33,7 +39,7 @@ interface AddRestaurantDialogProps {
 // where this wireframe draws them. The experiences dialogs put Cancel first
 // and the pair on the right; two artifacts draw two things, and each screen
 // follows the one that draws it.
-export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogProps) {
+export function AddRestaurantDialog({ open, onOpenChange, onAdded }: AddRestaurantDialogProps) {
   const add = useAddRestaurant();
   const [picked, setPicked] = useState<PlaceSuggestion | undefined>();
   const [note, setNote] = useState("");
@@ -57,9 +63,13 @@ export function AddRestaurantDialog({ open, onOpenChange }: AddRestaurantDialogP
     add.mutate(
       { googlePlaceId: picked.google_place_id, note: note.trim().length > 0 ? note.trim() : null },
       {
-        onSuccess: () => {
+        // managing-my-list.adding-a-restaurant.sequence.d2: "201 — the
+        // Restaurant with address and cuisine, and the List item's note". That
+        // response is what names the restaurant now on the list, and it is
+        // handed on rather than discarded.
+        onSuccess: (added) => {
           reset();
-          onOpenChange(false);
+          onAdded(added);
         },
       },
     );
