@@ -7,6 +7,10 @@ import type { SheetPosition } from "./sheet";
 interface ListSheetProps {
   position: SheetPosition;
   onPosition: (position: SheetPosition) => void;
+
+  // What sits between the handle and the cards, outside the scroll: anything
+  // about the list as a whole, which must not scroll away from it.
+  header?: ReactNode;
   children: ReactNode;
 }
 
@@ -19,7 +23,7 @@ interface ListSheetProps {
 // bounded by the sheet, so a card reaching the top edge is cut off there. The
 // page itself has no scrolling of its own — "the page itself does not scroll" —
 // which is also what leaves a single finger free to drag the map.
-export function ListSheet({ position, onPosition, children }: ListSheetProps) {
+export function ListSheet({ position, onPosition, header, children }: ListSheetProps) {
   const from = useRef<number | undefined>(undefined);
 
   function startDragging(event: PointerEvent<HTMLDivElement>) {
@@ -82,6 +86,8 @@ export function ListSheet({ position, onPosition, children }: ListSheetProps) {
           className="h-1.5 w-12 rounded-full bg-muted-foreground/40 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       </div>
+
+      {header !== undefined && <div className="shrink-0">{header}</div>}
 
       {/*
         min-h-0 is what lets this shrink past its content and overflow inside

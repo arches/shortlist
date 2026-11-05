@@ -112,3 +112,21 @@ export function labelOf(filter: VisitedFilter): string {
 export function signatureOf(by: Narrowing): string {
   return narrowing(by) ? `${by.search.trim().toLowerCase()}|${by.filter}` : "";
 }
+
+// Scenario: Searching within a filter — "And I see that both a search and a
+// filter are narrowing my list". Both have to be named, because either one
+// alone would explain a shorter list and the owner would go looking for the
+// wrong thing to clear.
+//
+// This is also what reports the filter when the menu is shut: the dot on the
+// hamburger says a filter is on, and a dot says nothing to a screen reader.
+export function whatIsNarrowing(by: Narrowing): string | undefined {
+  const both = [
+    searching(by) ? `the search “${by.search.trim()}”` : undefined,
+    filtering(by) ? `the ${labelOf(by.filter)} filter` : undefined,
+  ].filter((half) => half !== undefined);
+
+  if (both.length === 0) return undefined;
+
+  return `Narrowed by ${both.join(" and ")}.`;
+}

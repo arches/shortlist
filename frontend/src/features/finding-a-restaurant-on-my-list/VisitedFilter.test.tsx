@@ -145,6 +145,67 @@ describe("filtering my list", () => {
     });
   });
 
+  // Scenario: Searching within a filter — "Given I filtered to visited, When I
+  // search for 'ba', Then I see only Bacari. And Soban is gone, though its name
+  // matches too."
+  describe("searching within a filter", () => {
+    it("keeps both, so a match the filter excludes stays gone", async () => {
+      renderApp("/");
+      await filterTo("Visited");
+      await search("ba");
+
+      expect(listed()).toEqual(["Bacari"]);
+      expect(screen.getAllByTestId("pin").map((pin) => pin.dataset.title)).toEqual(["Bacari"]);
+    });
+
+    // "And I see that both a search and a filter are narrowing my list."
+    it("says that both are narrowing the list", async () => {
+      renderApp("/");
+      await filterTo("Visited");
+      await search("ba");
+
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Narrowed by the search “ba” and the Visited filter.",
+      );
+    });
+
+    it("says so of a search on its own", async () => {
+      renderApp("/");
+      await search("ba");
+
+      expect(screen.getByRole("status")).toHaveTextContent("Narrowed by the search “ba”.");
+    });
+
+    it("says so of a filter on its own, which the dot alone cannot", async () => {
+      renderApp("/");
+      await filterTo("Not visited");
+
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Narrowed by the Not visited filter.",
+      );
+    });
+
+    it("says nothing while nothing is narrowing the list", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+
+      expect(screen.queryByRole("status")).toBeNull();
+    });
+
+    // The cards scroll and this does not: it is about the list rather than one
+    // restaurant, so it stays put at the top of the sheet.
+    it("stays out of what scrolls", async () => {
+      renderApp("/");
+      await search("ba");
+
+      const notice = screen.getByRole("status");
+
+      expect(notice.closest("div.overflow-y-auto")).toBeNull();
+      expect(screen.getByRole("region", { name: "My list" }).contains(notice)).toBe(true);
+    });
+  });
+
   // Not a scenario — no Background has a list a filter can empty — but
   // reachable: nothing on this list is unvisited once Soban is gone.
   it("says so when the filter leaves nothing", async () => {
@@ -175,6 +236,14 @@ async function filterTo(label: string): Promise<void> {
 
   const menu = await openTheMenu();
   await userEvent.click(within(menu).getByRole("menuitemradio", { name: label }));
+}
+
+// One act of searching, as in the search suite beside this one.
+async function search(text: string): Promise<void> {
+  await screen.findByTestId("map");
+
+  await userEvent.click(screen.getByRole("searchbox", { name: "Search my list" }));
+  await userEvent.paste(text);
 }
 
 // Which ring is filled, as the menu reports it to anybody who cannot see the

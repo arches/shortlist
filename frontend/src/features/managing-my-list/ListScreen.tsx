@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Restaurant } from "@/api/types";
 import { SessionEnded, signOut } from "@/session/session";
 
+import { NarrowingNotice } from "@/features/finding-a-restaurant-on-my-list/NarrowingNotice";
 import {
   narrowed,
   nothingMatches,
@@ -117,7 +118,7 @@ export function ListScreen() {
         onSignOut={() => void leave()}
       />
 
-      <ListSheet position={sheet} onPosition={setSheet}>
+      <ListSheet position={sheet} onPosition={setSheet} header={<NarrowingNotice by={by} />}>
         <RestaurantList
           restaurants={matches}
           isPending={isPending}
