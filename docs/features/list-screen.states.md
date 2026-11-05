@@ -23,7 +23,7 @@ Nothing here is a lifecycle. They all run for as long as the screen is open, so 
 | Pan/Zoom the map       | Unchanged                        | Unchanged               | Unchanged | Unchanged | Close  | Unchanged                      |
 | Open the "Add" dialog  | Unchanged                        | Unchanged               | Unchanged | Unchanged | Close  | Unchanged                      |
 | Close the "Add" dialog | Unchanged                        | Unchanged               | Unchanged | Unchanged | Close  | Unchanged                      |
-| Add a restaurant       | Unchanged                        | New restaurant selected | → Empty   | All       | Close  | Center on selection, zoom 13   |
+| Add a restaurant       | → Peek                           | New restaurant selected | → Empty   | All       | Close  | Center on selection, zoom 13   |
 | Locate-me              | Unchanged                        | None                    | Unchanged | Unchanged | Close  | Center on my location, zoom 13 |
 
 - Selection should always scroll the list so the selected item is in view, and highlight the map pin
