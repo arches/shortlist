@@ -24,30 +24,56 @@ Scenario: See restaurants from my list
   When I view the main page
   Then I see a map centered around my location at zoom level 13
   And I see a pin for Bacari on the map
-  And I see Bacari in the list
   And I see a blue dot showing my location
+  And the sheet rests at half
+  And I see Bacari in the sheet
+```
+
+## Alternate paths
+
+```gherkin
+Scenario Outline: Changing how much map I can see
+  Given the sheet rests at <before>
+  When I drag the sheet <direction>
+  Then the sheet rests at <after>
+  And the map has not panned or changed zoom
+
+  Examples:
+    | before | direction | after |
+    | half   | down      | peek  |
+    | half   | up        | full  |
+    | peek   | up        | half  |
+    | full   | down      | half  |
+    | peek   | down      | peek  |
 ```
 
 ```gherkin
 Scenario: Scrolling the list
+  Given the sheet rests at full
   When I scroll the list
-  Then the restaurants move within the list panel
-  And the map stays fully visible, unchanged in size and position
-  And no restaurant passes behind the map
+  Then the restaurants move within the sheet
+  And no restaurant appears outside the sheet
+  And the page itself does not scroll
+  And the map does not pan or change zoom
 ```
 
 ```gherkin
 Scenario: Selecting a restaurant on the list
-  When I click on Bacari in the list
-  Then the map pans to show Bacari in the center
+  Given the sheet rests at full
+  When I click on Bacari in the sheet
+  Then the sheet drops to peek
+  And the map pans to show Bacari in the center
   And the Bacari pin is highlighted
+  And Bacari is the restaurant showing in the sheet
 ```
 
 ```gherkin
 Scenario: Selecting a restaurant on the map
+  Given the sheet rests at half
   When I click on the Bacari pin in the map
-  Then the list scrolls so Bacari is in view
-  And I see Bacari highlighted on the list
+  Then Bacari is the restaurant showing in the sheet
+  And I see Bacari highlighted in the sheet
+  And the sheet stays at half
 ```
 
 ```gherkin

@@ -85,7 +85,6 @@ Scenario: Managing my list while signed out
 
 - Recording, changing or removing an experience, and the notes an experience carries
 - A note on a restaurant that is not on my list. A note lives on the list item, so taking the restaurant off the list takes the note with it.
-- Searching or filtering the list by what a note says.
 - Sharing a list, or seeing anybody else's.
 - Photos or attachments.
 

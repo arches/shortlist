@@ -1,23 +1,23 @@
 <mxfile host="65bd71144e">
     <diagram name="Managing my list" id="0">
-        <mxGraphModel dx="1126" dy="629" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="880" background="#ffffff" math="0" shadow="0">
+        <mxGraphModel dx="2211" dy="705" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="880" background="#ffffff" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
                 <mxCell id="n2" value="" style="rounded=0;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=2;dashed=0;" parent="1" vertex="1">
                     <mxGeometry x="190" y="104" width="360" height="738" as="geometry"/>
                 </mxCell>
-                <mxCell id="n3" value="" style="rounded=0;html=1;fillColor=#f2f2f2;strokeColor=#555555;strokeWidth=2;dashed=0;" parent="1" vertex="1">
-                    <mxGeometry x="190" y="104" width="360" height="40" as="geometry"/>
+                <mxCell id="27" value="" style="rounded=0;html=1;fillColor=#66FFB3;strokeColor=#555555;strokeWidth=2;dashed=0;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="190" y="104" width="360" height="738" as="geometry"/>
                 </mxCell>
-                <mxCell id="n4" value="&lt;b&gt;+ Add&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;" parent="1" vertex="1">
-                    <mxGeometry x="461" y="112" width="76" height="24" as="geometry"/>
+                <mxCell id="n200" value="" style="rounded=0;html=1;fillColor=#FFFFFF;strokeColor=#555555;strokeWidth=2;dashed=0;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="190" y="473" width="360" height="369" as="geometry"/>
                 </mxCell>
-                <mxCell id="n38" value="Managing my list — wireframe with map" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=25;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
+                <mxCell id="n201" value="" style="rounded=0;html=1;fillColor=#999999;strokeColor=#666666;strokeWidth=1;dashed=0;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="346" y="483" width="48" height="6" as="geometry"/>
+                </mxCell>
+                <mxCell id="n38" value="Managing my list — the map, the sheet at half, and the chrome" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=25;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
                     <mxGeometry x="40" y="34" width="180" height="20" as="geometry"/>
-                </mxCell>
-                <mxCell id="n40" value="My list" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
-                    <mxGeometry x="210" y="114" width="180" height="20" as="geometry"/>
                 </mxCell>
                 <mxCell id="24" value="" style="group" parent="1" vertex="1" connectable="0">
                     <mxGeometry x="210" y="665" width="329" height="161" as="geometry"/>
@@ -31,11 +31,8 @@
                 <mxCell id="n51" value="Pizza - 943 Ash Ave, Los Angeles CA&lt;br&gt;Visited 1 time" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#666666;" parent="24" vertex="1">
                     <mxGeometry x="12" y="26.943396226415096" width="180" height="15.849056603773587" as="geometry"/>
                 </mxCell>
-                <mxCell id="23" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;" parent="24" vertex="1">
+                <mxCell id="23" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;fontColor=#FFFFFF;" parent="24" vertex="1">
                     <mxGeometry x="236" y="23.77358490566038" width="76" height="19.0188679245283" as="geometry"/>
-                </mxCell>
-                <mxCell id="64" value="" style="whiteSpace=wrap;html=1;aspect=fixed;shadow=0;strokeColor=#000000;fontColor=#000000;fillColor=none;dashed=1" parent="24" vertex="1">
-                    <mxGeometry x="-7" y="-174" width="335" height="335" as="geometry"/>
                 </mxCell>
                 <mxCell id="25" value="" style="group;fillColor=#FFFFCC;container=0;" parent="1" vertex="1" connectable="0">
                     <mxGeometry x="210" y="581" width="320" height="72" as="geometry"/>
@@ -52,16 +49,13 @@
                 <mxCell id="n43" value="Italian - 12 Main St, New York NY&lt;br&gt;Visited 1 time" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#666666;" parent="26" vertex="1">
                     <mxGeometry x="12" y="34" width="180" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="21" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;" parent="26" vertex="1">
+                <mxCell id="21" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;fontColor=#FFFFFF;" parent="26" vertex="1">
                     <mxGeometry x="236" y="27" width="76" height="24" as="geometry"/>
-                </mxCell>
-                <mxCell id="27" value="" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#66FFB3;" parent="1" vertex="1">
-                    <mxGeometry x="208" y="154" width="323" height="323" as="geometry"/>
                 </mxCell>
                 <mxCell id="31" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;fillColor=#FF9999;position2=0.77;" parent="1" vertex="1">
                     <mxGeometry x="263" y="344" width="34" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="34" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontColor=#000000;strokeColor=#9999FF;" parent="1" source="32" target="27" edge="1">
+                <mxCell id="34" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fontColor=#000000;strokeColor=#9999FF;" parent="1" source="32" target="27" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="32" value="Map with location markers" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
@@ -97,7 +91,7 @@
                 <mxCell id="n47" value="Mexican - 381 Sycamore St, Los Angeles CA&lt;br&gt;Visited 2 times" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#666666;" parent="1" vertex="1">
                     <mxGeometry x="222" y="615" width="180" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="22" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;" parent="1" vertex="1">
+                <mxCell id="22" value="&lt;b&gt;Remove&lt;/b&gt;" style="rounded=0;html=1;fillColor=#1f5c8b;strokeColor=#123f61;strokeWidth=1;dashed=0;fontColor=#FFFFFF;" parent="1" vertex="1">
                     <mxGeometry x="450" y="606" width="76" height="24" as="geometry"/>
                 </mxCell>
                 <mxCell id="44" value="-" style="whiteSpace=wrap;html=1;aspect=fixed;strokeColor=#9999FF;fontColor=#000000;fillColor=#B3B3B3;" parent="1" vertex="1">
@@ -146,28 +140,157 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="55" value="Map zoom" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
-                    <mxGeometry x="572" y="464" width="87" height="40" as="geometry"/>
+                    <mxGeometry x="632" y="429" width="87" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="59" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#9999FF;fontColor=#000000;" parent="1" source="58" target="46" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="58" value="&quot;Locate Me&quot; button" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
-                    <mxGeometry x="559" y="404" width="87" height="40" as="geometry"/>
+                    <mxGeometry x="643" y="333" width="87" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="66" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.01;entryY=0.28;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#9999FF;fontColor=#000000;" parent="1" source="63" target="64" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="63" value="List panel scrolls,&lt;br&gt;map does not" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
+                <mxCell id="63" value="Sheet drags between peek, half and full. It cannot be dismissed." style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
                     <mxGeometry x="20" y="513" width="120" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="67" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;fillColor=#99FF99;position2=0.77;" vertex="1" parent="1">
+                <mxCell id="67" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;fillColor=#99FF99;position2=0.77;" parent="1" vertex="1">
                     <mxGeometry x="453" y="229" width="34" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="69" style="html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.946;entryY=0.379;entryDx=0;entryDy=0;entryPerimeter=0;fillColor=#9999FF;strokeColor=#9999FF;" edge="1" parent="1" source="68" target="67">
+                <mxCell id="69" style="html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.946;entryY=0.379;entryDx=0;entryDy=0;entryPerimeter=0;fillColor=#9999FF;strokeColor=#9999FF;" parent="1" source="68" target="67" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="68" value="Visited locations should have green markers" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" vertex="1" parent="1">
+                <mxCell id="68" value="Visited locations should have green markers" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
                     <mxGeometry x="757" y="154" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="n210" value="" style="rounded=0;html=1;fillColor=#FFFFFF;strokeColor=#999999;strokeWidth=1;dashed=0;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="202" y="116" width="336" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="n211" value="☰" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;align=center;fontSize=16;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="126" width="24" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n212" value="" style="rounded=0;html=1;fillColor=#F2F2F2;strokeColor=#999999;strokeWidth=1;dashed=0;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="126" width="252" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n213" value="Search my list…" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="246" y="126" width="200" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n214" value="+" style="rounded=0;html=1;fillColor=#1F5C8B;strokeColor=#123F61;strokeWidth=1;dashed=0;fontColor=#FFFFFF;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="126" width="28" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n220" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1F5C8B;strokeWidth=1;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="420" width="18" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="n221" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F5C8B;strokeColor=#123F61;strokeWidth=1;fontColor=#FFFFFF;" parent="1" vertex="1">
+                    <mxGeometry x="304" y="424" width="10" height="10" as="geometry"/>
+                </mxCell>
+                <mxCell id="n230" style="edgeStyle=none;html=1;strokeColor=#9999FF;fontColor=#000000;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="63" target="n200" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n231" value="Chrome floats over the map. No header, no page title." style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="100" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="n232" style="edgeStyle=none;html=1;strokeColor=#9999FF;fontColor=#000000;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="n231" target="n210" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n233" value="Sign out lives behind hamburger" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="210" width="150" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="n234" style="edgeStyle=none;html=1;strokeColor=#9999FF;fontColor=#000000;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="n233" target="n211" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n239" value="Cards scroll inside the sheet and are clipped at its edge. Nothing passes outside it." style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="676" width="180" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="n240" style="edgeStyle=none;html=1;strokeColor=#9999FF;fontColor=#000000;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" parent="1" source="n239" target="n200" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n270" value="Hamburger menu" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="98" width="200" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="n271" value="" style="rounded=0;html=1;dashed=0;fillColor=#FFFFFF;strokeColor=#555555;strokeWidth=2;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="120" width="200" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="n272" value="☰" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;align=center;fontSize=16;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="972" y="132" width="24" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n273" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F5C8B;strokeColor=#123F61;strokeWidth=1;fontColor=#FFFFFF;" parent="1" vertex="1">
+                    <mxGeometry x="994" y="130" width="9" height="9" as="geometry"/>
+                </mxCell>
+                <mxCell id="n274" value="" style="rounded=0;html=1;dashed=0;fillColor=#999999;strokeColor=#999999;strokeWidth=1;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="162" width="200" height="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n275" value="Show" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontColor=#666666;" parent="1" vertex="1">
+                    <mxGeometry x="974" y="172" width="120" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="n276" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#555555;strokeWidth=1;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="976" y="196" width="12" height="12" as="geometry"/>
+                </mxCell>
+                <mxCell id="n277" value="All" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="996" y="194" width="140" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="n278" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F5C8B;strokeColor=#123F61;strokeWidth=3;fontColor=#FFFFFF;" parent="1" vertex="1">
+                    <mxGeometry x="976" y="224" width="12" height="12" as="geometry"/>
+                </mxCell>
+                <mxCell id="n279" value="Visited" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="996" y="222" width="140" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="n280" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#555555;strokeWidth=1;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="976" y="252" width="12" height="12" as="geometry"/>
+                </mxCell>
+                <mxCell id="n281" value="Not visited" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="996" y="250" width="140" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="n282" value="" style="rounded=0;html=1;dashed=0;fillColor=#999999;strokeColor=#999999;strokeWidth=1;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="286" width="200" height="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n283" value="Sign out" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="974" y="300" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n284" value="Filled ring = the position the filter is in. Exactly one is always filled, so it cannot show nothing." style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;verticalAlign=top;fontSize=10;fontColor=#666666;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="950" y="428" width="230" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="n286" value="The hamburger carries the dot whenever the filter is away from All, so a hidden filter never narrows the map silently." style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;verticalAlign=top;fontSize=10;fontColor=#666666;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="950" y="472" width="230" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="n285" style="edgeStyle=none;html=1;strokeColor=#9999FF;fontColor=#000000;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="n270" target="n211" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n235" value="Search stays in the row, and still floats above the sheet at full" style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="520" width="180" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="n236" style="edgeStyle=none;html=1;strokeColor=#9999FF;fontColor=#000000;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="n235" target="n212" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n237" value="One finger drags the map. The page itself never scrolls, so nothing else wants a single-finger gesture." style="ellipse;whiteSpace=wrap;html=1;fontColor=#000000;fillColor=none;strokeColor=#9999FF;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="640" width="200" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="n238" style="edgeStyle=none;html=1;strokeColor=#9999FF;fontColor=#000000;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.45;entryDx=0;entryDy=0;" parent="1" source="n237" target="27" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n250" value="" style="rounded=0;html=1;dashed=0;fillColor=#FFFFFF;strokeColor=#555555;strokeWidth=1;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="620" width="280" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="n251" value="Legend — pin colour" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;fontColor=#111111;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="894" y="632" width="240" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="n252" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0.77;fontColor=#111111;fillColor=#FF9999;strokeColor=#8A1F1F;strokeWidth=1;" parent="1" vertex="1">
+                    <mxGeometry x="898" y="660" width="20" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="n253" value="Not visited — the standard google pin, thin border" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="928" y="660" width="226" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="n254" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0.77;fontColor=#111111;fillColor=#99FF99;strokeColor=#1F7A3D;strokeWidth=3;" parent="1" vertex="1">
+                    <mxGeometry x="898" y="702" width="20" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="n255" value="Visited — green, thick border. Mine, not the restaurant's." style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="928" y="702" width="226" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="n256" value="" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0.77;fontColor=#111111;fillColor=#FFFF33;strokeColor=#8A6D1F;strokeWidth=1;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="898" y="744" width="20" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="n257" value="Chosen — yellow, dashed border. Only ever one, and it beats green." style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#111111;" parent="1" vertex="1">
+                    <mxGeometry x="928" y="744" width="226" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="n258" value="Border weight is this drawing's own, so the legend survives greyscale. On the map the highlight is colour-based." style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontColor=#666666;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="806" width="300" height="30" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
