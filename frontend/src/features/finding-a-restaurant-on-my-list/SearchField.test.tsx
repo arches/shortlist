@@ -3,7 +3,14 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { aRestaurant } from "@/features/managing-my-list/testing";
-import { theConfiguration } from "@/features/seeing-my-list-on-a-map/testing";
+import {
+  cardFor,
+  PIN_COLOURS,
+  pinColourFor,
+  restAt,
+  theConfiguration,
+  whereTheSheetRests,
+} from "@/features/seeing-my-list-on-a-map/testing";
 import { forgetSession, rememberSession } from "@/session/store";
 import { respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
@@ -148,6 +155,78 @@ describe("searching my list", () => {
 
       const map = screen.getByTestId("map");
       expect(map.dataset.movedTo).toBeUndefined();
+    });
+  });
+
+  // list-screen.states.md, Type in search: "Sheet: → Half" and "Selection:
+  // None". The owner is looking for something else now, so the list they are
+  // narrowing has to be visible, and the restaurant they had chosen is no
+  // longer the answer.
+  describe("what typing does to the rest of the screen", () => {
+    it("raises the sheet to half from peek", async () => {
+      renderApp("/");
+      await screen.findByTestId("map");
+      await restAt("peek");
+
+      await search("soban");
+
+      expect(await whereTheSheetRests()).toBe("half");
+    });
+
+    it("lowers the sheet to half from full", async () => {
+      renderApp("/");
+      await screen.findByTestId("map");
+      await restAt("full");
+
+      await search("soban");
+
+      expect(await whereTheSheetRests()).toBe("half");
+    });
+
+    it("leaves the sheet at half when it is already there", async () => {
+      renderApp("/");
+      await search("soban");
+
+      expect(await whereTheSheetRests()).toBe("half");
+    });
+
+    // "ba" matches Bacari, so the restaurant that was chosen is still listed —
+    // which is what makes the choice being dropped visible rather than merely
+    // narrowed away.
+    it("drops the choice, even of a restaurant the search keeps", async () => {
+      renderApp("/");
+      await screen.findByTestId("map");
+      await userEvent.click(cardFor("Bacari"));
+      expect(cardFor("Bacari")).toHaveAttribute("aria-current", "true");
+
+      await search("ba");
+
+      expect(listed()).toEqual(["Bacari", "Soban"]);
+      expect(cardFor("Bacari")).not.toHaveAttribute("aria-current");
+      expect(pinColourFor("Bacari")).not.toBe(PIN_COLOURS.highlighted);
+    });
+
+    // list-screen.states.md, Clear the search: "Sheet: Unchanged" and
+    // "Selection: Unchanged". The two rows differ in exactly this, so emptying
+    // the field is not another narrowing — it is the end of one.
+    it("leaves the sheet where it was when the search is cleared", async () => {
+      renderApp("/");
+      await search("soban");
+      await restAt("full");
+
+      await userEvent.clear(screen.getByRole("searchbox", { name: "Search my list" }));
+
+      expect(await whereTheSheetRests()).toBe("full");
+    });
+
+    it("keeps the choice when the search is cleared", async () => {
+      renderApp("/");
+      await screen.findByTestId("map");
+      await userEvent.click(cardFor("Bacari"));
+
+      await userEvent.clear(screen.getByRole("searchbox", { name: "Search my list" }));
+
+      expect(cardFor("Bacari")).toHaveAttribute("aria-current", "true");
     });
   });
 

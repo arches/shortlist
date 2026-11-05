@@ -9,6 +9,7 @@ import {
   narrowed,
   nothingMatches,
   NOTHING_NARROWED,
+  searching,
 } from "@/features/finding-a-restaurant-on-my-list/narrowing";
 import type { Narrowing } from "@/features/finding-a-restaurant-on-my-list/narrowing";
 import { Chrome } from "@/features/seeing-my-list-on-a-map/Chrome";
@@ -67,6 +68,26 @@ export function ListScreen() {
     setSheet("peek");
   }
 
+  // list-screen.states.md has two rows for the field, and what tells them apart
+  // is the state each leaves the Search region in: Type in search leaves a
+  // Query, Clear the search leaves it Empty. So the event is read off what the
+  // field is left holding rather than off which keys were pressed — and
+  // whitespace is Empty, the way narrowing.ts already has it.
+  //
+  // Typing raises the sheet to half and drops the choice: the owner is looking
+  // for something else now, so the list they are narrowing has to be visible
+  // and the restaurant they were looking at is no longer the answer. Clearing
+  // does neither — Sheet and Selection both read Unchanged on that row.
+  function narrow(search: string) {
+    const next = { ...by, search };
+    setNarrowing(next);
+
+    if (!searching(next)) return;
+
+    setSelection(undefined);
+    setSheet("half");
+  }
+
   // Scenario: My session ends in the middle of what I am doing. Only a refused
   // renewal reaches here, and the answer to it is to ask for a sign-in.
   useEffect(() => {
@@ -109,7 +130,7 @@ export function ListScreen() {
 
       <Chrome
         by={by}
-        onSearch={(search) => setNarrowing({ ...by, search })}
+        onSearch={narrow}
         onFilter={(filter) => setNarrowing({ ...by, filter })}
         onAdd={() => setAdding(true)}
         onSignOut={() => void leave()}
