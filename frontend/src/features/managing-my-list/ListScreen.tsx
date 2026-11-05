@@ -11,7 +11,10 @@ import {
   NOTHING_NARROWED,
   searching,
 } from "@/features/finding-a-restaurant-on-my-list/narrowing";
-import type { Narrowing } from "@/features/finding-a-restaurant-on-my-list/narrowing";
+import type {
+  Narrowing,
+  VisitedFilter,
+} from "@/features/finding-a-restaurant-on-my-list/narrowing";
 import { Chrome } from "@/features/seeing-my-list-on-a-map/Chrome";
 import { ListMap } from "@/features/seeing-my-list-on-a-map/ListMap";
 import { ListSheet } from "@/features/seeing-my-list-on-a-map/ListSheet";
@@ -88,6 +91,16 @@ export function ListScreen() {
     setSheet("half");
   }
 
+  // list-screen.states.md, Change the filter: "Selection: None", and the sheet
+  // left where it is. The choice goes for the same reason it goes on a search —
+  // the owner has changed what they are choosing between — but the sheet does
+  // not move, because the filter is chosen in the menu rather than in the row
+  // and the owner never lost sight of the list.
+  function filterTo(filter: VisitedFilter) {
+    setNarrowing({ ...by, filter });
+    setSelection(undefined);
+  }
+
   // Scenario: My session ends in the middle of what I am doing. Only a refused
   // renewal reaches here, and the answer to it is to ask for a sign-in.
   useEffect(() => {
@@ -131,7 +144,7 @@ export function ListScreen() {
       <Chrome
         by={by}
         onSearch={narrow}
-        onFilter={(filter) => setNarrowing({ ...by, filter })}
+        onFilter={filterTo}
         onAdd={() => setAdding(true)}
         onSignOut={() => void leave()}
       />

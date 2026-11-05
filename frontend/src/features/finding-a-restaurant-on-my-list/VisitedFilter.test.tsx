@@ -3,7 +3,15 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { aRestaurant } from "@/features/managing-my-list/testing";
-import { openTheMenu, theConfiguration } from "@/features/seeing-my-list-on-a-map/testing";
+import {
+  cardFor,
+  openTheMenu,
+  PIN_COLOURS,
+  pinColourFor,
+  restAt,
+  theConfiguration,
+  whereTheSheetRests,
+} from "@/features/seeing-my-list-on-a-map/testing";
 import { forgetSession, rememberSession } from "@/session/store";
 import { respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
@@ -80,6 +88,38 @@ describe("filtering my list", () => {
 
     const map = screen.getByTestId("map");
     expect(map.dataset.movedTo).toBeUndefined();
+  });
+
+  // "Selection: None" on the same row. The owner has changed what they are
+  // choosing between, so the restaurant they had chosen is no longer the
+  // answer — the same reason a search drops it.
+  //
+  // Bacari is visited, so the Visited filter keeps it listed: a choice narrowed
+  // off the list would look dropped whatever the code did.
+  it("drops the choice, even of a restaurant the filter keeps", async () => {
+    renderApp("/");
+    await screen.findByTestId("map");
+    await userEvent.click(cardFor("Bacari"));
+    expect(cardFor("Bacari")).toHaveAttribute("aria-current", "true");
+
+    await filterTo("Visited");
+
+    expect(listed()).toEqual(["Bacari", "Tacos El Bronco"]);
+    expect(cardFor("Bacari")).not.toHaveAttribute("aria-current");
+    expect(pinColourFor("Bacari")).not.toBe(PIN_COLOURS.highlighted);
+  });
+
+  // "Sheet: Unchanged", which is what tells this row from Type in search. The
+  // filter is chosen in the menu rather than in the row over the map, so the
+  // owner never lost sight of the list and nothing has to be uncovered.
+  it("leaves the sheet where it was", async () => {
+    renderApp("/");
+    await screen.findByTestId("map");
+    await restAt("full");
+
+    await filterTo("Visited");
+
+    expect(await whereTheSheetRests()).toBe("full");
   });
 
   it("leaves only the ones I have", async () => {
