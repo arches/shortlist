@@ -2,12 +2,17 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SearchField } from "@/features/finding-a-restaurant-on-my-list/SearchField";
+import type {
+  Narrowing,
+  VisitedFilter,
+} from "@/features/finding-a-restaurant-on-my-list/narrowing";
 
 import { HamburgerMenu } from "./HamburgerMenu";
 
 interface ChromeProps {
-  search: string;
+  by: Narrowing;
   onSearch: (search: string) => void;
+  onFilter: (filter: VisitedFilter) => void;
   onAdd: () => void;
   onSignOut: () => void;
 }
@@ -25,7 +30,7 @@ interface ChromeProps {
 // floats above the sheet at full" — and belongs to
 // finding-a-restaurant-on-my-list.scenarios.md, which is what gives it
 // something to do.
-export function Chrome({ search, onSearch, onAdd, onSignOut }: ChromeProps) {
+export function Chrome({ by, onSearch, onFilter, onAdd, onSignOut }: ChromeProps) {
   return (
     // Floating means over the map rather than beside it, so the row claims only
     // its own height: the band around it does not take clicks, and what is in
@@ -33,9 +38,9 @@ export function Chrome({ search, onSearch, onAdd, onSignOut }: ChromeProps) {
     // the map cannot be dragged by.
     <div className="pointer-events-none absolute inset-x-0 top-0 z-20 p-3">
       <div className="pointer-events-auto mx-auto flex max-w-2xl items-center justify-between gap-2 rounded-lg bg-background/95 p-2 shadow-md ring-1 ring-foreground/10">
-        <HamburgerMenu onSignOut={onSignOut} />
+        <HamburgerMenu by={by} onFilter={onFilter} onSignOut={onSignOut} />
 
-        <SearchField search={search} onSearch={onSearch} />
+        <SearchField search={by.search} onSearch={onSearch} />
 
         {/*
           managing-my-list.adding-a-restaurant.sequence.d2 is unchanged, so this

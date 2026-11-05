@@ -21,6 +21,14 @@ export interface Narrowing {
   filter: VisitedFilter;
 }
 
+// The three, in the order seeing-my-list-on-a-map.drawio draws them, with the
+// words it writes beside each ring.
+export const POSITIONS: { filter: VisitedFilter; label: string }[] = [
+  { filter: "all", label: "All" },
+  { filter: "visited", label: "Visited" },
+  { filter: "not-visited", label: "Not visited" },
+];
+
 // A list nothing is narrowing: the whole of it, which is what the page opens
 // at and what "clearing the search brings all three back" returns to.
 export const NOTHING_NARROWED: Narrowing = { search: "", filter: "all" };
@@ -88,7 +96,14 @@ export function narrowed(
 export function nothingMatches(by: Narrowing): string {
   if (searching(by)) return `Nothing on your list matches “${by.search.trim()}”.`;
 
-  return "Nothing on your list matches the filter.";
+  // Not a scenario, because no Background has a list the filter can empty. It
+  // is reachable all the same: three visited restaurants and the filter at not
+  // visited.
+  return `Nothing on your list is ${labelOf(by.filter).toLowerCase()}.`;
+}
+
+export function labelOf(filter: VisitedFilter): string {
+  return POSITIONS.find((position) => position.filter === filter)?.label ?? "All";
 }
 
 // One value that changes whenever the narrowing does, for the map to watch:

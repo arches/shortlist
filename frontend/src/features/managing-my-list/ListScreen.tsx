@@ -110,8 +110,9 @@ export function ListScreen() {
       </div>
 
       <Chrome
-        search={by.search}
+        by={by}
         onSearch={(search) => setNarrowing({ ...by, search })}
+        onFilter={(filter) => setNarrowing({ ...by, filter })}
         onAdd={() => setAdding(true)}
         onSignOut={() => void leave()}
       />
