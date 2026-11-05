@@ -106,13 +106,6 @@ export function labelOf(filter: VisitedFilter): string {
   return POSITIONS.find((position) => position.filter === filter)?.label ?? "All";
 }
 
-// One value that changes whenever the narrowing does, for the map to watch:
-// "And the map moves to fit it" is the answer to the owner narrowing the list,
-// not to the list arriving again.
-export function signatureOf(by: Narrowing): string {
-  return narrowing(by) ? `${by.search.trim().toLowerCase()}|${by.filter}` : "";
-}
-
 // Scenario: Searching within a filter — "And I see that both a search and a
 // filter are narrowing my list". Both have to be named, because either one
 // alone would explain a shorter list and the owner would go looking for the

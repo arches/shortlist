@@ -55,21 +55,12 @@ interface Camera {
   zoom: number;
 }
 
-// The box fitBounds is given, in the shape Google's LatLngBoundsLiteral takes.
-interface Bounds {
-  south: number;
-  west: number;
-  north: number;
-  east: number;
-}
-
 // The handful of the real map instance's methods Shortlist calls. A pan moves
 // the centre and leaves the zoom where the owner left it; a camera move sets
 // both at once. Everything else about the camera is the owner's.
 interface FakeMap {
   panTo: (point: Point) => void;
   moveCamera: (camera: Camera) => void;
-  fitBounds: (bounds: Bounds) => void;
 }
 
 const MapInstance = createContext<FakeMap | null>(null);
@@ -93,19 +84,16 @@ export function APIProvider({ children, apiKey }: { children?: ReactNode; apiKey
 }
 
 // data-center is where the map opened; data-panned-to is where panTo has sent it
-// since, which is what the selection scenarios turn on; data-moved-to is the
-// whole camera, centre and zoom together, as moveCamera set it; data-fitted-to
-// is the box fitBounds was given, which is what narrowing the list moves the
-// map to. All three are
-// separate because the owner can now move the map between them, and a view the
+// since, which is what choosing a restaurant turns on; data-moved-to is the
+// whole camera, centre and zoom together, as moveCamera set it. The three are
+// separate because the owner can now move the map between them, so a view the
 // map was sent to has to be distinguishable from the one it opened at — and a
 // move that resets the zoom from a pan that does not.
 export function Map({ children, className, ...props }: MapProps) {
   const [pannedTo, setPannedTo] = useState<Point | undefined>();
   const [movedTo, setMovedTo] = useState<Camera | undefined>();
-  const [fittedTo, setFittedTo] = useState<Bounds | undefined>();
   const instance = useMemo<FakeMap>(
-    () => ({ panTo: setPannedTo, moveCamera: setMovedTo, fitBounds: setFittedTo }),
+    () => ({ panTo: setPannedTo, moveCamera: setMovedTo }),
     [],
   );
 
@@ -122,7 +110,6 @@ export function Map({ children, className, ...props }: MapProps) {
         data-center={attribute(props.defaultCenter)}
         data-panned-to={attribute(pannedTo)}
         data-moved-to={attribute(movedTo)}
-        data-fitted-to={attribute(fittedTo)}
         data-zoom={attribute(props.defaultZoom)}
         data-gesture-handling={props.gestureHandling}
         data-zoom-control={attribute(props.zoomControl)}

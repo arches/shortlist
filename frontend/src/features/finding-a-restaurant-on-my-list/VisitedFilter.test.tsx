@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { aRestaurant } from "@/features/managing-my-list/testing";
 import { openTheMenu, theConfiguration } from "@/features/seeing-my-list-on-a-map/testing";
-import { OPENING_ZOOM } from "@/features/seeing-my-list-on-a-map/view";
 import { forgetSession, rememberSession } from "@/session/store";
 import { respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
@@ -64,18 +63,24 @@ describe("filtering my list", () => {
   });
 
   // Scenario Outline: Narrowing my list — "I filter to not visited. Then I see
-  // only Soban in the list. And Soban is all that is pinned on the map. And the
-  // map moves to fit it."
+  // only Soban in the list. And Soban is all that is pinned on the map."
   it("leaves only the restaurants I have not eaten at", async () => {
     renderApp("/");
     await filterTo("Not visited");
 
     expect(listed()).toEqual(["Soban"]);
     expect(screen.getAllByTestId("pin").map((pin) => pin.dataset.title)).toEqual(["Soban"]);
-    expect(screen.getByTestId("map")).toHaveAttribute(
-      "data-moved-to",
-      JSON.stringify({ center: { lat: SOBAN.latitude, lng: SOBAN.longitude }, zoom: OPENING_ZOOM }),
-    );
+  });
+
+  // list-screen.states.md, Change the filter: "Map: Unchanged". The filter
+  // takes pins off the map and leaves the camera alone, the same as a search.
+  it("leaves the map where it was", async () => {
+    renderApp("/");
+    await filterTo("Not visited");
+
+    const map = screen.getByTestId("map");
+    expect(map.dataset.movedTo).toBeUndefined();
+    expect(map.dataset.pannedTo).toBeUndefined();
   });
 
   it("leaves only the ones I have", async () => {

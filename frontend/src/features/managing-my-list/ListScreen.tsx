@@ -9,7 +9,6 @@ import {
   narrowed,
   nothingMatches,
   NOTHING_NARROWED,
-  signatureOf,
 } from "@/features/finding-a-restaurant-on-my-list/narrowing";
 import type { Narrowing } from "@/features/finding-a-restaurant-on-my-list/narrowing";
 import { Chrome } from "@/features/seeing-my-list-on-a-map/Chrome";
@@ -102,12 +101,7 @@ export function ListScreen() {
   return (
     <main className="relative h-dvh w-full overflow-hidden">
       <div className="absolute inset-0">
-        <ListMap
-          restaurants={matches}
-          selected={selected}
-          onSelect={setSelected}
-          narrowedBy={signatureOf(by)}
-        />
+        <ListMap restaurants={matches} selected={selected} onSelect={setSelected} />
       </div>
 
       <Chrome

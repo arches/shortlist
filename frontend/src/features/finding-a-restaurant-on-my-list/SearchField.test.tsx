@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { aRestaurant } from "@/features/managing-my-list/testing";
 import { theConfiguration } from "@/features/seeing-my-list-on-a-map/testing";
-import { OPENING_ZOOM } from "@/features/seeing-my-list-on-a-map/view";
 import { forgetSession, rememberSession } from "@/session/store";
 import { respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
@@ -90,36 +89,34 @@ describe("searching my list", () => {
     expect(screen.getAllByTestId("pin").map((pin) => pin.dataset.title)).toEqual(["Soban"]);
   });
 
-  // "And the map moves to fit it." One match has no box to fit, so it is the
-  // opening view centred on it — see ASSUMPTIONS.md, "What fitting the matches
-  // comes to".
-  it("moves the map to the one restaurant that matched", async () => {
+  // list-screen.states.md, Type in search: "Map: Unchanged". Narrowing the list
+  // takes pins off the map and moves the camera nowhere — the owner is reading
+  // the map they had, and a camera that jumped to the match would take the
+  // surroundings they were comparing against with it.
+  //
+  // "And the map moves to fit it" was in
+  // finding-a-restaurant-on-my-list.scenarios.md and is not any more.
+  it("leaves the map where it was when one restaurant matches", async () => {
     renderApp("/");
     await search("soban");
 
-    expect(screen.getByTestId("map")).toHaveAttribute(
-      "data-moved-to",
-      JSON.stringify({ center: { lat: SOBAN.latitude, lng: SOBAN.longitude }, zoom: OPENING_ZOOM }),
-    );
+    const map = screen.getByTestId("map");
+    expect(map.dataset.movedTo).toBeUndefined();
+    expect(map.dataset.pannedTo).toBeUndefined();
   });
 
-  // Several matches have a box, which is what fitting means. "ba" is the
-  // search in Scenario: Searching within a filter, and it matches Bacari by
-  // name and Soban by its note.
-  it("fits the map around several matches", async () => {
+  // "ba" is the search in Scenario: Searching within a filter, and it matches
+  // Bacari by name and Soban by its note. Several matches used to be a box the
+  // camera was fitted around; now they are two pins and a camera nobody moved.
+  it("leaves the map where it was when several match", async () => {
     renderApp("/");
     await search("ba");
 
     expect(listed()).toEqual(["Bacari", "Soban"]);
-    expect(screen.getByTestId("map")).toHaveAttribute(
-      "data-fitted-to",
-      JSON.stringify({
-        south: SOBAN.latitude,
-        west: SOBAN.longitude,
-        north: BACARI.latitude,
-        east: BACARI.longitude,
-      }),
-    );
+
+    const map = screen.getByTestId("map");
+    expect(map.dataset.movedTo).toBeUndefined();
+    expect(map.dataset.pannedTo).toBeUndefined();
   });
 
   // Scenario: Nothing matches — "Then I see that nothing on my list matches
@@ -139,8 +136,8 @@ describe("searching my list", () => {
 
       const map = screen.getByTestId("map");
       expect(screen.queryAllByTestId("pin")).toEqual([]);
-      expect(map.dataset.fittedTo).toBeUndefined();
       expect(map.dataset.movedTo).toBeUndefined();
+      expect(map.dataset.pannedTo).toBeUndefined();
     });
 
     // "And clearing the search brings all three back."
@@ -151,6 +148,10 @@ describe("searching my list", () => {
 
       expect(listed()).toEqual(["Bacari", "Soban", "Tacos El Bronco"]);
       expect(screen.getAllByTestId("pin")).toHaveLength(3);
+
+      const map = screen.getByTestId("map");
+      expect(map.dataset.movedTo).toBeUndefined();
+      expect(map.dataset.pannedTo).toBeUndefined();
     });
   });
 
@@ -178,7 +179,6 @@ describe("searching my list", () => {
 
     expect(listed()).toEqual(["Bacari", "Soban", "Tacos El Bronco"]);
     expect(screen.getByRole("searchbox", { name: "Search my list" })).toHaveValue("");
-    expect(screen.getByTestId("map").dataset.fittedTo).toBeUndefined();
   });
 });
 
@@ -187,9 +187,9 @@ function listed(): string[] {
 }
 
 // One act of searching, the way the scenarios put it: "When I search for
-// 'sushi'". Typing it letter by letter is several narrowings, and the
-// intermediate ones legitimately move the map — "sus" matching nothing is not
-// what Scenario: Nothing matches is about.
+// 'sushi'". Pasting rather than typing letter by letter, so the field goes from
+// empty to the whole word in one go: "sus" matching nothing is a narrowing of
+// its own, and not the one any of these scenarios is about.
 async function search(text: string): Promise<void> {
   await screen.findByTestId("map");
 
