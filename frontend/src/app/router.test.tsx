@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { chooseInTheMenu } from "@/features/seeing-my-list-on-a-map/testing";
 import { couldBeSignedIn, forgetSession, rememberSession } from "@/session/store";
 import { noContent, respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
@@ -41,7 +41,7 @@ describe("where the owner lands", () => {
 
     renderApp("/");
 
-    expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "My list" })).toBeInTheDocument();
   });
 
   // An owner whose access token has run out but whose refresh token has not is
@@ -52,7 +52,7 @@ describe("where the owner lands", () => {
 
     renderApp("/");
 
-    expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "My list" })).toBeInTheDocument();
   });
 
   it("sends a signed-in owner away from the sign-in screen", async () => {
@@ -61,7 +61,7 @@ describe("where the owner lands", () => {
 
     renderApp("/sign-in");
 
-    expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "My list" })).toBeInTheDocument();
   });
 
   // signing-in.scenarios.md, "Signing up". An owner holding a session that
@@ -72,7 +72,7 @@ describe("where the owner lands", () => {
 
     renderApp("/sign-up");
 
-    expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "My list" })).toBeInTheDocument();
   });
 
   it("offers the sign-up form to a signed-out owner who asks for it", async () => {
@@ -88,10 +88,10 @@ describe("where the owner lands", () => {
       signedIn();
       fetchMock.mockResolvedValue(respond(200, []));
       renderApp("/");
-      await screen.findByRole("heading", { name: "My list" });
+      await screen.findByRole("region", { name: "My list" });
 
       fetchMock.mockResolvedValueOnce(noContent());
-      await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+      await chooseInTheMenu("Sign out");
 
       expect(await screen.findByRole("button", { name: "Sign in" })).toBeInTheDocument();
     });
@@ -100,10 +100,10 @@ describe("where the owner lands", () => {
       signedIn();
       fetchMock.mockResolvedValue(respond(200, []));
       renderApp("/");
-      await screen.findByRole("heading", { name: "My list" });
+      await screen.findByRole("region", { name: "My list" });
 
       fetchMock.mockResolvedValueOnce(noContent());
-      await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+      await chooseInTheMenu("Sign out");
 
       await waitFor(() => {
         expect(couldBeSignedIn()).toBe(false);

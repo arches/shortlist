@@ -1,4 +1,5 @@
 import { screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import type { Configuration, Restaurant } from "@/api/types";
 import { aRestaurant } from "@/features/managing-my-list/testing";
@@ -86,4 +87,19 @@ export function pinColourFor(name: string): string | undefined {
 // asking what the whole map looks like rather than one restaurant.
 export function pinColours(): (string | undefined)[] {
   return screen.getAllByTestId("google-pin").map((pin) => pin.dataset.background);
+}
+
+// The hamburger, and what is behind it. seeing-my-list-on-a-map.drawio draws
+// the menu rather than the controls themselves, so a test reaches Sign out and
+// the filter the way an owner does: open the menu, then choose in it.
+export async function openTheMenu(): Promise<HTMLElement> {
+  await userEvent.click(screen.getByRole("button", { name: "Menu" }));
+
+  return screen.findByRole("menu");
+}
+
+export async function chooseInTheMenu(name: string): Promise<void> {
+  const menu = await openTheMenu();
+
+  await userEvent.click(within(menu).getByRole("menuitem", { name }));
 }

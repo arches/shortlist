@@ -376,7 +376,7 @@ describe("visited and not visited on the map", () => {
 // the two halves are placed and which of them is the one that scrolls. Whether
 // a real viewport then behaves is the End-to-end tests row shortlist.stack.md
 // leaves TBD. One test per clause below.
-describe("scrolling the list", () => {
+describe("the list over the map", () => {
   let fetchMock: Mock;
 
   beforeEach(() => {
@@ -397,55 +397,46 @@ describe("scrolling the list", () => {
     vi.unstubAllGlobals();
   });
 
-  // "the restaurants move within the list panel"
-  it("scrolls the restaurants inside a panel of their own", async () => {
+  // "the restaurants move within the sheet", and "no restaurant appears outside
+  // the sheet" — the cards scroll inside the sheet and are clipped at its edge,
+  // which is what the wireframe's own annotation says of them.
+  it("scrolls the restaurants inside the sheet", async () => {
     renderApp("/");
 
     await screen.findByTestId("map");
 
-    const panel = cardFor("Bacari").closest("div.overflow-y-auto");
+    const sheet = screen.getByRole("region", { name: "My list" });
+    const scrolls = cardFor("Bacari").closest("div.overflow-y-auto");
 
-    expect(panel).not.toBeNull();
-    // flex-1 and min-h-0 together are what bound the panel: it takes the room
-    // the map leaves and overflows inside it rather than growing the column.
-    expect(panel).toHaveClass("overflow-y-auto", "flex-1", "min-h-0");
+    expect(scrolls).not.toBeNull();
+    expect(sheet.contains(scrolls)).toBe(true);
   });
 
-  // "the map stays fully visible, unchanged in size and position"
-  it("keeps the map at its own size, in a column the page cannot outgrow", async () => {
+  // "the page itself does not scroll". One finger drags the map, so the page
+  // has no scrolling of its own to claim the gesture.
+  it("leaves the page itself nothing to scroll", async () => {
+    renderApp("/");
+
+    await screen.findByTestId("map");
+
+    expect(screen.getByRole("main")).toHaveClass("h-dvh", "overflow-hidden");
+  });
+
+  // The map is the page now rather than a band at the top of a column, and the
+  // sheet is over it: "Chrome floats over the map", and the sheet is drawn
+  // inside the same frame.
+  it("lays the sheet over a map that fills the page", async () => {
     renderApp("/");
 
     const map = await screen.findByTestId("map");
+    const sheet = screen.getByRole("region", { name: "My list" });
+
+    expect(map.className).toContain("h-full");
+    expect(sheet).toHaveClass("absolute", "bottom-0");
+    expect(sheet.contains(map)).toBe(false);
 
     // Outside the one thing that scrolls, so nothing can scroll it away.
     expect(map.closest("div.overflow-y-auto")).toBeNull();
-
-    // And nothing can squash it either: the panel is the flexible half.
-    expect(map.closest("main > div")).toHaveClass("shrink-0");
-
-    // The page is the height of the viewport, so there is no page scroll for
-    // the map to have a position within.
-    expect(screen.getByRole("main")).toHaveClass("h-dvh", "flex", "flex-col");
-  });
-
-  // "no restaurant passes behind the map"
-  it("leaves nothing over the map for a restaurant to pass behind", async () => {
-    renderApp("/");
-
-    const map = await screen.findByTestId("map");
-    const band = map.closest("main > div");
-    const panel = cardFor("Bacari").closest("div.overflow-y-auto");
-
-    // Siblings in the column rather than one over the other, so the edge the
-    // cards are clipped at is below the map instead of underneath it.
-    expect(band?.parentElement).toBe(panel?.parentElement);
-    expect(band?.contains(cardFor("Bacari"))).toBe(false);
-
-    // Nothing is lifted out of the column's flow to sit over anything else,
-    // which is what the map used to be.
-    const column = screen.getByRole("main");
-    expect(column.querySelector(".sticky")).toBeNull();
-    expect(column.querySelector(".fixed")).toBeNull();
   });
 });
 

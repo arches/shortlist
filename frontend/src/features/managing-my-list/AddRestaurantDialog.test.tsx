@@ -22,8 +22,8 @@ import type { Mock } from "vitest";
 // dialog in managing-my-list.wireframe.drawio.
 async function openTheDialog() {
   renderApp("/");
-  await screen.findByRole("heading", { name: "My list" });
-  await openDialog("Add", "Add a restaurant");
+  await screen.findByRole("region", { name: "My list" });
+  await openDialog("Add a restaurant", "Add a restaurant");
 }
 
 const suggestion = {

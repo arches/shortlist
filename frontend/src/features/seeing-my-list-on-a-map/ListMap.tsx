@@ -24,12 +24,11 @@ interface ListMapProps {
   onSelect: (id: number) => void;
 }
 
-// seeing-my-list-on-a-map.drawio draws the map 323px tall at the top of the
-// column, roughly square at the width that wireframe is drawn at. The height is
-// what carries over rather than the squareness: the map is the half of the
-// column that keeps its size, so what it takes is what the list panel does not
-// get, and a square map at this page's width would leave no panel at all.
-const HEIGHT = "h-80";
+// seeing-my-list-on-a-map.drawio draws the map filling the whole frame, from
+// the top of the page to the bottom, with the chrome and the sheet floating
+// over it. So the map takes whatever it is given rather than a height of its
+// own, and what it is given is the page.
+const FILLS_THE_PAGE = "h-full w-full";
 
 // seeing-my-list-on-a-map.drawio highlights the chosen pin in yellow, and its
 // own note says the highlight is colour-based. Border and glyph are set with
@@ -189,9 +188,11 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
   // the map before it can be drawn".
   if (error) {
     return (
-      <p role="alert" className="text-destructive text-sm">
-        The map is unavailable just now.
-      </p>
+      <div className="flex h-full w-full items-center justify-center bg-muted p-6">
+        <p role="alert" className="text-destructive text-sm">
+          The map is unavailable just now.
+        </p>
+      </div>
     );
   }
 
@@ -202,7 +203,11 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
   // the owner may already have moved. See ASSUMPTIONS.md, "When the map waits
   // for the owner's location".
   if (!configuration || asking) {
-    return <p className="text-muted-foreground text-sm">Opening the map…</p>;
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-muted p-6">
+        <p className="text-muted-foreground text-sm">Opening the map…</p>
+      </div>
+    );
   }
 
   const view = viewOf(restaurants, shared);
@@ -218,7 +223,7 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         // The Maps API will not draw an advanced marker without a Map ID, and
         // an advanced marker is what a pin is now.
         mapId={configuration.google_maps_map_id}
-        className={`${HEIGHT} w-full overflow-hidden rounded-lg`}
+        className={FILLS_THE_PAGE}
         {...THE_OWNER_S_TO_MOVE}
         // "I see a map centered around my location at zoom level 13", or the
         // first restaurant on the list when the owner shared nothing — where it

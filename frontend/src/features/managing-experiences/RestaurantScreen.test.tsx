@@ -82,7 +82,7 @@ describe("a restaurant's own screen", () => {
 
     await userEvent.click(screen.getByRole("link", { name: "‹ My list" }));
 
-    expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "My list" })).toBeInTheDocument();
   });
 
   // Reaching the experiences of a restaurant that is off my list is out of
@@ -93,7 +93,7 @@ describe("a restaurant's own screen", () => {
 
     renderApp("/restaurants/999");
 
-    expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "My list" })).toBeInTheDocument();
   });
 
   // Scenario: Managing experiences while signed out — "Then I am asked to sign

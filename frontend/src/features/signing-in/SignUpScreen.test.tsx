@@ -60,7 +60,7 @@ describe("the sign-up screen", () => {
 
       await fillIn("Nora Vance", "nora.vance@fastmail.com", "quiet-lemon-garden-fence");
 
-      expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+      expect(await screen.findByRole("region", { name: "My list" })).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Sign up" })).not.toBeInTheDocument();
     });
 
@@ -68,7 +68,7 @@ describe("the sign-up screen", () => {
       renderApp("/sign-up");
 
       await fillIn("Nora Vance", "nora.vance@fastmail.com", "quiet-lemon-garden-fence");
-      await screen.findByRole("heading", { name: "My list" });
+      await screen.findByRole("region", { name: "My list" });
 
       expect(couldBeSignedIn()).toBe(true);
     });
@@ -77,7 +77,7 @@ describe("the sign-up screen", () => {
       renderApp("/sign-up");
 
       await fillIn("Nora Vance", "nora.vance@fastmail.com", "quiet-lemon-garden-fence");
-      await screen.findByRole("heading", { name: "My list" });
+      await screen.findByRole("region", { name: "My list" });
 
       const request = lastRequestWith(fetchMock, "POST");
       expect(request.path).toBe("/api/users");

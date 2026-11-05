@@ -39,7 +39,7 @@ describe("the sign-in screen", () => {
 
     await fillIn("sam.reed@fastmail.com", "correct-horse-battery-staple");
 
-    expect(await screen.findByRole("heading", { name: "My list" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "My list" })).toBeInTheDocument();
     expect(couldBeSignedIn()).toBe(true);
   });
 
@@ -49,7 +49,7 @@ describe("the sign-in screen", () => {
     renderApp("/sign-in");
 
     await fillIn("sam.reed@fastmail.com", "correct-horse-battery-staple");
-    await screen.findByRole("heading", { name: "My list" });
+    await screen.findByRole("region", { name: "My list" });
 
     const request = lastRequestWith(fetchMock, "POST");
     expect(request.path).toBe("/api/session");

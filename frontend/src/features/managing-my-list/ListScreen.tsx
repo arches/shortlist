@@ -2,9 +2,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import type { Restaurant } from "@/api/types";
-import { Button } from "@/components/ui/button";
 import { SessionEnded, signOut } from "@/session/session";
 
+import { Chrome } from "@/features/seeing-my-list-on-a-map/Chrome";
 import { ListMap } from "@/features/seeing-my-list-on-a-map/ListMap";
 
 import { AddRestaurantDialog } from "./AddRestaurantDialog";
@@ -12,12 +12,11 @@ import { RestaurantList } from "./RestaurantList";
 import { TakeOffListDialog } from "./TakeOffListDialog";
 import { useRestaurants } from "./queries";
 
-// managing-my-list.wireframe.drawio: the screen is headed "My list", with a
-// primary Add beside the heading and one card per restaurant below it.
-//
-// The wireframe shows no sign-out control. One has to exist — "Signing out when
-// I am done" is a named scenario — so it sits in the header, which is the only
-// chrome the wireframe has.
+// seeing-my-list-on-a-map.drawio draws the whole page: the map fills it, the
+// chrome floats over it, and the list sits in a panel over the bottom half.
+// There is no header and no page title — the wireframe says so in its own
+// annotation — and managing-my-list.wireframe.drawio, which used to draw both,
+// no longer draws either.
 //
 // seeing-my-list-on-a-map.scenarios.md calls itself an extension of this view:
 // "map and list together comprise a single page". So the map is part of this
@@ -52,55 +51,46 @@ export function ListScreen() {
   // something the list reads out. Every other refusal is.
   const refusal = error && !(error instanceof SessionEnded) ? error.message : undefined;
 
-  // Scenario: Scrolling the list — the page itself is what does not scroll. The
-  // column is the height of the viewport and everything that overflows is
-  // inside the list panel, which is what makes "the map stays fully visible"
-  // structural rather than a promise the page keeps while it is short enough.
+  // The page is the viewport and never scrolls: "the page itself does not
+  // scroll", and "One finger drags the map", which is only true of a page with
+  // no scrolling of its own to claim the gesture. Everything else is layered
+  // over the map rather than stacked beside it.
   return (
-    <main className="mx-auto flex h-dvh w-full max-w-2xl flex-col p-6">
-      <header className="mb-6 flex shrink-0 items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">My list</h1>
-
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={() => void leave()}>
-            Sign out
-          </Button>
-
-          <Button onClick={() => setAdding(true)}>Add</Button>
-        </div>
-      </header>
-
-      {/*
-        "the map stays fully visible, unchanged in size and position". shrink-0
-        is the load-bearing half: in a column too short for both halves, the map
-        is the one that keeps its size and the list panel is what gives, which
-        is what the scenario asks for in so many words.
-      */}
-      <div className="mb-3 shrink-0">
+    <main className="relative h-dvh w-full overflow-hidden">
+      <div className="absolute inset-0">
         <ListMap restaurants={restaurants} selected={selected} onSelect={setSelected} />
       </div>
 
-      {/*
-        "the restaurants move within the list panel", and "no restaurant passes
-        behind the map" — the cards scroll inside this region, which clips at
-        its own top edge, below the map. A card reaching the top of the panel is
-        clipped there rather than carrying on under the map.
+      <Chrome onAdd={() => setAdding(true)} onSignOut={() => void leave()} />
 
-        min-h-0 is what lets a flex child shrink past its content and overflow;
-        without it the panel grows to fit the cards and the page scrolls again.
-        The horizontal pair gives the cards' ring a pixel of room inside the
-        clip, so it is not shaved off at the panel's edges.
+      {/*
+        The sheet, at the half the wireframe draws it at: its top edge sits
+        halfway down the frame. Dragging it between peek, half and full is the
+        next thing to land; what is here is where it rests.
+
+        The cards scroll inside it and are clipped at its edge — "no restaurant
+        appears outside the sheet" — which is what the inner region does, and
+        the page itself is not what moves.
+
+        Named rather than headed: the wireframe draws no title, and a region
+        with nothing to call it is one an owner using a screen reader cannot
+        find.
       */}
-      <div className="-mx-1 min-h-0 flex-1 overflow-y-auto px-1">
-        <RestaurantList
-          restaurants={restaurants}
-          isPending={isPending}
-          error={refusal}
-          selected={selected}
-          onSelect={setSelected}
-          onTakeOff={setTakingOff}
-        />
-      </div>
+      <section
+        aria-label="My list"
+        className="absolute inset-x-0 bottom-0 z-10 h-1/2 rounded-t-xl bg-background shadow-lg ring-1 ring-foreground/10"
+      >
+        <div className="h-full overflow-y-auto px-4 pt-4 pb-6">
+          <RestaurantList
+            restaurants={restaurants}
+            isPending={isPending}
+            error={refusal}
+            selected={selected}
+            onSelect={setSelected}
+            onTakeOff={setTakingOff}
+          />
+        </div>
+      </section>
 
       <AddRestaurantDialog open={adding} onOpenChange={setAdding} />
       <TakeOffListDialog restaurant={takingOff} onClose={() => setTakingOff(undefined)} />
