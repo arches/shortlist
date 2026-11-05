@@ -38,9 +38,9 @@ export function ListScreen() {
   const [takingOff, setTakingOff] = useState<Restaurant | undefined>();
 
   // seeing-my-list-on-a-map.scenarios.md: "map and list together comprise a
-  // single page", and both of its selection scenarios move the other half. So
-  // which restaurant is chosen belongs to the page that holds both, not to
-  // either one of them. Nothing is chosen until the owner chooses it.
+  // single page", and list-screen.states.md has choosing move every region of
+  // it. So which restaurant is chosen belongs to the page that holds both, not
+  // to either one of them. Nothing is chosen until the owner chooses it.
   const [selected, setSelected] = useState<number | undefined>();
 
   // "And the sheet rests at half" — where it opens, and the owner's to drag
@@ -55,11 +55,12 @@ export function ListScreen() {
   // URL — see ASSUMPTIONS.md, "Whether the narrowing is in the URL".
   const [by, setNarrowing] = useState<Narrowing>(NOTHING_NARROWED);
 
-  // The two selection scenarios differ in exactly one thing, and it is the
-  // sheet. Choosing in the sheet is choosing something to go and look at —
-  // "Then the sheet drops to peek", which is what uncovers the map it pans.
-  // Choosing on the map is already looking at it, so "the sheet stays at half".
-  function chooseInTheSheet(id: number) {
+  // list-screen.states.md gives Tap a row and Tap a pin identical rows: the
+  // sheet drops to peek, the restaurant becomes the selection, and the map
+  // centres on it. So there is one way of choosing a restaurant rather than two
+  // that differ by where the owner reached for it, and whichever half they used
+  // the sheet gets out of the way of the map it just moved.
+  function choose(id: number) {
     setSelected(id);
     setSheet("peek");
   }
@@ -101,7 +102,7 @@ export function ListScreen() {
   return (
     <main className="relative h-dvh w-full overflow-hidden">
       <div className="absolute inset-0">
-        <ListMap restaurants={matches} selected={selected} onSelect={setSelected} />
+        <ListMap restaurants={matches} selected={selected} onSelect={choose} />
       </div>
 
       <Chrome
@@ -119,7 +120,7 @@ export function ListScreen() {
           error={refusal}
           empty={empty}
           selected={selected}
-          onSelect={chooseInTheSheet}
+          onSelect={choose}
           onTakeOff={setTakingOff}
         />
       </ListSheet>

@@ -60,8 +60,8 @@ describe("choosing a restaurant", () => {
     vi.unstubAllGlobals();
   });
 
-  // Scenario: Selecting a restaurant on the list, which opens at full — the
-  // sheet dropping is half of what the scenario is about.
+  // Choosing in the sheet, which opens at full — the sheet dropping is half of
+  // what list-screen.states.md's Tap a row says happens.
   describe("on the list", () => {
     it("centres the map on it, and highlights its pin", async () => {
       renderApp("/");
@@ -146,8 +146,9 @@ describe("choosing a restaurant", () => {
     });
   });
 
-  // Scenario: Selecting a restaurant on the map, which opens at half — where
-  // the sheet stays, because the owner is already looking at the map.
+  // Choosing on the map. list-screen.states.md gives Tap a pin every cell Tap a
+  // row has, so what used to be the one difference between the two — the sheet
+  // — is now the thing they agree about.
   describe("on the map", () => {
     it("shows it in the sheet, and highlights it there", async () => {
       renderApp("/");
@@ -159,15 +160,29 @@ describe("choosing a restaurant", () => {
       expect(cardFor("Bacari")).toHaveAttribute("aria-current", "true");
     });
 
-    // "And the sheet stays at half" — the one thing that tells the two
-    // selection scenarios apart.
-    it("leaves the sheet at half", async () => {
+    // list-screen.states.md, Tap a pin: "Sheet: → Peek", the same as Tap a
+    // row. The sheet used to stay at half here, on the reading that an owner
+    // clicking a pin is already looking at the map; the table drops it out of
+    // the way of the map it just centred instead.
+    it("drops the sheet to peek", async () => {
       renderApp("/");
 
       await screen.findByTestId("map");
       await userEvent.click(pinFor("Bacari"));
 
-      expect(await whereTheSheetRests()).toBe("half");
+      expect(await whereTheSheetRests()).toBe("peek");
+    });
+
+    // Already at peek, so there is nothing for the tap to move. Peek is where
+    // the row above leaves it, which makes a second choice the reachable case.
+    it("leaves the sheet at peek when it is already there", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await restAt("peek");
+      await userEvent.click(pinFor("Bacari"));
+
+      expect(await whereTheSheetRests()).toBe("peek");
     });
 
     it("highlights the pin that was clicked", async () => {
