@@ -14,6 +14,13 @@ import type { Narrowing, VisitedFilter as Position } from "@/features/finding-a-
 
 interface HamburgerMenuProps {
   by: Narrowing;
+
+  // list-screen.states.md has a Menu column: one region, open or closed, that
+  // every row of the table says something about. Fourteen of the fifteen rows
+  // close it and only Tap the hamburger opens it, so whether it is open is the
+  // page's answer rather than the trigger's.
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onFilter: (filter: Position) => void;
   onSignOut: () => void;
 }
@@ -25,9 +32,15 @@ interface HamburgerMenuProps {
 // signing-in.scenarios.md is why one has to exist at all: "Signing out when I
 // am done" is a named scenario. The wireframe that used to draw no sign-out
 // control now says where it lives, so it comes out of the header and in here.
-export function HamburgerMenu({ by, onFilter, onSignOut }: HamburgerMenuProps) {
+export function HamburgerMenu({
+  by,
+  open,
+  onOpenChange,
+  onFilter,
+  onSignOut,
+}: HamburgerMenuProps) {
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={onOpenChange}>
       {/*
         The glyph is drawn rather than written, so the control is named for
         anybody who cannot see it. "Menu" is what it opens.

@@ -61,6 +61,11 @@ export function ListScreen() {
   // URL — see ASSUMPTIONS.md, "Whether the narrowing is in the URL".
   const [by, setNarrowing] = useState<Narrowing>(NOTHING_NARROWED);
 
+  // list-screen.states.md, initial state: "Menu: Closed". It belongs to the
+  // page because almost every row of the table closes it, and most of those
+  // events land somewhere else on the screen entirely.
+  const [menu, setMenu] = useState(false);
+
   // list-screen.states.md gives Tap a row and Tap a pin identical rows: the
   // sheet drops to peek, the restaurant becomes the selection, and the map
   // centres on it. So there is one way of choosing a restaurant rather than two
@@ -148,6 +153,8 @@ export function ListScreen() {
 
       <Chrome
         by={by}
+        menu={menu}
+        onMenu={setMenu}
         onSearch={narrow}
         onFilter={filterTo}
         onAdd={() => setAdding(true)}
