@@ -138,7 +138,12 @@ export function ListScreen() {
   return (
     <main className="relative h-dvh w-full overflow-hidden">
       <div className="absolute inset-0">
-        <ListMap restaurants={matches} selection={selection} onSelect={choose} />
+        <ListMap
+          restaurants={matches}
+          selection={selection}
+          onSelect={choose}
+          onLocate={() => setSelection(undefined)}
+        />
       </div>
 
       <Chrome

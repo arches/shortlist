@@ -9,7 +9,7 @@ import { declinesLocation, forgetGeolocation, sharesLocation } from "@/test/geol
 import { respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
-import { BACARI, cardFor, SILVERLAKE, theConfiguration } from "./testing";
+import { BACARI, cardFor, PIN_COLOURS, pinColourFor, SILVERLAKE, theConfiguration, whereTheSheetRests } from "./testing";
 import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
@@ -101,6 +101,40 @@ describe("locating me", () => {
       "data-moved-to",
       MY_LOCATION_AT_OPENING_ZOOM,
     );
+  });
+
+  // list-screen.states.md, Locate-me: "Selection: None". Going back to where the
+  // owner is standing is leaving behind the restaurant they went to look at, so
+  // the highlight goes with it — on the card and on the pin both.
+  it("drops the choice", async () => {
+    sharesLocation(SILVERLAKE);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+    await userEvent.click(cardFor("Lilia"));
+    expect(cardFor("Lilia")).toHaveAttribute("aria-current", "true");
+
+    await userEvent.click(screen.getByRole("button", { name: "Locate me" }));
+
+    expect(cardFor("Lilia")).not.toHaveAttribute("aria-current");
+    expect(pinColourFor("Lilia")).not.toBe(PIN_COLOURS.highlighted);
+  });
+
+  // "Sheet: Unchanged" on the same row. Choosing Lilia dropped the sheet to
+  // peek, and going back to the owner's location does not undo that: the sheet
+  // is where they left it, not where it was before they chose.
+  it("leaves the sheet where it was", async () => {
+    sharesLocation(SILVERLAKE);
+
+    renderApp("/");
+
+    await screen.findByTestId("map");
+    await userEvent.click(cardFor("Lilia"));
+
+    await userEvent.click(screen.getByRole("button", { name: "Locate me" }));
+
+    expect(await whereTheSheetRests()).toBe("peek");
   });
 
   // Nothing to go back to, so nothing is offered — see ASSUMPTIONS.md, "The

@@ -23,6 +23,11 @@ interface ListMapProps {
   restaurants: Restaurant[] | undefined;
   selection: Selection | undefined;
   onSelect: (id: number) => void;
+
+  // list-screen.states.md has Locate-me clear the selection as well as move the
+  // camera, and the selection belongs to the page — so the button reports the
+  // event rather than owning the answer to it.
+  onLocate: () => void;
 }
 
 // seeing-my-list-on-a-map.drawio draws the map filling the whole frame, from
@@ -171,6 +176,10 @@ function CentreOn({ at, point }: { at: number | undefined; point: Point | undefi
 // opening view again, zoom included. The scenario names the zoom, so the owner
 // having zoomed in since is not a reason to keep it.
 //
+// list-screen.states.md also has it clear the selection: "Selection: None".
+// Going back to where the owner is standing is leaving behind the restaurant
+// they went to look at, so the highlight goes with it.
+//
 // The location is the one read when the page opened, and clicking this does not
 // ask the browser again — see ASSUMPTIONS.md, "Whether the locate-me button
 // asks the browser again".
@@ -178,7 +187,7 @@ function CentreOn({ at, point }: { at: number | undefined; point: Point | undefi
 // It is drawn into the map's own control layer rather than over the map by this
 // page, so it sits inside the map and travels with it, the way the wireframe
 // draws it alongside the zoom buttons.
-function LocateMe({ shared }: { shared: Point }) {
+function LocateMe({ shared, onLocate }: { shared: Point; onLocate: () => void }) {
   const map = useMap();
 
   return (
@@ -189,6 +198,10 @@ function LocateMe({ shared }: { shared: Point }) {
         aria-label="Locate me"
         className={LOCATE_ME}
         onClick={() => {
+          // The event lands on both regions, so the selection is dropped
+          // whether or not there is a map yet to move.
+          onLocate();
+
           if (map === null) return;
 
           map.moveCamera({ center: shared, zoom: OPENING_ZOOM });
@@ -203,7 +216,7 @@ function LocateMe({ shared }: { shared: Point }) {
 // The map half of the list screen. shortlist.context.d2 has Google Maps feeding
 // Shortlist map tiles and functionality, and shortlist.principles.md is why the
 // key it needs arrives from the API rather than from the bundle.
-export function ListMap({ restaurants, selection, onSelect }: ListMapProps) {
+export function ListMap({ restaurants, selection, onSelect, onLocate }: ListMapProps) {
   const { data: configuration, error } = useConfiguration();
 
   // Scenario: See restaurants from my list opens the map on the owner's own
@@ -274,7 +287,7 @@ export function ListMap({ restaurants, selection, onSelect }: ListMapProps) {
             nothing to offer them — the same silence Scenario: Location not
             shared gives the blue dot. See ASSUMPTIONS.md, "The locate-me button
             when there is no location to go to". */}
-        {shared ? <LocateMe shared={shared} /> : null}
+        {shared ? <LocateMe shared={shared} onLocate={onLocate} /> : null}
 
         {pins.map((restaurant) => (
           // "Markers should be standard google pins", per the wireframe's own
