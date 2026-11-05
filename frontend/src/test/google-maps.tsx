@@ -55,11 +55,11 @@ interface Camera {
   zoom: number;
 }
 
-// The handful of the real map instance's methods Shortlist calls. A pan moves
-// the centre and leaves the zoom where the owner left it; a camera move sets
-// both at once. Everything else about the camera is the owner's.
+// The one method of the real map instance Shortlist calls. A camera move sets
+// the centre and the zoom together, which is what every row of
+// list-screen.states.md that moves the map asks for. Everything else about the
+// camera is the owner's.
 interface FakeMap {
-  panTo: (point: Point) => void;
   moveCamera: (camera: Camera) => void;
 }
 
@@ -83,19 +83,13 @@ export function APIProvider({ children, apiKey }: { children?: ReactNode; apiKey
   );
 }
 
-// data-center is where the map opened; data-panned-to is where panTo has sent it
-// since, which is what choosing a restaurant turns on; data-moved-to is the
-// whole camera, centre and zoom together, as moveCamera set it. The three are
-// separate because the owner can now move the map between them, so a view the
-// map was sent to has to be distinguishable from the one it opened at — and a
-// move that resets the zoom from a pan that does not.
+// data-center is where the map opened; data-moved-to is the whole camera, centre
+// and zoom together, as moveCamera has set it since. The two are separate
+// because the owner can now move the map between them, so a view the map was
+// sent to has to be distinguishable from the one it opened at.
 export function Map({ children, className, ...props }: MapProps) {
-  const [pannedTo, setPannedTo] = useState<Point | undefined>();
   const [movedTo, setMovedTo] = useState<Camera | undefined>();
-  const instance = useMemo<FakeMap>(
-    () => ({ panTo: setPannedTo, moveCamera: setMovedTo }),
-    [],
-  );
+  const instance = useMemo<FakeMap>(() => ({ moveCamera: setMovedTo }), []);
 
   return (
     <MapInstance.Provider value={instance}>
@@ -108,7 +102,6 @@ export function Map({ children, className, ...props }: MapProps) {
         className={className}
         data-map-id={props.mapId}
         data-center={attribute(props.defaultCenter)}
-        data-panned-to={attribute(pannedTo)}
         data-moved-to={attribute(movedTo)}
         data-zoom={attribute(props.defaultZoom)}
         data-gesture-handling={props.gestureHandling}

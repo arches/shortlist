@@ -102,7 +102,6 @@ describe("searching my list", () => {
 
     const map = screen.getByTestId("map");
     expect(map.dataset.movedTo).toBeUndefined();
-    expect(map.dataset.pannedTo).toBeUndefined();
   });
 
   // "ba" is the search in Scenario: Searching within a filter, and it matches
@@ -116,7 +115,6 @@ describe("searching my list", () => {
 
     const map = screen.getByTestId("map");
     expect(map.dataset.movedTo).toBeUndefined();
-    expect(map.dataset.pannedTo).toBeUndefined();
   });
 
   // Scenario: Nothing matches — "Then I see that nothing on my list matches
@@ -137,7 +135,6 @@ describe("searching my list", () => {
       const map = screen.getByTestId("map");
       expect(screen.queryAllByTestId("pin")).toEqual([]);
       expect(map.dataset.movedTo).toBeUndefined();
-      expect(map.dataset.pannedTo).toBeUndefined();
     });
 
     // "And clearing the search brings all three back."
@@ -151,7 +148,6 @@ describe("searching my list", () => {
 
       const map = screen.getByTestId("map");
       expect(map.dataset.movedTo).toBeUndefined();
-      expect(map.dataset.pannedTo).toBeUndefined();
     });
   });
 

@@ -122,19 +122,21 @@ const THE_OWNER_S_TO_MOVE = {
   zoomControlOptions: { position: ControlPosition.RIGHT_CENTER },
 } as const;
 
-// Scenario: Selecting a restaurant on the list — "the map pans to show Bacari
-// in the center" — and the same pan from the other side, on the map.
+// list-screen.states.md gives Tap a row and Tap a pin the same answer from the
+// map: "Center on selection, zoom 13". So centring is the whole camera rather
+// than a pan — the zoom comes back to 13 however far the owner had zoomed in or
+// out since, the same way Locate-me and the opening view set both.
 //
-// The pan goes through the map instance rather than a controlled `center` prop.
-// A controlled centre is re-asserted on every render, so any move the owner
-// made themselves would be undone by the next one — a refetch of the list is
-// enough. Keyed on the coordinates, so choosing a different restaurant pans and
-// a re-render does not.
+// It goes through the map instance rather than a controlled `center` prop. A
+// controlled centre is re-asserted on every render, so any move the owner made
+// themselves would be undone by the next one — a refetch of the list is enough.
+// Keyed on the coordinates, so choosing a different restaurant centres and a
+// re-render does not.
 //
-// Nothing changes the zoom: the scenario asks for a pan, and the zoom is now
-// the owner's. See ASSUMPTIONS.md, "Whether choosing a restaurant changes the
-// zoom".
-function PanTo({ point }: { point: Point | undefined }) {
+// A restaurant Google gave no point for has nothing to centre on, so the map
+// stays where it is — see ASSUMPTIONS.md, "Centring on a selection with no
+// coordinates".
+function CentreOn({ point }: { point: Point | undefined }) {
   const map = useMap();
   const lat = point?.lat;
   const lng = point?.lng;
@@ -142,7 +144,7 @@ function PanTo({ point }: { point: Point | undefined }) {
   useEffect(() => {
     if (map === null || lat === undefined || lng === undefined) return;
 
-    map.panTo({ lat, lng });
+    map.moveCamera({ center: { lat, lng }, zoom: OPENING_ZOOM });
   }, [map, lat, lng]);
 
   return null;
@@ -242,7 +244,7 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         defaultCenter={view.centre}
         defaultZoom={view.zoom}
       >
-        <PanTo point={chosen === undefined ? undefined : pointOf(chosen)} />
+        <CentreOn point={chosen === undefined ? undefined : pointOf(chosen)} />
 
         {/* The owner, where they are standing, when they shared it. Nothing is
             drawn when there is nothing to draw — "And there is no blue dot

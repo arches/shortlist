@@ -80,7 +80,6 @@ describe("filtering my list", () => {
 
     const map = screen.getByTestId("map");
     expect(map.dataset.movedTo).toBeUndefined();
-    expect(map.dataset.pannedTo).toBeUndefined();
   });
 
   it("leaves only the ones I have", async () => {

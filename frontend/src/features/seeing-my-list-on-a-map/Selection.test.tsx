@@ -31,6 +31,12 @@ import type { Mock } from "vitest";
 // distinguished from.
 const LILIA = { id: 2, name: "Lilia", latitude: 40.7128, longitude: -73.9542 };
 
+// list-screen.states.md: "Center on selection, zoom 13". Both halves together,
+// which is what makes this a camera move rather than a pan.
+function centredOn({ latitude, longitude }: { latitude: number; longitude: number }): string {
+  return JSON.stringify({ center: { lat: latitude, lng: longitude }, zoom: OPENING_ZOOM });
+}
+
 describe("choosing a restaurant", () => {
   let fetchMock: Mock;
 
@@ -57,33 +63,30 @@ describe("choosing a restaurant", () => {
   // Scenario: Selecting a restaurant on the list, which opens at full — the
   // sheet dropping is half of what the scenario is about.
   describe("on the list", () => {
-    it("pans the map to centre it, and highlights its pin", async () => {
+    it("centres the map on it, and highlights its pin", async () => {
       renderApp("/");
 
       await screen.findByTestId("map");
       await restAt("full");
       await userEvent.click(cardFor("Bacari"));
 
-      expect(screen.getByTestId("map")).toHaveAttribute(
-        "data-panned-to",
-        JSON.stringify({ lat: BACARI.latitude, lng: BACARI.longitude }),
-      );
+      expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(BACARI));
 
       expect(pinColourFor("Bacari")).toBe(PIN_COLOURS.highlighted);
     });
 
-    // "the map pans to show Bacari in the center" names a pan and no zoom, and
-    // the zoom is the owner's now — see ASSUMPTIONS.md, "Whether choosing a
-    // restaurant changes the zoom".
-    it("pans without changing the zoom", async () => {
+    // The zoom travels with the centre rather than being left where the owner
+    // left it: list-screen.states.md names both, "Center on selection, zoom
+    // 13", the same way it names the opening view and Locate-me.
+    it("sets the zoom to 13 as it centres", async () => {
       renderApp("/");
 
       await screen.findByTestId("map");
       await userEvent.click(cardFor("Bacari"));
 
-      const map = screen.getByTestId("map");
-      expect(map).toHaveAttribute("data-panned-to");
-      expect(map).toHaveAttribute("data-zoom", String(OPENING_ZOOM));
+      const camera = screen.getByTestId("map").dataset.movedTo;
+      expect(camera).toBeDefined();
+      expect(JSON.parse(camera ?? "{}")).toMatchObject({ zoom: OPENING_ZOOM });
     });
 
     it("leaves every other pin standard", async () => {
@@ -139,10 +142,7 @@ describe("choosing a restaurant", () => {
 
       expect(cardFor("Lilia")).toHaveAttribute("aria-current", "true");
       expect(cardFor("Bacari")).not.toHaveAttribute("aria-current");
-      expect(screen.getByTestId("map")).toHaveAttribute(
-        "data-panned-to",
-        JSON.stringify({ lat: LILIA.latitude, lng: LILIA.longitude }),
-      );
+      expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(LILIA));
     });
   });
 
@@ -179,28 +179,25 @@ describe("choosing a restaurant", () => {
       expect(pinColourFor("Bacari")).toBe(PIN_COLOURS.highlighted);
     });
 
-    it("pans the map to centre what was clicked" , async () => {
+    it("centres the map on what was clicked", async () => {
       renderApp("/");
 
       await screen.findByTestId("map");
       await userEvent.click(pinFor("Lilia"));
 
-      expect(screen.getByTestId("map")).toHaveAttribute(
-        "data-panned-to",
-        JSON.stringify({ lat: LILIA.latitude, lng: LILIA.longitude }),
-      );
+      expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(LILIA));
     });
   });
 
   // Nothing is chosen until the owner chooses something, so the map keeps the
   // view it opened at and no card is marked.
   describe("before anything is chosen", () => {
-    it("pans nowhere and highlights nothing", async () => {
+    it("centres nowhere and highlights nothing", async () => {
       renderApp("/");
 
       const map = await screen.findByTestId("map");
 
-      expect(map).not.toHaveAttribute("data-panned-to");
+      expect(map).not.toHaveAttribute("data-moved-to");
       expect(pinColours()).toEqual([undefined, undefined]);
       expect(cardFor("Bacari")).not.toHaveAttribute("aria-current");
       expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();

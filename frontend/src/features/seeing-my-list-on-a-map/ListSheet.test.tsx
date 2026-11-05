@@ -74,8 +74,8 @@ describe("the sheet", () => {
     });
   });
 
-  // "And the map has not panned or changed zoom" — the sheet moves over the
-  // map rather than moving it.
+  // list-screen.states.md, Drag the sheet: "Map: Unchanged" — the sheet moves
+  // over the map rather than moving it.
   it("leaves the map where it was", async () => {
     renderApp("/");
     await restAt("half");
@@ -83,7 +83,6 @@ describe("the sheet", () => {
     await dragTheSheet("up");
 
     const map = screen.getByTestId("map");
-    expect(map.dataset.pannedTo).toBeUndefined();
     expect(map.dataset.movedTo).toBeUndefined();
     expect(map.dataset.zoom).toBe("13");
   });

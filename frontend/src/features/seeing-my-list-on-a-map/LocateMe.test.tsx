@@ -91,8 +91,8 @@ describe("locating me", () => {
     await userEvent.click(cardFor("Lilia"));
 
     expect(screen.getByTestId("map")).toHaveAttribute(
-      "data-panned-to",
-      JSON.stringify({ lat: LILIA.latitude, lng: LILIA.longitude }),
+      "data-moved-to",
+      JSON.stringify({ center: { lat: LILIA.latitude, lng: LILIA.longitude }, zoom: OPENING_ZOOM }),
     );
 
     await userEvent.click(screen.getByRole("button", { name: "Locate me" }));
