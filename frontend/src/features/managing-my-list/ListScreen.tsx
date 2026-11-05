@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import type { Restaurant } from "@/api/types";
 import { SessionEnded, signOut } from "@/session/session";
 
+import {
+  narrowed,
+  nothingMatches,
+  NOTHING_NARROWED,
+  signatureOf,
+} from "@/features/finding-a-restaurant-on-my-list/narrowing";
+import type { Narrowing } from "@/features/finding-a-restaurant-on-my-list/narrowing";
 import { Chrome } from "@/features/seeing-my-list-on-a-map/Chrome";
 import { ListMap } from "@/features/seeing-my-list-on-a-map/ListMap";
 import { ListSheet } from "@/features/seeing-my-list-on-a-map/ListSheet";
@@ -41,6 +48,13 @@ export function ListScreen() {
   // choosing a restaurant on either half moves it.
   const [sheet, setSheet] = useState<SheetPosition>(OPENS_AT);
 
+  // finding-a-restaurant-on-my-list.scenarios.md: what the owner is choosing
+  // between. It belongs to the page because it narrows both halves of it —
+  // "<match> is all that is pinned on the map" as well as all that is listed.
+  // Nothing is narrowing it until the owner narrows it, and it is not in the
+  // URL — see ASSUMPTIONS.md, "Whether the narrowing is in the URL".
+  const [by, setNarrowing] = useState<Narrowing>(NOTHING_NARROWED);
+
   // The two selection scenarios differ in exactly one thing, and it is the
   // sheet. Choosing in the sheet is choosing something to go and look at —
   // "Then the sheet drops to peek", which is what uncovers the map it pans.
@@ -68,6 +82,18 @@ export function ListScreen() {
   // something the list reads out. Every other refusal is.
   const refusal = error && !(error instanceof SessionEnded) ? error.message : undefined;
 
+  // The restaurants the owner is choosing between, which is what both the sheet
+  // and the map are given. Everything downstream sees the narrowed list and
+  // nothing has to narrow it twice.
+  const matches = narrowed(restaurants, by);
+
+  // Scenario: Nothing matches names the search; an empty list has nothing to
+  // name. The page is what can tell those apart.
+  const empty =
+    restaurants !== undefined && restaurants.length > 0
+      ? nothingMatches(by)
+      : "Nothing on your list yet.";
+
   // The page is the viewport and never scrolls: "the page itself does not
   // scroll", and "One finger drags the map", which is only true of a page with
   // no scrolling of its own to claim the gesture. Everything else is layered
@@ -75,16 +101,27 @@ export function ListScreen() {
   return (
     <main className="relative h-dvh w-full overflow-hidden">
       <div className="absolute inset-0">
-        <ListMap restaurants={restaurants} selected={selected} onSelect={setSelected} />
+        <ListMap
+          restaurants={matches}
+          selected={selected}
+          onSelect={setSelected}
+          narrowedBy={signatureOf(by)}
+        />
       </div>
 
-      <Chrome onAdd={() => setAdding(true)} onSignOut={() => void leave()} />
+      <Chrome
+        search={by.search}
+        onSearch={(search) => setNarrowing({ ...by, search })}
+        onAdd={() => setAdding(true)}
+        onSignOut={() => void leave()}
+      />
 
       <ListSheet position={sheet} onPosition={setSheet}>
         <RestaurantList
-          restaurants={restaurants}
+          restaurants={matches}
           isPending={isPending}
           error={refusal}
+          empty={empty}
           selected={selected}
           onSelect={chooseInTheSheet}
           onTakeOff={setTakingOff}

@@ -33,6 +33,40 @@ export interface MapView {
   zoom: number;
 }
 
+// The box the map is moved to when the list is narrowed:
+// finding-a-restaurant-on-my-list.scenarios.md, "And the map moves to fit it".
+// The south-west and north-east corners, which is the pair Google's own
+// fitBounds takes.
+export interface Bounds {
+  south: number;
+  west: number;
+  north: number;
+  east: number;
+}
+
+// The smallest box holding every point given, or nothing when there are no
+// points — "And the map stays where it was", which Scenario: Nothing matches
+// says in so many words.
+//
+// One point has no box: a degenerate bounds is a zoom to the highest level
+// Google has, which is not what "moves to fit it" means when the owner has
+// narrowed to one restaurant. So a single match is the opening view again,
+// centred on it — see ASSUMPTIONS.md, "What fitting the matches comes to".
+export function boundsOf(points: Point[]): Bounds | undefined {
+  const [first] = points;
+  if (first === undefined) return undefined;
+
+  return points.reduce<Bounds>(
+    (box, { lat, lng }) => ({
+      south: Math.min(box.south, lat),
+      west: Math.min(box.west, lng),
+      north: Math.max(box.north, lat),
+      east: Math.max(box.east, lng),
+    }),
+    { south: first.lat, west: first.lng, north: first.lat, east: first.lng },
+  );
+}
+
 export function isLocated(restaurant: Restaurant): restaurant is LocatedRestaurant {
   return restaurant.latitude !== null && restaurant.longitude !== null;
 }

@@ -66,12 +66,34 @@ function passes(restaurant: Restaurant, filter: VisitedFilter): boolean {
 // The list narrowed by both, in the order it arrived in. Nothing reorders
 // anything: sorting the list is out of scope in
 // finding-a-restaurant-on-my-list.scenarios.md.
+//
+// A list that has not arrived is not an empty one, and stays undefined: an
+// empty list reads "Nothing on your list yet", which is not what a list still
+// opening has to say.
 export function narrowed(
   restaurants: Restaurant[] | undefined,
   by: Narrowing,
-): Restaurant[] {
-  return (restaurants ?? []).filter(
+): Restaurant[] | undefined {
+  if (restaurants === undefined) return undefined;
+
+  return restaurants.filter(
     (restaurant) =>
       passes(restaurant, by.filter) && (!searching(by) || matches(restaurant, by.search)),
   );
+}
+
+// Scenario: Nothing matches — "Then I see that nothing on my list matches
+// 'sushi'". It names what was searched for, because that is the thing to
+// correct.
+export function nothingMatches(by: Narrowing): string {
+  if (searching(by)) return `Nothing on your list matches “${by.search.trim()}”.`;
+
+  return "Nothing on your list matches the filter.";
+}
+
+// One value that changes whenever the narrowing does, for the map to watch:
+// "And the map moves to fit it" is the answer to the owner narrowing the list,
+// not to the list arriving again.
+export function signatureOf(by: Narrowing): string {
+  return narrowing(by) ? `${by.search.trim().toLowerCase()}|${by.filter}` : "";
 }

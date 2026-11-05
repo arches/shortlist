@@ -41,10 +41,17 @@ const TACOS = aRestaurant({
 const MY_LIST = [BACARI, SOBAN, TACOS];
 
 function names(by: Partial<Narrowing>): string[] {
-  return narrowed(MY_LIST, { ...NOTHING_NARROWED, ...by }).map(({ name }) => name);
+  return (narrowed(MY_LIST, { ...NOTHING_NARROWED, ...by }) ?? []).map(({ name }) => name);
 }
 
 describe("narrowing my list", () => {
+  // A list still opening is not an empty one. "Nothing on your list yet" is
+  // not what a list that has not arrived has to say.
+  it("leaves a list that has not arrived alone", () => {
+    expect(narrowed(undefined, NOTHING_NARROWED)).toBeUndefined();
+    expect(narrowed(undefined, { search: "soban", filter: "visited" })).toBeUndefined();
+  });
+
   it("leaves the whole list when nothing is narrowing it", () => {
     expect(names({})).toEqual(["Bacari", "Soban", "Tacos El Bronco"]);
     expect(narrowing(NOTHING_NARROWED)).toBe(false);

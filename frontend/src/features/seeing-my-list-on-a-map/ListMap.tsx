@@ -8,12 +8,12 @@ import {
   useMap,
 } from "@vis.gl/react-google-maps";
 import { LocateFixed } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { Restaurant } from "@/api/types";
 import { Button } from "@/components/ui/button";
 
-import { located, OPENING_ZOOM, pointOf, viewOf } from "./view";
+import { boundsOf, located, OPENING_ZOOM, pointOf, viewOf } from "./view";
 import type { Point } from "./view";
 import { useOwnerLocation } from "./location";
 import { useConfiguration } from "./queries";
@@ -22,6 +22,11 @@ interface ListMapProps {
   restaurants: Restaurant[] | undefined;
   selected: number | undefined;
   onSelect: (id: number) => void;
+
+  // What is narrowing the list, as one value that changes whenever the
+  // narrowing does. The map moves to fit the matches each time it changes, and
+  // the empty string is a list nothing is narrowing.
+  narrowedBy: string;
 }
 
 // seeing-my-list-on-a-map.drawio draws the map filling the whole frame, from
@@ -148,6 +153,45 @@ function PanTo({ point }: { point: Point | undefined }) {
   return null;
 }
 
+// finding-a-restaurant-on-my-list.scenarios.md: "And <match> is all that is
+// pinned on the map. And the map moves to fit it." So narrowing the list moves
+// the camera, and it is the narrowing that moves it rather than the pins: a
+// refetch that brings back the same restaurants is not the owner asking for
+// anything.
+//
+// Nothing matched leaves the camera alone — "And the map stays where it was" —
+// and so does the first draw, which is where the opening view is settled.
+function FitToTheMatches({ narrowedBy, points }: { narrowedBy: string; points: Point[] }) {
+  const map = useMap();
+
+  // The narrowing the map has already answered. Everything else that changes
+  // the pins — a restaurant added, one taken off, the list simply arriving
+  // again — leaves the camera alone, because none of it is the owner asking to
+  // see something else.
+  const fitted = useRef(narrowedBy);
+
+  useEffect(() => {
+    if (map === null || fitted.current === narrowedBy) return;
+
+    fitted.current = narrowedBy;
+
+    const bounds = boundsOf(points);
+    if (bounds === undefined) return;
+
+    // One match has no box to fit, so it is the opening view again, centred on
+    // it — see ASSUMPTIONS.md, "What fitting the matches comes to".
+    const [only] = points;
+    if (points.length === 1 && only !== undefined) {
+      map.moveCamera({ center: only, zoom: OPENING_ZOOM });
+      return;
+    }
+
+    map.fitBounds(bounds);
+  }, [map, narrowedBy, points]);
+
+  return null;
+}
+
 // Scenario: Recentering on the user location — "When I click on the 'locate me'
 // button. Then I see a map centered around my location at zoom level 13".
 //
@@ -188,7 +232,7 @@ function LocateMe({ shared }: { shared: Point }) {
 // The map half of the list screen. shortlist.context.d2 has Google Maps feeding
 // Shortlist map tiles and functionality, and shortlist.principles.md is why the
 // key it needs arrives from the API rather than from the bundle.
-export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
+export function ListMap({ restaurants, selected, onSelect, narrowedBy }: ListMapProps) {
   const { data: configuration, error } = useConfiguration();
 
   // Scenario: See restaurants from my list opens the map on the owner's own
@@ -243,6 +287,7 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         defaultZoom={view.zoom}
       >
         <PanTo point={chosen === undefined ? undefined : pointOf(chosen)} />
+        <FitToTheMatches narrowedBy={narrowedBy} points={pins.map(pointOf)} />
 
         {/* The owner, where they are standing, when they shared it. Nothing is
             drawn when there is nothing to draw — "And there is no blue dot

@@ -6,6 +6,11 @@ interface RestaurantListProps {
   restaurants: Restaurant[] | undefined;
   isPending: boolean;
   error?: string | undefined;
+
+  // What to read when there is nothing to show. A list with nothing on it and
+  // a list narrowed to nothing are different things to say, and only the page
+  // holding both the list and the narrowing can tell them apart.
+  empty: string;
   selected: number | undefined;
   onSelect: (id: number) => void;
   onTakeOff: (restaurant: Restaurant) => void;
@@ -25,6 +30,7 @@ export function RestaurantList({
   restaurants,
   isPending,
   error,
+  empty,
   selected,
   onSelect,
   onTakeOff,
@@ -40,7 +46,7 @@ export function RestaurantList({
       )}
 
       {restaurants && restaurants.length === 0 && (
-        <p className="text-muted-foreground text-sm">Nothing on your list yet.</p>
+        <p className="text-muted-foreground text-sm">{empty}</p>
       )}
 
       {restaurants && restaurants.length > 0 && (
