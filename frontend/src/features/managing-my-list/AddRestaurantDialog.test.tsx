@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,6 +12,16 @@ import {
   stubFetch,
 } from "@/test/http";
 import { renderApp } from "@/test/router";
+
+import {
+  cardFor,
+  openTheMenu,
+  PIN_COLOURS,
+  pinColourFor,
+  restAt,
+  theConfiguration,
+  whereTheSheetRests,
+} from "@/features/seeing-my-list-on-a-map/testing";
 
 import { aRestaurant, openDialog, typeInto } from "./testing";
 
@@ -262,5 +272,148 @@ describe("adding a restaurant", () => {
     });
     expect(fetchMock.mock.calls.filter((call) => (call[1] as { method?: string })?.method === "POST"))
       .toEqual([]);
+  });
+});
+
+// Derived from the Add a restaurant row of list-screen.states.md, which moves
+// five of the screen's six regions: the restaurant just added becomes the
+// selection, the search goes Empty, the filter goes back to All, the menu
+// closes, and the map centres on the selection at zoom 13. Only the sheet reads
+// Unchanged.
+describe("what adding a restaurant does to the screen", () => {
+  let fetchMock: Mock;
+
+  // Bacari is visited and on the list already, so the filter has somewhere to
+  // be moved away from. Tacos El Bronco is what the add puts there, and both
+  // carry coordinates because the row moves the map.
+  const BACARI_ROW = aRestaurant({
+    id: 1,
+    name: "Bacari",
+    visited: true,
+    experience_count: 1,
+    latitude: 34.0901,
+    longitude: -118.2765,
+  });
+
+  const TACOS = aRestaurant({
+    id: 2,
+    name: "Tacos El Bronco",
+    google_place_id: suggestion.google_place_id,
+    latitude: 40.6478,
+    longitude: -74.0106,
+  });
+
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    fetchMock = stubFetch();
+    window.localStorage.clear();
+    forgetSession();
+    rememberSession({ access_token: "access-one", refresh_token: "refresh-one", expires_in: 900 });
+
+    // The list answers differently once the add has landed, which is what the
+    // mutation's own invalidation goes back for.
+    let onTheList = false;
+
+    fetchMock.mockImplementation((path: string, options?: { method?: string }) => {
+      const url = String(path);
+
+      if (url.endsWith("/configuration")) return Promise.resolve(respond(200, theConfiguration()));
+      if (url.includes("/places/suggestions")) return Promise.resolve(respond(200, [suggestion]));
+
+      if (options?.method === "POST") {
+        onTheList = true;
+        return Promise.resolve(respond(201, TACOS));
+      }
+
+      return Promise.resolve(respond(200, onTheList ? [BACARI_ROW, TACOS] : [BACARI_ROW]));
+    });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  async function add() {
+    await openTheDialog();
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+    await addToList();
+
+    await screen.findByRole("heading", { name: "Tacos El Bronco" });
+  }
+
+  it("chooses the restaurant it added", async () => {
+    await add();
+
+    expect(cardFor("Tacos El Bronco")).toHaveAttribute("aria-current", "true");
+    expect(cardFor("Bacari")).not.toHaveAttribute("aria-current");
+    expect(pinColourFor("Tacos El Bronco")).toBe(PIN_COLOURS.highlighted);
+  });
+
+  it("centres the map on it at zoom 13", async () => {
+    await add();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("map").dataset.movedTo).toBe(
+        JSON.stringify({ center: { lat: TACOS.latitude, lng: TACOS.longitude }, zoom: 13 }),
+      );
+    });
+  });
+
+  // "Search: → Empty". A restaurant added while a search was narrowing the list
+  // would otherwise be chosen and then hidden by the narrowing already there.
+  it("empties the search", async () => {
+    renderApp("/");
+    await screen.findByRole("region", { name: "My list" });
+
+    await userEvent.click(screen.getByRole("searchbox", { name: "Search my list" }));
+    await userEvent.paste("bacari");
+    expect(screen.queryByRole("heading", { name: "Tacos El Bronco" })).toBeNull();
+
+    await openDialog("Add a restaurant", "Add a restaurant");
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+    await addToList();
+
+    expect(await screen.findByRole("heading", { name: "Tacos El Bronco" })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Search my list" })).toHaveValue("");
+  });
+
+  // "Filter: All". Tacos El Bronco is not visited, so a filter left at Visited
+  // would have hidden the restaurant the add just chose.
+  it("returns the filter to All", async () => {
+    renderApp("/");
+    await screen.findByRole("region", { name: "My list" });
+
+    const menu = await openTheMenu();
+    await userEvent.click(within(menu).getByRole("menuitemradio", { name: "Visited" }));
+    expect(screen.getByTestId("filter-dot")).toBeInTheDocument();
+
+    await openDialog("Add a restaurant", "Add a restaurant");
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+    await addToList();
+
+    expect(await screen.findByRole("heading", { name: "Tacos El Bronco" })).toBeInTheDocument();
+    expect(screen.queryByTestId("filter-dot")).toBeNull();
+  });
+
+  // "Sheet: Unchanged", which is what tells this row from Tap a row. The owner
+  // was in a dialog rather than reading the list, so there is nothing to
+  // uncover and nowhere they had got to.
+  it("leaves the sheet where it was", async () => {
+    renderApp("/");
+    await screen.findByRole("region", { name: "My list" });
+    await restAt("full");
+
+    await openDialog("Add a restaurant", "Add a restaurant");
+    await typeAndSeeSuggestions("Tacos El Bronco");
+    await pick(suggestion.description);
+    await addToList();
+
+    await screen.findByRole("heading", { name: "Tacos El Bronco" });
+
+    expect(await whereTheSheetRests()).toBe("full");
   });
 });

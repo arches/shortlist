@@ -130,11 +130,24 @@ export function ListScreen() {
     setMenu(false);
   }
 
-  // list-screen.states.md, Add a restaurant. The dialog reports that one went
-  // on the list and this is what the screen does about it — which for now is
-  // what the dialog used to do for itself.
-  function added(_restaurant: Restaurant) {
+  // list-screen.states.md, Add a restaurant: the restaurant just added becomes
+  // the selection, the search goes Empty, the filter goes back to All, the menu
+  // closes, and the map centres on the selection at zoom 13.
+  //
+  // Emptying the search and resetting the filter is the whole of NOTHING_NARROWED,
+  // and the two go together for a reason: a restaurant added while the list was
+  // narrowed would otherwise be chosen and then hidden by the narrowing that
+  // was already there. Clearing both is what makes it the thing the owner is
+  // looking at.
+  //
+  // The sheet reads Unchanged on this row, which is what tells the add from
+  // Tap a row — the owner was in a dialog rather than reading the list, so
+  // there is nothing to uncover and nowhere they had got to.
+  function added(restaurant: Restaurant) {
     setAdding(false);
+    setNarrowing(NOTHING_NARROWED);
+    setSelection((previous) => chose(restaurant.id, previous));
+    setMenu(false);
   }
 
   function locate() {
