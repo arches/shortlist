@@ -321,10 +321,10 @@ describe("visited and not visited on the map", () => {
     expect(pinColourFor("Lilia")).toBeUndefined();
   });
 
-  // Scenario: Selecting a restaurant on the map — "the Bacari pin is
-  // highlighted" — which exempts no restaurant, so the highlight wins over the
-  // green. A visited restaurant that answered a click with the colour it
-  // already had would answer it with nothing.
+  // list-screen.states.md highlights the chosen pin whichever restaurant it is,
+  // which exempts no restaurant, so the highlight wins over the green. A
+  // visited restaurant that answered a tap with the colour it already had would
+  // answer it with nothing.
   it("highlights a visited restaurant when it is chosen, rather than leaving it green", async () => {
     serve([aVisitedRestaurant(BACARI)]);
 

@@ -56,9 +56,10 @@ describe("the sheet", () => {
     expect(await theSheet()).toHaveAttribute("data-position", "half");
   });
 
-  // Scenario Outline: Changing how much map I can see, one case per row of the
-  // Examples table. The last of them is the clamp: a sheet already at peek has
-  // nowhere lower to go, which is the wireframe's "It cannot be dismissed".
+  // list-screen.states.md's detail table, one case per row of it. The last is
+  // the clamp: a sheet already at peek has nowhere lower to go, which is the
+  // wireframe's "It cannot be dismissed". Full and up is the row the table does
+  // not have — see ASSUMPTIONS.md, "Dragging the sheet up from full".
   const cases: { before: SheetPosition; direction: DragDirection; after: SheetPosition }[] = [
     { before: "half", direction: "down", after: "peek" },
     { before: "half", direction: "up", after: "full" },

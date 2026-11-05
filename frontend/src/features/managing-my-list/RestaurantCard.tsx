@@ -65,10 +65,9 @@ export function RestaurantCard({
 
   const detail = selected ? HIGHLIGHT_DETAIL : "text-muted-foreground";
 
-  // Scenario: Selecting a restaurant on the list — "When I click on Bacari in
-  // the list". The card is what is clicked; the name inside it is still the way
-  // into the restaurant's own screen. See ASSUMPTIONS.md, "What clicking a card
-  // does".
+  // list-screen.states.md, Tap a row. The card is what is tapped; the name
+  // inside it is still the way into the restaurant's own screen. See
+  // ASSUMPTIONS.md, "What clicking a card does".
   return (
     <Card
       ref={card}

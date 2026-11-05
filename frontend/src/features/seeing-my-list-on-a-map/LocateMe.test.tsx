@@ -14,9 +14,8 @@ import { OPENING_ZOOM } from "./view";
 
 import type { Mock } from "vitest";
 
-// Derived from Scenario: Recentering on the user location in
-// seeing-my-list-on-a-map.scenarios.md, and from the control the wireframe
-// beside it draws above the zoom buttons.
+// Derived from the Locate-me row of list-screen.states.md, and from the control
+// seeing-my-list-on-a-map.drawio draws above the zoom buttons.
 //
 // Background: I am signed in as the owner of my list, I have been asked to
 // share my browser location, and Bacari is on my list at 3626 Sunset Blvd.
@@ -58,7 +57,7 @@ describe("locating me", () => {
     vi.unstubAllGlobals();
   });
 
-  // Scenario: Recentering on the user location
+  // "Map: Center on my location, zoom 13".
   it("recentres on the owner's location at zoom 13", async () => {
     sharesLocation(SILVERLAKE);
 
@@ -80,8 +79,7 @@ describe("locating me", () => {
 
   // Which is the reason the button exists: the owner has moved the map away,
   // here by choosing a restaurant a continent from where they are standing, and
-  // this is how they get back. The zoom comes back with the centre, where
-  // Scenario: Selecting a restaurant on the list deliberately leaves it alone.
+  // this is how they get back.
   it("recentres after the map has been moved away", async () => {
     sharesLocation(SILVERLAKE);
 

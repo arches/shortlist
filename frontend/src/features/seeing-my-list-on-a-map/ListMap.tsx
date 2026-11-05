@@ -66,12 +66,13 @@ const VISITED = {
 
 // Which of the three colours the wireframe draws a given pin in.
 //
-// The highlight wins over the green rather than the other way round. Scenario:
-// Selecting a restaurant on the list — "the Bacari pin is highlighted" —
-// exempts no restaurant, and a visited Bacari that stayed green when it was
-// chosen would answer the click with nothing at all. Green is a standing
-// property of the restaurant; the highlight is the answer to what the owner
-// just did, and there is only ever one of it.
+// The highlight wins over the green rather than the other way round.
+// list-screen.states.md has the chosen pin highlighted whichever restaurant it
+// is — "Selection should always scroll the list so the selected item is in
+// view, and highlight the map pin" — and a visited Bacari that stayed green
+// when it was chosen would answer the tap with nothing at all. Green is a
+// standing property of the restaurant; the highlight is the answer to what the
+// owner just did, and there is only ever one of it.
 //
 // Nothing overridden is the standard Google pin, per the wireframe's other
 // note, and that is what a restaurant the owner has not eaten at reads as.
@@ -168,17 +169,13 @@ function CentreOn({ at, point }: { at: number | undefined; point: Point | undefi
   return null;
 }
 
-// Scenario: Recentering on the user location — "When I click on the 'locate me'
-// button. Then I see a map centered around my location at zoom level 13".
+// list-screen.states.md, Locate-me: "Center on my location, zoom 13" and
+// "Selection: None".
 //
-// Both halves of that are set at once, which is what separates this from the
-// selection pan: a pan leaves the zoom where the owner left it, and this is the
-// opening view again, zoom included. The scenario names the zoom, so the owner
-// having zoomed in since is not a reason to keep it.
-//
-// list-screen.states.md also has it clear the selection: "Selection: None".
-// Going back to where the owner is standing is leaving behind the restaurant
-// they went to look at, so the highlight goes with it.
+// Centre and zoom are set together, which is the opening view again — the table
+// names the zoom, so the owner having zoomed in since is not a reason to keep
+// it. Going back to where they are standing is also leaving behind the
+// restaurant they went to look at, so the highlight goes with it.
 //
 // The location is the one read when the page opened, and clicking this does not
 // ask the browser again — see ASSUMPTIONS.md, "Whether the locate-me button
