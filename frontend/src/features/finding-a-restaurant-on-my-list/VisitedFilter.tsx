@@ -37,6 +37,15 @@ export function VisitedFilter({ filter, onFilter }: VisitedFilterProps) {
       */}
       <DropdownMenuLabel>Show</DropdownMenuLabel>
 
+      {/*
+        list-screen.states.md, Change the filter: "Menu: Close". Choosing a
+        position is done with, so the menu gets out of the way of the list it
+        just narrowed — a radio item keeps it open by default, which left the
+        owner looking at a menu instead of at the answer.
+
+        The page is what closes it, along with every other row of that column,
+        so nothing has to be asked for here.
+      */}
       {POSITIONS.map(({ filter: position, label }) => (
         <DropdownMenuRadioItem key={position} value={position}>
           {label}

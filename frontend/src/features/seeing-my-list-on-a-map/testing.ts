@@ -102,15 +102,14 @@ export function pinColours(): (string | undefined)[] {
 // the menu rather than the controls themselves, so a test reaches Sign out and
 // the filter the way an owner does: open the menu, then choose in it.
 export async function openTheMenu(): Promise<HTMLElement> {
-  // Choosing a filter position leaves the menu open — a radio item is not a
-  // command, and the owner can see the ring fill — so an open one is the menu
-  // rather than something to press past.
-  const open = screen.queryByRole("menu");
-  if (open !== null) return open;
-
   await userEvent.click(screen.getByRole("button", { name: "Menu" }));
 
   return screen.findByRole("menu");
+}
+
+// Whether the menu is open, which is the Menu region of list-screen.states.md.
+export function theMenuIsOpen(): boolean {
+  return screen.queryByRole("menu") !== null;
 }
 
 export async function chooseInTheMenu(name: string): Promise<void> {

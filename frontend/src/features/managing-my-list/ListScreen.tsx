@@ -64,6 +64,12 @@ export function ListScreen() {
   // list-screen.states.md, initial state: "Menu: Closed". It belongs to the
   // page because almost every row of the table closes it, and most of those
   // events land somewhere else on the screen entirely.
+  //
+  // Fourteen of the fifteen rows read Close, so every handler below ends by
+  // shutting it. That is the page answering the event, rather than the menu
+  // noticing it was pressed past: an owner who clears the search field they
+  // were already typing in presses nothing outside the menu, and the row still
+  // says Close.
   const [menu, setMenu] = useState(false);
 
   // list-screen.states.md gives Tap a row and Tap a pin identical rows: the
@@ -74,6 +80,15 @@ export function ListScreen() {
   function choose(id: number) {
     setSelection((previous) => chose(id, previous));
     setSheet("peek");
+    setMenu(false);
+  }
+
+  // Drag the sheet, and Scroll the list up from peek. Both reach the sheet and
+  // both close the menu, so the page takes its position rather than handing the
+  // setter straight to it.
+  function restTheSheetAt(position: SheetPosition) {
+    setSheet(position);
+    setMenu(false);
   }
 
   // list-screen.states.md has two rows for the field, and what tells them apart
@@ -89,6 +104,7 @@ export function ListScreen() {
   function narrow(search: string) {
     const next = { ...by, search };
     setNarrowing(next);
+    setMenu(false);
 
     if (!searching(next)) return;
 
@@ -104,6 +120,19 @@ export function ListScreen() {
   function filterTo(filter: VisitedFilter) {
     setNarrowing({ ...by, filter });
     setSelection(undefined);
+    setMenu(false);
+  }
+
+  // Open the "Add" dialog, and Locate-me. Neither moves anything else the table
+  // tracks; both close the menu.
+  function openTheAddDialog() {
+    setAdding(true);
+    setMenu(false);
+  }
+
+  function locate() {
+    setSelection(undefined);
+    setMenu(false);
   }
 
   // Scenario: My session ends in the middle of what I am doing. Only a refused
@@ -140,14 +169,26 @@ export function ListScreen() {
   // scroll", and "One finger drags the map", which is only true of a page with
   // no scrolling of its own to claim the gesture. Everything else is layered
   // over the map rather than stacked beside it.
+  // Every row of list-screen.states.md but Tap the hamburger closes the menu,
+  // and a non-modal menu already closes on an outside pointer interaction —
+  // which is what a drag, a tap on a row or a pin, a reach for the search
+  // field, a pan of the map and every button on the page all are.
+  //
+  // A wheel is the one that is not. Zooming the map and scrolling the list are
+  // both events in the table, and neither presses anything, so the page closes
+  // the menu on a wheel of its own accord. The menu itself is portalled out of
+  // here, so scrolling inside it does not shut it.
   return (
-    <main className="relative h-dvh w-full overflow-hidden">
+    <main
+      className="relative h-dvh w-full overflow-hidden"
+      onWheel={() => setMenu(false)}
+    >
       <div className="absolute inset-0">
         <ListMap
           restaurants={matches}
           selection={selection}
           onSelect={choose}
-          onLocate={() => setSelection(undefined)}
+          onLocate={locate}
         />
       </div>
 
@@ -157,11 +198,11 @@ export function ListScreen() {
         onMenu={setMenu}
         onSearch={narrow}
         onFilter={filterTo}
-        onAdd={() => setAdding(true)}
+        onAdd={openTheAddDialog}
         onSignOut={() => void leave()}
       />
 
-      <ListSheet position={sheet} onPosition={setSheet} header={<NarrowingNotice by={by} />}>
+      <ListSheet position={sheet} onPosition={restTheSheetAt} header={<NarrowingNotice by={by} />}>
         <RestaurantList
           restaurants={matches}
           isPending={isPending}

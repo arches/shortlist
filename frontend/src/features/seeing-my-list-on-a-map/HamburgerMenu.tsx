@@ -39,8 +39,14 @@ export function HamburgerMenu({
   onFilter,
   onSignOut,
 }: HamburgerMenuProps) {
+  // Not modal, which is what lets the table's Menu column mean what it says.
+  // Every row that closes the menu also does something else — the sheet moves,
+  // a pin is chosen, the map pans — so one gesture has to both shut the menu
+  // and land on what is under it. A modal menu swallows that gesture as a
+  // dismissal and the row's other columns never happen. See ASSUMPTIONS.md,
+  // "Whether one gesture both acts and closes the menu".
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange}>
+    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       {/*
         The glyph is drawn rather than written, so the control is named for
         anybody who cannot see it. "Menu" is what it opens.
