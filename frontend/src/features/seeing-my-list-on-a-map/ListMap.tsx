@@ -89,7 +89,11 @@ const MY_LOCATION_DOT = "block size-3.5 rounded-full border-2 border-white bg-bl
 // shadow rather than the wireframe's grey, which is what the zoom buttons it
 // stacks with are — see ASSUMPTIONS.md, "What the locate-me button is drawn
 // as".
-const LOCATE_ME = "m-2.5 size-10 rounded-sm bg-background shadow-md hover:bg-background";
+//
+// The bottom margin lifts it clear of the line it is centred on, which is the
+// edge the sheet rests at: the wireframe draws both controls just above that
+// edge rather than straddling it.
+const LOCATE_ME = "mr-2.5 mb-14 size-10 rounded-sm bg-background shadow-md hover:bg-background";
 
 // Manually panning and zooming is no longer out of scope in
 // seeing-my-list-on-a-map.scenarios.md, so the map is the owner's to move.
@@ -109,6 +113,13 @@ const THE_OWNER_S_TO_MOVE = {
   // keyboard are simply no longer suppressed.
   disableDefaultUI: true,
   zoomControl: true,
+
+  // The map fills the page now and the sheet lies over the bottom of it, so
+  // the corner these used to sit in is behind the sheet at every position it
+  // rests at. The wireframe draws them at the right edge, immediately above
+  // the line the sheet's own top edge is at — which is the middle of the map.
+  // See ASSUMPTIONS.md, "Where the map's own controls sit".
+  zoomControlOptions: { position: ControlPosition.RIGHT_CENTER },
 } as const;
 
 // Scenario: Selecting a restaurant on the list — "the map pans to show Bacari
@@ -156,7 +167,7 @@ function LocateMe({ shared }: { shared: Point }) {
   const map = useMap();
 
   return (
-    <MapControl position={ControlPosition.RIGHT_BOTTOM}>
+    <MapControl position={ControlPosition.RIGHT_CENTER}>
       <Button
         variant="ghost"
         size="icon"

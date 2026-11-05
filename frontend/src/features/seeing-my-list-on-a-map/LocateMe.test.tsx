@@ -122,7 +122,11 @@ describe("locating me", () => {
   // in, so it goes into Google's own control layer at that corner rather than
   // being placed over the map by the page — see ASSUMPTIONS.md, "What the
   // locate-me button is drawn as".
-  it("sits in the map's own controls, in the corner the zoom buttons are in", async () => {
+  //
+  // The corner is the right edge at the middle of the map now, which is where
+  // the wireframe draws both controls: immediately above the line the sheet
+  // rests at. The bottom of the map is behind the sheet.
+  it("sits in the map's own controls, in the column the zoom buttons are in", async () => {
     sharesLocation(SILVERLAKE);
 
     renderApp("/");
@@ -130,7 +134,21 @@ describe("locating me", () => {
     const map = await screen.findByTestId("map");
     const control = screen.getByRole("button", { name: "Locate me" }).closest("[data-position]");
 
-    expect(control).toHaveAttribute("data-position", String(ControlPosition.RIGHT_BOTTOM));
+    expect(control).toHaveAttribute("data-position", String(ControlPosition.RIGHT_CENTER));
     expect(map.contains(control)).toBe(true);
+  });
+
+  // Google draws its own zoom buttons, so the only thing Shortlist can say
+  // about them is where they go. Left where they were they would be behind the
+  // sheet at peek, half and full alike.
+  it("stacks with zoom buttons the sheet does not cover", async () => {
+    sharesLocation(SILVERLAKE);
+
+    renderApp("/");
+
+    const map = await screen.findByTestId("map");
+
+    expect(map.dataset.zoomControl).toBe("true");
+    expect(map.dataset.zoomControlPosition).toBe(String(ControlPosition.RIGHT_CENTER));
   });
 });

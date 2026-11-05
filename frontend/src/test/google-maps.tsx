@@ -18,6 +18,7 @@ interface MapProps {
   defaultZoom?: number;
   gestureHandling?: string;
   zoomControl?: boolean;
+  zoomControlOptions?: { position?: number };
   scrollwheel?: boolean;
   disableDefaultUI?: boolean;
   disableDoubleClickZoom?: boolean;
@@ -112,6 +113,7 @@ export function Map({ children, className, ...props }: MapProps) {
         data-zoom={attribute(props.defaultZoom)}
         data-gesture-handling={props.gestureHandling}
         data-zoom-control={attribute(props.zoomControl)}
+        data-zoom-control-position={attribute(props.zoomControlOptions?.position)}
         data-scrollwheel={attribute(props.scrollwheel)}
         data-default-ui-disabled={attribute(props.disableDefaultUI)}
         data-double-click-zoom-disabled={attribute(props.disableDoubleClickZoom)}
@@ -158,6 +160,7 @@ export function AdvancedMarker({ children, position, title, onClick }: MarkerPro
 // This is the one corner Shortlist puts anything in, at the value the real copy
 // gives it, so a test can name the corner rather than the number.
 export const ControlPosition = {
+  RIGHT_CENTER: 8,
   RIGHT_BOTTOM: 9,
 } as const;
 
