@@ -67,12 +67,16 @@ const VISITED = {
 // Which of the three colours the wireframe draws a given pin in.
 //
 // The highlight wins over the green rather than the other way round.
-// list-screen.states.md has the chosen pin highlighted whichever restaurant it
-// is — "Selection should always scroll the list so the selected item is in
-// view, and highlight the map pin" — and a visited Bacari that stayed green
-// when it was chosen would answer the tap with nothing at all. Green is a
-// standing property of the restaurant; the highlight is the answer to what the
-// owner just did, and there is only ever one of it.
+// list-screen.states.md answers Tap a row, Tap a pin and Add a restaurant with
+// "Center on selection, zoom 13, pin highlighted", and exempts no restaurant
+// from it — so a visited Bacari that stayed green when it was chosen would
+// answer the tap with nothing at all. Green is a standing property of the
+// restaurant; the highlight is the answer to what the owner just did, and there
+// is only ever one of it.
+//
+// The highlight is written in the Map cell of those three rows, but what it
+// draws is the Selection region: the rows leaving "Selection: None" take it
+// away, which is what keeps a restaurant narrowed off the map from holding it.
 //
 // Nothing overridden is the standard Google pin, per the wireframe's other
 // note, and that is what a restaurant the owner has not eaten at reads as.

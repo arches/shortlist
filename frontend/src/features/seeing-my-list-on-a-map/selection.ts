@@ -1,8 +1,14 @@
 // list-screen.states.md has one region for which restaurant the owner is
 // looking at. Three events set it — Tap a row, Tap a pin and Add a restaurant —
-// and four clear it, and both halves of the page answer to it: the chosen card
-// is highlighted and scrolled into view, the chosen pin is highlighted, and the
-// map centres on it.
+// and four clear it.
+//
+// What the owner sees of it is written in the cells of those same three rows
+// rather than in a rule standing over the table: "→ Peek, scrolled to show
+// selection" in the Sheet column, "Center on selection, zoom 13, pin
+// highlighted" in the Map column. The two halves of that are different kinds of
+// thing. The highlight on the card and on the pin draws this region, so the
+// rows leaving "Selection: None" take it away. The scroll and the centring are
+// acts performed once, which is what the count below is for.
 //
 // Nothing is chosen until the owner chooses something, so the region's initial
 // state is the absence of a Selection rather than a Selection standing for
