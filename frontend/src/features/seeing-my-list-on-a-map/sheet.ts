@@ -11,6 +11,12 @@ export type SheetPosition = "peek" | "half" | "full";
 
 export type DragDirection = "up" | "down";
 
+// Which way the owner scrolled the list inside the sheet. "Up" is the gesture
+// rather than the scroll offset: the owner swipes up, the cards travel up, and
+// later ones come into view. That reading is what makes the table's row useful
+// — see ASSUMPTIONS.md, "Which way scrolling the list up is".
+export type ScrollDirection = "up" | "down";
+
 // Low to high, which is the order a drag moves through them.
 const POSITIONS: SheetPosition[] = ["peek", "half", "full"];
 
@@ -48,6 +54,17 @@ export function dragged(from: SheetPosition, direction: DragDirection): SheetPos
   const clamped = Math.min(Math.max(next, 0), POSITIONS.length - 1);
 
   return POSITIONS[clamped] as SheetPosition;
+}
+
+// list-screen.states.md, Scroll the list up: "Peek → Half, otherwise
+// Unchanged". So the gesture that reveals more of the list opens the sheet far
+// enough to show it, once, and does nothing from half or full. Scroll the list
+// down has its own row and leaves the sheet alone everywhere — the sheet is
+// closed by its handle, not by scrolling back to the top.
+export function scrolled(from: SheetPosition, direction: ScrollDirection): SheetPosition {
+  if (direction === "up" && from === "peek") return "half";
+
+  return from;
 }
 
 // Which way a gesture went, or nothing when it did not go far enough to be a

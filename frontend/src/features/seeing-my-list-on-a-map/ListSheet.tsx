@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import type { KeyboardEvent, PointerEvent, ReactNode } from "react";
+import type { KeyboardEvent, PointerEvent, ReactNode, UIEvent } from "react";
 
-import { dragged, directionOf, HEIGHTS } from "./sheet";
+import { dragged, directionOf, HEIGHTS, scrolled } from "./sheet";
 import type { SheetPosition } from "./sheet";
 
 interface ListSheetProps {
@@ -26,6 +26,11 @@ interface ListSheetProps {
 export function ListSheet({ position, onPosition, header, children }: ListSheetProps) {
   const from = useRef<number | undefined>(undefined);
 
+  // Where the cards were scrolled to when this was last asked, so the next
+  // answer can be compared against it. A scroll event says that the region
+  // moved and not which way.
+  const scrolledTo = useRef(0);
+
   function startDragging(event: PointerEvent<HTMLDivElement>) {
     from.current = event.clientY;
   }
@@ -43,6 +48,24 @@ export function ListSheet({ position, onPosition, header, children }: ListSheetP
     if (direction === undefined) return;
 
     onPosition(dragged(position, direction));
+  }
+
+  // list-screen.states.md gives the list's own scrolling two rows of its own,
+  // and the one that moves the sheet is Scroll the list up: "Peek → Half".
+  //
+  // Read off the region actually scrolling rather than off a wheel, so a swipe,
+  // a scrollbar and the keyboard all count — they are the same event to the
+  // owner. A gesture over a region with nothing to reveal scrolls nothing and
+  // moves nothing: see ASSUMPTIONS.md, "What scrolling the list is when there
+  // is nothing to scroll".
+  function readScroll(event: UIEvent<HTMLDivElement>) {
+    const was = scrolledTo.current;
+    const now = event.currentTarget.scrollTop;
+    scrolledTo.current = now;
+
+    if (now === was) return;
+
+    onPosition(scrolled(position, now > was ? "up" : "down"));
   }
 
   // Nothing in the artifacts covers reaching the sheet without a pointer, and
@@ -94,7 +117,9 @@ export function ListSheet({ position, onPosition, header, children }: ListSheetP
         the sheet instead of growing it. Without it the cards would push the
         sheet past the positions it is allowed to rest at.
       */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6" onScroll={readScroll}>
+        {children}
+      </div>
     </section>
   );
 }

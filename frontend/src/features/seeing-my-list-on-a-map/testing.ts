@@ -140,6 +140,37 @@ export async function dragTheSheet(
   fireEvent.pointerUp(handle, { clientY: end });
 }
 
+// What scrolls inside the sheet. The cards are clipped at its edge and scroll
+// in here; the sheet itself does not move, except where
+// list-screen.states.md says this gesture moves it.
+async function theScrollRegion(): Promise<HTMLElement> {
+  const region = (await theSheet()).querySelector("div.overflow-y-auto");
+  if (region === null) throw new Error("the sheet has nothing that scrolls");
+
+  return region as HTMLElement;
+}
+
+// One scroll of the list, the way list-screen.states.md names it. "Up" is the
+// gesture: the owner swipes up, the cards travel up, and the offset grows.
+export async function scrollTheList(direction: DragDirection): Promise<void> {
+  const region = await theScrollRegion();
+  const was = region.scrollTop;
+
+  region.scrollTop = direction === "up" ? was + A_SCROLL : Math.max(was - A_SCROLL, 0);
+  fireEvent.scroll(region);
+}
+
+// Where the list is already scrolled to, set without the sheet being told —
+// for arranging a Given rather than performing a When. Scrolling down from the
+// top is otherwise unreachable, there being nothing above it.
+export async function listAlreadyScrolled(): Promise<void> {
+  (await theScrollRegion()).scrollTop = A_SCROLL;
+}
+
+// Far enough to be a scroll. No artifact gives a number, and none has to: the
+// sheet answers the direction rather than the distance.
+const A_SCROLL = 80;
+
 export async function restAt(position: SheetPosition): Promise<void> {
   if (position === "peek") await dragTheSheet("down");
   if (position === "full") await dragTheSheet("up");

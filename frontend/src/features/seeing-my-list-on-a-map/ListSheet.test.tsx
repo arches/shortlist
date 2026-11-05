@@ -11,19 +11,23 @@ import {
   BACARI,
   cardFor,
   dragTheSheet,
+  listAlreadyScrolled,
   restAt,
+  scrollTheList,
   theConfiguration,
   theSheet,
+  whereTheSheetRests,
 } from "./testing";
 import { DRAG_TRAVEL } from "./sheet";
 import type { DragDirection, SheetPosition } from "./sheet";
 
 import type { Mock } from "vitest";
 
-// Derived from seeing-my-list-on-a-map.scenarios.md — Scenario Outline:
-// Changing how much map I can see, and Scenario: Scrolling the list — and from
-// the sheet in seeing-my-list-on-a-map.drawio, whose own annotations say it
-// cannot be dismissed and that the cards are clipped at its edge.
+// Derived from list-screen.states.md — its Sheet column, and the detail table
+// that gives the five results of moving the drag handle — and from Scenario:
+// Scrolling the list in seeing-my-list-on-a-map.scenarios.md. The sheet in
+// seeing-my-list-on-a-map.drawio is the third source: its own annotations say
+// it cannot be dismissed and that the cards are clipped at its edge.
 describe("the sheet", () => {
   let fetchMock: Mock;
 
@@ -112,6 +116,71 @@ describe("the sheet", () => {
   // Scenario: Scrolling the list — "the restaurants move within the sheet",
   // "no restaurant appears outside the sheet", "the page itself does not
   // scroll".
+  // list-screen.states.md, Scroll the list up: "Peek → Half, otherwise
+  // Unchanged". The gesture that reveals more of the list opens the sheet far
+  // enough to show it.
+  describe("scrolling the list", () => {
+    it("raises the sheet to half from peek", async () => {
+      renderApp("/");
+      await restAt("peek");
+
+      await scrollTheList("up");
+
+      expect(await whereTheSheetRests()).toBe("half");
+    });
+
+    it("leaves the sheet at half when it is already there", async () => {
+      renderApp("/");
+      await restAt("half");
+
+      await scrollTheList("up");
+
+      expect(await whereTheSheetRests()).toBe("half");
+    });
+
+    it("leaves the sheet at full", async () => {
+      renderApp("/");
+      await restAt("full");
+
+      await scrollTheList("up");
+
+      expect(await whereTheSheetRests()).toBe("full");
+    });
+
+    // Scroll the list down has its own row and leaves the sheet alone
+    // everywhere. The sheet is closed by its handle, not by scrolling back to
+    // the top of the list.
+    it("leaves the sheet at peek when the list is scrolled down", async () => {
+      renderApp("/");
+      await restAt("peek");
+      await listAlreadyScrolled();
+
+      await scrollTheList("down");
+
+      expect(await whereTheSheetRests()).toBe("peek");
+    });
+
+    it("leaves the sheet at full when the list is scrolled down", async () => {
+      renderApp("/");
+      await restAt("full");
+      await listAlreadyScrolled();
+
+      await scrollTheList("down");
+
+      expect(await whereTheSheetRests()).toBe("full");
+    });
+
+    // list-screen.states.md, Scroll the list up: "Map: Unchanged".
+    it("leaves the map where it was", async () => {
+      renderApp("/");
+      await restAt("peek");
+
+      await scrollTheList("up");
+
+      expect(screen.getByTestId("map").dataset.movedTo).toBeUndefined();
+    });
+  });
+
   it("scrolls the cards inside itself, clipped at its own edge", async () => {
     renderApp("/");
     await restAt("full");
