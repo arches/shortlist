@@ -140,13 +140,17 @@ export function ListScreen() {
   // was already there. Clearing both is what makes it the thing the owner is
   // looking at.
   //
-  // The sheet reads Unchanged on this row, which is what tells the add from
-  // Tap a row — the owner was in a dialog rather than reading the list, so
-  // there is nothing to uncover and nowhere they had got to.
+  // The sheet drops to peek, which is the cell Tap a row and Tap a pin carry
+  // too: the add centres the map on the restaurant it just chose, so the sheet
+  // gets out of the way of the map it moved. The row used to read Unchanged, on
+  // the reading that an owner coming out of a dialog had nowhere they had got
+  // to — the table answers choosing by the add the same way it answers choosing
+  // on either half of the page instead.
   function added(restaurant: Restaurant) {
     setAdding(false);
     setNarrowing(NOTHING_NARROWED);
     setSelection((previous) => chose(restaurant.id, previous));
+    setSheet("peek");
     setMenu(false);
   }
 

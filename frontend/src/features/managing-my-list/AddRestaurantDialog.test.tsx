@@ -399,10 +399,11 @@ describe("what adding a restaurant does to the screen", () => {
     expect(screen.queryByTestId("filter-dot")).toBeNull();
   });
 
-  // "Sheet: Unchanged", which is what tells this row from Tap a row. The owner
-  // was in a dialog rather than reading the list, so there is nothing to
-  // uncover and nowhere they had got to.
-  it("leaves the sheet where it was", async () => {
+  // "Sheet: → Peek", the same cell Tap a row and Tap a pin carry. The map has
+  // just centred on the restaurant the add chose, so the sheet drops out of the
+  // way of it. The row used to read Unchanged, on the reading that an owner
+  // coming out of a dialog had nowhere they had got to.
+  it("drops the sheet to peek", async () => {
     renderApp("/");
     await screen.findByRole("region", { name: "My list" });
     await restAt("full");
@@ -414,6 +415,6 @@ describe("what adding a restaurant does to the screen", () => {
 
     await screen.findByRole("heading", { name: "Tacos El Bronco" });
 
-    expect(await whereTheSheetRests()).toBe("full");
+    expect(await whereTheSheetRests()).toBe("peek");
   });
 });
