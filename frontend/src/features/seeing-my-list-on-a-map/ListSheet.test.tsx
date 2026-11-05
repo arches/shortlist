@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,7 +7,14 @@ import { forgetSession, rememberSession } from "@/session/store";
 import { respond, stubFetch } from "@/test/http";
 import { renderApp } from "@/test/router";
 
-import { BACARI, cardFor, theConfiguration } from "./testing";
+import {
+  BACARI,
+  cardFor,
+  dragTheSheet,
+  restAt,
+  theConfiguration,
+  theSheet,
+} from "./testing";
 import { DRAG_TRAVEL } from "./sheet";
 import type { DragDirection, SheetPosition } from "./sheet";
 
@@ -61,7 +68,7 @@ describe("the sheet", () => {
       renderApp("/");
       await restAt(before);
 
-      await drag(direction);
+      await dragTheSheet(direction);
 
       expect(await theSheet()).toHaveAttribute("data-position", after);
     });
@@ -73,7 +80,7 @@ describe("the sheet", () => {
     renderApp("/");
     await restAt("half");
 
-    await drag("up");
+    await dragTheSheet("up");
 
     const map = screen.getByTestId("map");
     expect(map.dataset.pannedTo).toBeUndefined();
@@ -86,7 +93,7 @@ describe("the sheet", () => {
     renderApp("/");
     await restAt("half");
 
-    await drag("up", DRAG_TRAVEL - 1);
+    await dragTheSheet("up", DRAG_TRAVEL - 1);
 
     expect(await theSheet()).toHaveAttribute("data-position", "half");
   });
@@ -122,32 +129,3 @@ describe("the sheet", () => {
     expect(screen.getByRole("main")).toHaveClass("overflow-hidden");
   });
 });
-
-async function theSheet(): Promise<HTMLElement> {
-  return screen.findByRole("region", { name: "My list" });
-}
-
-// Dragging the handle: down the page is positive, which is how a pointer
-// reports it.
-async function drag(direction: DragDirection, travel = DRAG_TRAVEL * 3): Promise<void> {
-  const handle = (await theSheet()).querySelector("div.cursor-grab");
-  if (handle === null) throw new Error("the sheet has no handle to drag");
-
-  const start = 400;
-  const end = direction === "up" ? start - travel : start + travel;
-
-  fireEvent.pointerDown(handle, { clientY: start });
-  fireEvent.pointerMove(handle, { clientY: end });
-  fireEvent.pointerUp(handle, { clientY: end });
-}
-
-// Getting the sheet to the position a scenario starts from, by dragging it
-// there — there is no other way in, which is itself worth exercising.
-async function restAt(position: SheetPosition): Promise<void> {
-  await theSheet();
-
-  if (position === "peek") await drag("down");
-  if (position === "full") await drag("up");
-
-  expect(await theSheet()).toHaveAttribute("data-position", position);
-}

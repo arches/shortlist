@@ -14,7 +14,9 @@ import {
   pinColourFor,
   pinColours,
   pinFor,
+  restAt,
   theConfiguration,
+  whereTheSheetRests,
 } from "./testing";
 import { OPENING_ZOOM } from "./view";
 
@@ -52,12 +54,14 @@ describe("choosing a restaurant", () => {
     vi.unstubAllGlobals();
   });
 
-  // Scenario: Selecting a restaurant on the list
+  // Scenario: Selecting a restaurant on the list, which opens at full — the
+  // sheet dropping is half of what the scenario is about.
   describe("on the list", () => {
     it("pans the map to centre it, and highlights its pin", async () => {
       renderApp("/");
 
       await screen.findByTestId("map");
+      await restAt("full");
       await userEvent.click(cardFor("Bacari"));
 
       expect(screen.getByTestId("map")).toHaveAttribute(
@@ -101,10 +105,35 @@ describe("choosing a restaurant", () => {
       expect(cardFor("Lilia")).not.toHaveAttribute("aria-current");
     });
 
+    // "Then the sheet drops to peek" — so the map it just panned is uncovered.
+    it("drops the sheet to peek", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await restAt("full");
+      await userEvent.click(cardFor("Bacari"));
+
+      expect(await whereTheSheetRests()).toBe("peek");
+    });
+
+    // "And Bacari is the restaurant showing in the sheet". At peek there is
+    // room for one, so the chosen card goes to the top of what the sheet shows
+    // rather than merely into view.
+    it("shows the chosen restaurant in the sheet", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await restAt("full");
+      await userEvent.click(cardFor("Bacari"));
+
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: "start" });
+    });
+
     it("moves the choice when a second restaurant is chosen", async () => {
       renderApp("/");
 
       await screen.findByTestId("map");
+      await restAt("full");
       await userEvent.click(cardFor("Bacari"));
       await userEvent.click(cardFor("Lilia"));
 
@@ -117,16 +146,28 @@ describe("choosing a restaurant", () => {
     });
   });
 
-  // Scenario: Selecting a restaurant on the map
+  // Scenario: Selecting a restaurant on the map, which opens at half — where
+  // the sheet stays, because the owner is already looking at the map.
   describe("on the map", () => {
-    it("scrolls the list so it is in view, and highlights it there", async () => {
+    it("shows it in the sheet, and highlights it there", async () => {
       renderApp("/");
 
       await screen.findByTestId("map");
       await userEvent.click(pinFor("Bacari"));
 
-      expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: "start" });
       expect(cardFor("Bacari")).toHaveAttribute("aria-current", "true");
+    });
+
+    // "And the sheet stays at half" — the one thing that tells the two
+    // selection scenarios apart.
+    it("leaves the sheet at half", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await userEvent.click(pinFor("Bacari"));
+
+      expect(await whereTheSheetRests()).toBe("half");
     });
 
     it("highlights the pin that was clicked", async () => {

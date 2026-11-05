@@ -55,11 +55,12 @@ export function RestaurantCard({
 }: RestaurantCardProps) {
   const card = useRef<HTMLDivElement>(null);
 
-  // Scenario: Selecting a restaurant on the map — "the list scrolls so Bacari is
-  // in view". "nearest" is what makes this the same code for both scenarios: a
-  // card chosen from the list is already in view, so nothing moves.
+  // Both selection scenarios end with "Bacari is the restaurant showing in the
+  // sheet", so the chosen card goes to the top of what the sheet shows rather
+  // than merely into view. At peek that makes it the only one there is, which
+  // is what the sheet dropping to peek is for.
   useEffect(() => {
-    if (selected) card.current?.scrollIntoView({ block: "nearest" });
+    if (selected) card.current?.scrollIntoView({ block: "start" });
   }, [selected]);
 
   const detail = selected ? HIGHLIGHT_DETAIL : "text-muted-foreground";

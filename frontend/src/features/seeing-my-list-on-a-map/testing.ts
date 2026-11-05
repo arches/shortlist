@@ -1,9 +1,11 @@
-import { screen, within } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import type { Configuration, Restaurant } from "@/api/types";
 import { aRestaurant } from "@/features/managing-my-list/testing";
 
+import { DRAG_TRAVEL } from "./sheet";
+import type { DragDirection, SheetPosition } from "./sheet";
 import type { LocatedRestaurant } from "./view";
 
 // A restaurant Google gave a point for. The pair is absent by default on
@@ -102,4 +104,40 @@ export async function chooseInTheMenu(name: string): Promise<void> {
   const menu = await openTheMenu();
 
   await userEvent.click(within(menu).getByRole("menuitem", { name }));
+}
+
+// The sheet, and the only way an owner moves it. Several scenarios open with
+// "Given the sheet rests at <position>", which is reached by dragging there.
+export function theSheet(): Promise<HTMLElement> {
+  return screen.findByRole("region", { name: "My list" });
+}
+
+export async function dragTheSheet(
+  direction: DragDirection,
+  travel = DRAG_TRAVEL * 3,
+): Promise<void> {
+  const handle = (await theSheet()).querySelector("div.cursor-grab");
+  if (handle === null) throw new Error("the sheet has no handle to drag");
+
+  const start = 400;
+  const end = direction === "up" ? start - travel : start + travel;
+
+  fireEvent.pointerDown(handle, { clientY: start });
+  fireEvent.pointerMove(handle, { clientY: end });
+  fireEvent.pointerUp(handle, { clientY: end });
+}
+
+export async function restAt(position: SheetPosition): Promise<void> {
+  if (position === "peek") await dragTheSheet("down");
+  if (position === "full") await dragTheSheet("up");
+
+  const sheet = await theSheet();
+  if (sheet.dataset.position !== position) {
+    throw new Error(`the sheet rests at ${String(sheet.dataset.position)}, not ${position}`);
+  }
+}
+
+// Where the sheet rests, as the scenarios name it.
+export async function whereTheSheetRests(): Promise<string | undefined> {
+  return (await theSheet()).dataset.position;
 }

@@ -41,6 +41,15 @@ export function ListScreen() {
   // choosing a restaurant on either half moves it.
   const [sheet, setSheet] = useState<SheetPosition>(OPENS_AT);
 
+  // The two selection scenarios differ in exactly one thing, and it is the
+  // sheet. Choosing in the sheet is choosing something to go and look at —
+  // "Then the sheet drops to peek", which is what uncovers the map it pans.
+  // Choosing on the map is already looking at it, so "the sheet stays at half".
+  function chooseInTheSheet(id: number) {
+    setSelected(id);
+    setSheet("peek");
+  }
+
   // Scenario: My session ends in the middle of what I am doing. Only a refused
   // renewal reaches here, and the answer to it is to ask for a sign-in.
   useEffect(() => {
@@ -77,7 +86,7 @@ export function ListScreen() {
           isPending={isPending}
           error={refusal}
           selected={selected}
-          onSelect={setSelected}
+          onSelect={chooseInTheSheet}
           onTakeOff={setTakingOff}
         />
       </ListSheet>
