@@ -9,6 +9,7 @@ import { renderApp } from "@/test/router";
 
 import {
   BACARI,
+  cameraMoves,
   cardFor,
   PIN_COLOURS,
   pinColourFor,
@@ -36,6 +37,7 @@ const LILIA = { id: 2, name: "Lilia", latitude: 40.7128, longitude: -73.9542 };
 function centredOn({ latitude, longitude }: { latitude: number; longitude: number }): string {
   return JSON.stringify({ center: { lat: latitude, lng: longitude }, zoom: OPENING_ZOOM });
 }
+
 
 describe("choosing a restaurant", () => {
   let fetchMock: Mock;
@@ -144,6 +146,24 @@ describe("choosing a restaurant", () => {
       expect(cardFor("Bacari")).not.toHaveAttribute("aria-current");
       expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(LILIA));
     });
+
+    // list-screen.states.md answers Tap a row with "Center on selection, zoom
+    // 13" every time it arrives, and says nothing about the restaurant having
+    // to be a different one. An owner who panned away from the restaurant they
+    // chose and tapped its row again is asking to be taken back.
+    it("centres again when the row already chosen is tapped", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await userEvent.click(cardFor("Bacari"));
+
+      const told = cameraMoves();
+
+      await userEvent.click(cardFor("Bacari"));
+
+      expect(cameraMoves()).toBe(told + 1);
+      expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(BACARI));
+    });
   });
 
   // Choosing on the map. list-screen.states.md gives Tap a pin every cell Tap a
@@ -202,6 +222,21 @@ describe("choosing a restaurant", () => {
 
       expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(LILIA));
     });
+
+    // The same again from the map's side. Tap a pin carries the same cell.
+    it("centres again when the pin already chosen is clicked", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await userEvent.click(pinFor("Lilia"));
+
+      const told = cameraMoves();
+
+      await userEvent.click(pinFor("Lilia"));
+
+      expect(cameraMoves()).toBe(told + 1);
+      expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(LILIA));
+    });
   });
 
   // Nothing is chosen until the owner chooses something, so the map keeps the
@@ -213,6 +248,7 @@ describe("choosing a restaurant", () => {
       const map = await screen.findByTestId("map");
 
       expect(map).not.toHaveAttribute("data-moved-to");
+      expect(cameraMoves()).toBe(0);
       expect(pinColours()).toEqual([undefined, undefined]);
       expect(cardFor("Bacari")).not.toHaveAttribute("aria-current");
       expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();

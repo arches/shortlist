@@ -14,6 +14,8 @@ import type { Narrowing } from "@/features/finding-a-restaurant-on-my-list/narro
 import { Chrome } from "@/features/seeing-my-list-on-a-map/Chrome";
 import { ListMap } from "@/features/seeing-my-list-on-a-map/ListMap";
 import { ListSheet } from "@/features/seeing-my-list-on-a-map/ListSheet";
+import { chose } from "@/features/seeing-my-list-on-a-map/selection";
+import type { Selection } from "@/features/seeing-my-list-on-a-map/selection";
 import { OPENS_AT } from "@/features/seeing-my-list-on-a-map/sheet";
 import type { SheetPosition } from "@/features/seeing-my-list-on-a-map/sheet";
 
@@ -41,7 +43,7 @@ export function ListScreen() {
   // single page", and list-screen.states.md has choosing move every region of
   // it. So which restaurant is chosen belongs to the page that holds both, not
   // to either one of them. Nothing is chosen until the owner chooses it.
-  const [selected, setSelected] = useState<number | undefined>();
+  const [selection, setSelection] = useState<Selection | undefined>();
 
   // "And the sheet rests at half" — where it opens, and the owner's to drag
   // from there. It belongs to the page for the same reason the choice does:
@@ -61,7 +63,7 @@ export function ListScreen() {
   // that differ by where the owner reached for it, and whichever half they used
   // the sheet gets out of the way of the map it just moved.
   function choose(id: number) {
-    setSelected(id);
+    setSelection((previous) => chose(id, previous));
     setSheet("peek");
   }
 
@@ -102,7 +104,7 @@ export function ListScreen() {
   return (
     <main className="relative h-dvh w-full overflow-hidden">
       <div className="absolute inset-0">
-        <ListMap restaurants={matches} selected={selected} onSelect={choose} />
+        <ListMap restaurants={matches} selection={selection} onSelect={choose} />
       </div>
 
       <Chrome
@@ -119,7 +121,7 @@ export function ListScreen() {
           isPending={isPending}
           error={refusal}
           empty={empty}
-          selected={selected}
+          selected={selection?.id}
           onSelect={choose}
           onTakeOff={setTakingOff}
         />

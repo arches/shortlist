@@ -64,6 +64,13 @@ export function pinFor(name: string): HTMLElement {
   return screen.getByRole("button", { name });
 }
 
+// How many times Shortlist has told the camera where to look. Choosing the same
+// restaurant twice sends it to the same place twice, which is a fact about the
+// instruction rather than about where the map ended up.
+export function cameraMoves(): number {
+  return Number(screen.getByTestId("map").dataset.cameraMoves ?? "0");
+}
+
 // The colours seeing-my-list-on-a-map.drawio draws a marker in, each one taken
 // off the wireframe rather than read back off ListMap: a test that agrees with
 // the component proves only that the component agrees with itself.

@@ -8,19 +8,20 @@ import {
   useMap,
 } from "@vis.gl/react-google-maps";
 import { LocateFixed } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { Restaurant } from "@/api/types";
 import { Button } from "@/components/ui/button";
 
 import { located, OPENING_ZOOM, pointOf, viewOf } from "./view";
 import type { Point } from "./view";
+import type { Selection } from "./selection";
 import { useOwnerLocation } from "./location";
 import { useConfiguration } from "./queries";
 
 interface ListMapProps {
   restaurants: Restaurant[] | undefined;
-  selected: number | undefined;
+  selection: Selection | undefined;
   onSelect: (id: number) => void;
 }
 
@@ -136,16 +137,28 @@ const THE_OWNER_S_TO_MOVE = {
 // A restaurant Google gave no point for has nothing to centre on, so the map
 // stays where it is — see ASSUMPTIONS.md, "Centring on a selection with no
 // coordinates".
-function CentreOn({ point }: { point: Point | undefined }) {
+//
+// What the camera answers to is the act of choosing rather than the restaurant
+// chosen: list-screen.states.md answers Tap a row with "Center on selection"
+// however many times it arrives, so an owner who panned away and tapped the
+// same row again is taken back. Keyed on the coordinates, the same point twice
+// would read as a re-render and move nothing.
+//
+// So the move is guarded by which act the camera has already answered, rather
+// than by the dependencies alone. A point that arrives after the choice — the
+// list still loading when the row was tapped — is answered on the render it
+// arrives, because nothing was recorded while there was nowhere to go.
+function CentreOn({ at, point }: { at: number | undefined; point: Point | undefined }) {
   const map = useMap();
-  const lat = point?.lat;
-  const lng = point?.lng;
+  const centred = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    if (map === null || lat === undefined || lng === undefined) return;
+    if (map === null || at === undefined || point === undefined) return;
+    if (centred.current === at) return;
 
-    map.moveCamera({ center: { lat, lng }, zoom: OPENING_ZOOM });
-  }, [map, lat, lng]);
+    centred.current = at;
+    map.moveCamera({ center: point, zoom: OPENING_ZOOM });
+  }, [map, at, point]);
 
   return null;
 }
@@ -190,7 +203,7 @@ function LocateMe({ shared }: { shared: Point }) {
 // The map half of the list screen. shortlist.context.d2 has Google Maps feeding
 // Shortlist map tiles and functionality, and shortlist.principles.md is why the
 // key it needs arrives from the API rather than from the bundle.
-export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
+export function ListMap({ restaurants, selection, onSelect }: ListMapProps) {
   const { data: configuration, error } = useConfiguration();
 
   // Scenario: See restaurants from my list opens the map on the owner's own
@@ -228,7 +241,7 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
 
   // Nothing is chosen until the owner chooses something, and until then the map
   // keeps the view it opened at.
-  const chosen = pins.find((restaurant) => restaurant.id === selected);
+  const chosen = pins.find((restaurant) => restaurant.id === selection?.id);
 
   return (
     <APIProvider apiKey={configuration.google_maps_api_key}>
@@ -244,7 +257,7 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
         defaultCenter={view.centre}
         defaultZoom={view.zoom}
       >
-        <CentreOn point={chosen === undefined ? undefined : pointOf(chosen)} />
+        <CentreOn at={selection?.at} point={chosen === undefined ? undefined : pointOf(chosen)} />
 
         {/* The owner, where they are standing, when they shared it. Nothing is
             drawn when there is nothing to draw — "And there is no blue dot
@@ -272,7 +285,7 @@ export function ListMap({ restaurants, selected, onSelect }: ListMapProps) {
             title={restaurant.name}
             onClick={() => onSelect(restaurant.id)}
           >
-            <Pin {...colourOf(restaurant, selected)} />
+            <Pin {...colourOf(restaurant, selection?.id)} />
           </AdvancedMarker>
         ))}
       </Map>

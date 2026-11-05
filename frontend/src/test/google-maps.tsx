@@ -87,9 +87,22 @@ export function APIProvider({ children, apiKey }: { children?: ReactNode; apiKey
 // and zoom together, as moveCamera has set it since. The two are separate
 // because the owner can now move the map between them, so a view the map was
 // sent to has to be distinguishable from the one it opened at.
+//
+// data-camera-moves counts the instructions rather than holding one. Shortlist
+// centres on the same restaurant twice when the owner chooses it twice, and the
+// last value cannot tell that from never having been told again.
 export function Map({ children, className, ...props }: MapProps) {
   const [movedTo, setMovedTo] = useState<Camera | undefined>();
-  const instance = useMemo<FakeMap>(() => ({ moveCamera: setMovedTo }), []);
+  const [moves, setMoves] = useState(0);
+  const instance = useMemo<FakeMap>(
+    () => ({
+      moveCamera: (camera: Camera) => {
+        setMovedTo(camera);
+        setMoves((counted) => counted + 1);
+      },
+    }),
+    [],
+  );
 
   return (
     <MapInstance.Provider value={instance}>
@@ -103,6 +116,7 @@ export function Map({ children, className, ...props }: MapProps) {
         data-map-id={props.mapId}
         data-center={attribute(props.defaultCenter)}
         data-moved-to={attribute(movedTo)}
+        data-camera-moves={String(moves)}
         data-zoom={attribute(props.defaultZoom)}
         data-gesture-handling={props.gestureHandling}
         data-zoom-control={attribute(props.zoomControl)}
