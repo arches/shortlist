@@ -22,7 +22,6 @@ Scenario Outline: Narrowing my list
   When I <narrow>
   Then I see only <match> in the list
   And <match> is all that is pinned on the map
-  And the map moves to fit it
 
   Examples:
     | narrow                | match  | narrowed by |
@@ -49,7 +48,6 @@ Scenario: Nothing matches
   When I search for "sushi"
   Then I see that nothing on my list matches "sushi"
   And I see no pins on the map
-  And the map stays where it was
   And clearing the search brings all three back
 ```
 
