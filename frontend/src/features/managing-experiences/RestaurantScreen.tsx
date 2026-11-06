@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import { useRestaurants } from "@/features/managing-my-list/queries";
+import { TakeOffListDialog } from "@/features/managing-my-list/TakeOffListDialog";
 import { SessionEnded } from "@/session/session";
 
 import { ExperienceList } from "./ExperienceList";
@@ -23,6 +24,7 @@ export function RestaurantScreen({ restaurantId }: { restaurantId: number }) {
   const navigate = useNavigate();
   const { data: restaurants, isPending, error } = useRestaurants();
   const [recording, setRecording] = useState(false);
+  const [takingOff, setTakingOff] = useState(false);
 
   const restaurant = restaurants?.find((one) => one.id === restaurantId);
 
@@ -86,6 +88,41 @@ export function RestaurantScreen({ restaurantId }: { restaurantId: number }) {
           />
 
           <ExperienceList restaurantId={restaurant.id} />
+
+          {/*
+            managing-experiences.wireframe.drawio puts Remove Restaurant at the
+            foot of this screen, below the experiences, and its own subtitle
+            says why it is here: this is "the restaurant's own screen, which is
+            also where the restaurant comes off the list". Taking a restaurant
+            off the list is managing-my-list.scenarios.md's act, so the dialog
+            that confirms it is that feature's and is reached from here.
+
+            Last on the screen because it is the one thing here that ends the
+            screen. The wireframe draws it as a plain box with a red label
+            rather than a filled one — outline carries the fill and
+            text-destructive the colour, set together so neither is left to a
+            default the other did not expect.
+          */}
+          <footer className="mt-8 flex justify-center">
+            <Button
+              variant="outline"
+              className="text-destructive"
+              onClick={() => setTakingOff(true)}
+            >
+              Remove Restaurant
+            </Button>
+          </footer>
+
+          {/*
+            "And I acknowledge a confirmation dialog". Nothing navigates away
+            here: the restaurant is off the list once it succeeds, and the
+            effect above already sends a restaurant that is not on the list
+            back to it.
+          */}
+          <TakeOffListDialog
+            restaurant={takingOff ? restaurant : undefined}
+            onClose={() => setTakingOff(false)}
+          />
         </>
       )}
     </main>
