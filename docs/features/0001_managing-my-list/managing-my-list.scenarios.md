@@ -31,6 +31,18 @@ Scenario Outline: Adding a restaurant
   And it has no experiences
 ```
 
+```gherkin
+Scenario: Taking a restaurant off my list
+  Given "Joe's Pizza" is on my list with the note "Go for the plain slice"
+  And I have recorded 2 experiences there
+  When I take "Joe's Pizza" off my list
+  And I acknowledge a confirmation dialog
+  Then "Joe's Pizza" is off my list
+  And its note is gone with it
+  And both experiences are gone with it
+  And the restaurant itself stays in the system
+```
+
 ## Alternate paths
 
 ```gherkin

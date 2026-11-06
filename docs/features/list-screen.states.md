@@ -12,7 +12,7 @@ Nothing here is a lifecycle. They all run for as long as the screen is open, so 
 | ---------------------- | ---------------------------------- | ----------------------- | --------- | --------- | ------ | ---------------------------------------------- |
 | Initial state          | Half                               | None                    | Empty     | All       | Closed | Center on my location, zoom 13                 |
 | Drag the sheet         | → Peek/Half/Full                   | Unchanged               | Unchanged | Unchanged | Close  | Unchanged                                      |
-| Tap a row              | → Peek, scrolled to show selection | One restaurant selected | Unchanged | Unchanged | Close  | Center on selection, zoom 13, pin highlighted. |
+| Tap an unselected row  | → Peek, scrolled to show selection | One restaurant selected | Unchanged | Unchanged | Close  | Center on selection, zoom 13, pin highlighted. |
 | Tap a pin              | → Peek, scrolled to show selection | One restaurant selected | Unchanged | Unchanged | Close  | Center on selection, zoom 13, pin highlighted. |
 | Type in search         | → Half                             | None                    | → Query   | Unchanged | Close  | Unchanged                                      |
 | Clear the search       | Unchanged                          | Unchanged               | → Empty   | Unchanged | Close  | Unchanged                                      |
@@ -25,6 +25,11 @@ Nothing here is a lifecycle. They all run for as long as the screen is open, so 
 | Close the "Add" dialog | Unchanged                          | Unchanged               | Unchanged | Unchanged | Close  | Unchanged                                      |
 | Add a restaurant       | → Peek, scrolled to show selection | New restaurant selected | → Empty   | All       | Close  | Center on selection, zoom 13, pin highlighted. |
 | Locate-me              | Unchanged                          | None                    | Unchanged | Unchanged | Close  | Center on my location, zoom 13                 |
+| Tap a row's name       | n/a                                | n/a                     | n/a       | n/a       | n/a    | n/a                                            |
+| Tap a selected row     | n/a                                | n/a                     | n/a       | n/a       | n/a    | n/a                                            |
+
+Tapping the name on a row opens the restaurant's own screen.
+Tapping the selected row opens the restaurant's own screen.
 
 ### Special Case: User Declines Location Sharing
 
