@@ -83,12 +83,18 @@ export function RestaurantCard({ restaurant, selected, onSelect }: RestaurantCar
           seeing-my-list-on-a-map.drawio: "The name opens the restaurant's own
           screen." The card carries nothing else to press — the Remove it used
           to offer is on that screen now.
+
+          list-screen.states.md gives the name its own row, reading n/a in every
+          region, so the tap it takes is not also the card's: a name tapped on
+          an unselected row opens the screen without choosing the restaurant on
+          the way out.
         */}
         <h2 className="truncate font-medium">
           <Link
             to="/restaurants/$restaurantId"
             params={{ restaurantId: String(restaurant.id) }}
             className="hover:underline"
+            onClick={(event) => event.stopPropagation()}
           >
             {restaurant.name}
           </Link>

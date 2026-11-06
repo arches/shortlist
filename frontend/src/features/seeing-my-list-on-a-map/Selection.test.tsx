@@ -142,6 +142,28 @@ describe("choosing a restaurant", () => {
       expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: "start" });
     });
 
+    // list-screen.states.md, Tap a row's name: n/a in every region, and the
+    // prose says what it does instead — "Tapping the name on a row opens the
+    // restaurant's own screen." So the name is a way off this screen rather
+    // than a second way of choosing on it, and the tap it takes is not also
+    // the card's.
+    it("chooses nothing when the row's name is tapped", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      const scrolled = cardsScrolledTo().length;
+
+      await userEvent.click(screen.getByRole("link", { name: "Lilia" }));
+
+      expect(
+        await screen.findByRole("heading", { level: 1, name: "Lilia" }),
+      ).toBeInTheDocument();
+
+      // Choosing Lilia would have scrolled the sheet to her card. Nothing was
+      // chosen, so nothing scrolled.
+      expect(cardsScrolledTo()).toHaveLength(scrolled);
+    });
+
     it("moves the choice when a second restaurant is chosen", async () => {
       renderApp("/");
 
