@@ -14,7 +14,10 @@ import {
   listAlreadyScrolled,
   restAt,
   scrollTheList,
+  theBrowserReportsTheScroll,
   theConfiguration,
+  theListDoesNotScrollWhenShown,
+  theListScrollsWhenShown,
   theSheet,
   whereTheSheetRests,
 } from "./testing";
@@ -179,6 +182,51 @@ describe("the sheet", () => {
       await scrollTheList("up");
 
       expect(screen.getByTestId("map").dataset.movedTo).toBeUndefined();
+    });
+  });
+
+  // The two events that read the same region, against each other. The sheet's
+  // answer to a choice is "→ Peek, scrolled to show selection", and the region
+  // it scrolls is the one Scroll the list up is read off — so the movement the
+  // sheet made itself must not come back as that event.
+  //
+  // This needs a scrollIntoView that moves the region and a browser that
+  // reports it, neither of which jsdom has. Without them the suite cannot see
+  // this at all, which is how it went unnoticed.
+  describe("the scroll the sheet performs itself", () => {
+    beforeEach(() => {
+      theListScrollsWhenShown();
+    });
+
+    afterEach(() => {
+      theListDoesNotScrollWhenShown();
+    });
+
+    // "Sheet: → Peek", and it stays there. Answered as Scroll the list up it
+    // would read "Peek → Half" and undo the cell that had just put it at peek.
+    it("leaves the sheet at peek", async () => {
+      renderApp("/");
+      await screen.findByRole("heading", { name: "Bacari" });
+      await restAt("full");
+
+      await userEvent.click(cardFor("Bacari"));
+      await theBrowserReportsTheScroll();
+
+      expect(await whereTheSheetRests()).toBe("peek");
+    });
+
+    // One movement is passed over, not the event. The owner scrolling the list
+    // after that still reaches Scroll the list up: "Peek → Half".
+    it("still answers the owner's own scroll afterwards", async () => {
+      renderApp("/");
+      await screen.findByRole("heading", { name: "Bacari" });
+
+      await userEvent.click(cardFor("Bacari"));
+      await theBrowserReportsTheScroll();
+
+      await scrollTheList("up");
+
+      expect(await whereTheSheetRests()).toBe("half");
     });
   });
 

@@ -95,6 +95,23 @@ export function ListSheet({ position, onPosition, showing, header, children }: L
 
     shown.current = showing;
     current.scrollIntoView({ block: "start" });
+
+    // Where that landed, recorded as though the sheet had been asked for it.
+    //
+    // list-screen.states.md has Scroll the list up as an event in its own
+    // right, and the scroll above moves the very region that event is read
+    // off. Read back as that event it would be answered "Peek → Half", taking
+    // the sheet off the peek the same cell had just put it at — one answer to
+    // one event arriving as a second event. So the movement is recorded as
+    // already seen, and the scroll event it causes reads as no movement at
+    // all. See ASSUMPTIONS.md, "Whether a scroll Shortlist performed is an
+    // event".
+    //
+    // Recording where it landed rather than raising a flag, because the
+    // browser fires the scroll event a frame or more after the movement and
+    // may fire none at all when the region was already there. Nothing here
+    // depends on whether it comes or when.
+    scrolledTo.current = region.scrollTop;
   });
 
   // list-screen.states.md gives the list's own scrolling two rows of its own,

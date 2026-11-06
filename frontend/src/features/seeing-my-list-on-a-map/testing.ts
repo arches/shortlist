@@ -183,6 +183,35 @@ export function cardsScrolledTo(): string[] {
   return cards.map((card) => (card as HTMLElement).querySelector("h2")?.textContent ?? "nothing");
 }
 
+// scrollIntoView as a browser does it, for the one thing the stub in
+// src/test/setup.ts cannot show: the sheet's answer to a choice moves the
+// region the cards scroll in, and the browser then reports that movement as a
+// scroll event. jsdom has no layout, so it neither moves nor reports.
+//
+// list-screen.states.md has Scroll the list up as an event of its own, read off
+// that same region, so what this is for is proving that the sheet's own
+// scrolling is not read back as that event.
+export function theListScrollsWhenShown(): void {
+  vi.mocked(Element.prototype.scrollIntoView).mockImplementation(function (this: Element) {
+    const region = this.closest("div.overflow-y-auto");
+    if (region === null) return;
+
+    (region as HTMLElement).scrollTop = A_SCROLL;
+  });
+}
+
+// Back to the stub that moves nothing, which is what every other suite expects.
+export function theListDoesNotScrollWhenShown(): void {
+  vi.mocked(Element.prototype.scrollIntoView).mockImplementation(() => undefined);
+}
+
+// The scroll event the browser reports after a region has moved. It fires a
+// frame or more after the movement rather than during it, which is why nothing
+// in the sheet may depend on when it arrives.
+export async function theBrowserReportsTheScroll(): Promise<void> {
+  fireEvent.scroll(await theScrollRegion());
+}
+
 export async function restAt(position: SheetPosition): Promise<void> {
   if (position === "peek") await dragTheSheet("down");
   if (position === "full") await dragTheSheet("up");
