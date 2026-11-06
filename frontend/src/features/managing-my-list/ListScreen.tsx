@@ -73,10 +73,15 @@ export function ListScreen() {
   const [menu, setMenu] = useState(false);
 
   // list-screen.states.md gives Tap a row and Tap a pin identical rows: the
-  // sheet drops to peek, the restaurant becomes the selection, and the map
-  // centres on it. So there is one way of choosing a restaurant rather than two
-  // that differ by where the owner reached for it, and whichever half they used
-  // the sheet gets out of the way of the map it just moved.
+  // sheet drops to peek scrolled to show the restaurant, the restaurant becomes
+  // the selection, and the map centres on it with its pin highlighted. So there
+  // is one way of choosing a restaurant rather than two that differ by where the
+  // owner reached for it, and whichever half they used the sheet gets out of the
+  // way of the map it just moved.
+  //
+  // The page sets the selection and nothing else: the scroll belongs to the
+  // sheet, which owns the region the cards scroll in, and the centring to the
+  // map. Both read the act off the selection rather than being told twice.
   function choose(id: number) {
     setSelection((previous) => chose(id, previous));
     setSheet("peek");
@@ -226,7 +231,12 @@ export function ListScreen() {
         onSignOut={() => void leave()}
       />
 
-      <ListSheet position={sheet} onPosition={restTheSheetAt} header={<NarrowingNotice by={by} />}>
+      <ListSheet
+        position={sheet}
+        onPosition={restTheSheetAt}
+        showing={selection?.at}
+        header={<NarrowingNotice by={by} />}
+      >
         <RestaurantList
           restaurants={matches}
           isPending={isPending}

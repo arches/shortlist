@@ -15,6 +15,7 @@ import { renderApp } from "@/test/router";
 
 import {
   cardFor,
+  cardsScrolledTo,
   openTheMenu,
   PIN_COLOURS,
   pinColourFor,
@@ -276,10 +277,10 @@ describe("adding a restaurant", () => {
 });
 
 // Derived from the Add a restaurant row of list-screen.states.md, which moves
-// five of the screen's six regions: the restaurant just added becomes the
+// every one of the screen's six regions: the restaurant just added becomes the
 // selection, the search goes Empty, the filter goes back to All, the menu
-// closes, and the map centres on the selection at zoom 13. Only the sheet reads
-// Unchanged.
+// closes, the map centres on the selection at zoom 13 with its pin highlighted,
+// and the sheet drops to peek scrolled to show it.
 describe("what adding a restaurant does to the screen", () => {
   let fetchMock: Mock;
 
@@ -305,6 +306,7 @@ describe("what adding a restaurant does to the screen", () => {
 
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(Element.prototype.scrollIntoView).mockClear();
     fetchMock = stubFetch();
     window.localStorage.clear();
     forgetSession();
@@ -416,5 +418,17 @@ describe("what adding a restaurant does to the screen", () => {
     await screen.findByRole("heading", { name: "Tacos El Bronco" });
 
     expect(await whereTheSheetRests()).toBe("peek");
+  });
+
+  // The other half of the same cell: "scrolled to show selection". The
+  // restaurant the add chose is not on the list on the render that chose it —
+  // it arrives with the refetch the add goes back for — so this is the one of
+  // the three rows where the sheet has nothing to scroll to at first.
+  it("scrolls the list to the restaurant it added", async () => {
+    await add();
+
+    await waitFor(() => {
+      expect(cardsScrolledTo()).toEqual(["Tacos El Bronco"]);
+    });
   });
 });

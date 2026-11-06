@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
 
 import type { Restaurant } from "@/api/types";
 import { Button } from "@/components/ui/button";
@@ -53,24 +52,18 @@ export function RestaurantCard({
   onSelect,
   onTakeOff,
 }: RestaurantCardProps) {
-  const card = useRef<HTMLDivElement>(null);
-
-  // Both selection scenarios end with "Bacari is the restaurant showing in the
-  // sheet", so the chosen card goes to the top of what the sheet shows rather
-  // than merely into view. At peek that makes it the only one there is, which
-  // is what the sheet dropping to peek is for.
-  useEffect(() => {
-    if (selected) card.current?.scrollIntoView({ block: "start" });
-  }, [selected]);
-
   const detail = selected ? HIGHLIGHT_DETAIL : "text-muted-foreground";
 
   // list-screen.states.md, Tap a row. The card is what is tapped; the name
   // inside it is still the way into the restaurant's own screen. See
   // ASSUMPTIONS.md, "What clicking a card does".
+  //
+  // aria-current is what the card is chosen by and what ListSheet scrolls to.
+  // "→ Peek, scrolled to show selection" is the sheet's cell rather than the
+  // card's, so the card says which one is chosen and the sheet, which owns the
+  // region the cards scroll in, does the scrolling.
   return (
     <Card
-      ref={card}
       onClick={() => onSelect(restaurant.id)}
       aria-current={selected ? "true" : undefined}
       className={`flex cursor-pointer flex-row items-center justify-between gap-4 p-4 ${

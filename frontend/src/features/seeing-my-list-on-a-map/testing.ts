@@ -1,5 +1,6 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 
 import type { Configuration, Restaurant } from "@/api/types";
 import { aRestaurant } from "@/features/managing-my-list/testing";
@@ -169,6 +170,18 @@ export async function listAlreadyScrolled(): Promise<void> {
 // Far enough to be a scroll. No artifact gives a number, and none has to: the
 // sheet answers the direction rather than the distance.
 const A_SCROLL = 80;
+
+// Which restaurants the sheet scrolled to, by name, in the order it scrolled to
+// them — "scrolled to show selection", named the way the owner would name it.
+//
+// src/test/setup.ts stubs scrollIntoView on the prototype, so what each call
+// was made on is the card. The name rather than the element, because a card is
+// a new element every render and the restaurant is what the cell is about.
+export function cardsScrolledTo(): string[] {
+  const cards = vi.mocked(Element.prototype.scrollIntoView).mock.contexts;
+
+  return cards.map((card) => (card as HTMLElement).querySelector("h2")?.textContent ?? "nothing");
+}
 
 export async function restAt(position: SheetPosition): Promise<void> {
   if (position === "peek") await dragTheSheet("down");

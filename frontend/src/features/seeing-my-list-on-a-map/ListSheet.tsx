@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { KeyboardEvent, PointerEvent, ReactNode, UIEvent } from "react";
 
 import { dragged, directionOf, HEIGHTS, scrolled } from "./sheet";
@@ -7,6 +7,16 @@ import type { SheetPosition } from "./sheet";
 interface ListSheetProps {
   position: SheetPosition;
   onPosition: (position: SheetPosition) => void;
+
+  // Which act of choosing the sheet is answering, counted by selection.ts, or
+  // nothing while nothing is chosen.
+  //
+  // list-screen.states.md gives Tap a row, Tap a pin and Add a restaurant one
+  // Sheet cell between them — "→ Peek, scrolled to show selection" — so the
+  // scroll is the sheet's answer to those three events. It used to be the
+  // chosen card scrolling itself whenever it was chosen, which is the standing
+  // rule the table replaced.
+  showing?: number | undefined;
 
   // What sits between the handle and the cards, outside the scroll: anything
   // about the list as a whole, which must not scroll away from it.
@@ -23,8 +33,18 @@ interface ListSheetProps {
 // bounded by the sheet, so a card reaching the top edge is cut off there. The
 // page itself has no scrolling of its own — "the page itself does not scroll" —
 // which is also what leaves a single finger free to drag the map.
-export function ListSheet({ position, onPosition, header, children }: ListSheetProps) {
+export function ListSheet({ position, onPosition, showing, header, children }: ListSheetProps) {
   const from = useRef<number | undefined>(undefined);
+
+  // The region the cards scroll in, which is the one the sheet scrolls to show
+  // a selection and the one it reads the owner's own scrolling off.
+  const scroller = useRef<HTMLDivElement>(null);
+
+  // Which act of choosing the sheet has already scrolled to. The cell names an
+  // act rather than a state, so it is performed once per act — and tapping the
+  // row already chosen is a new act, which is the reading the Map cell beside
+  // it already gets.
+  const shown = useRef<number | undefined>(undefined);
 
   // Where the cards were scrolled to when this was last asked, so the next
   // answer can be compared against it. A scroll event says that the region
@@ -49,6 +69,33 @@ export function ListSheet({ position, onPosition, header, children }: ListSheetP
 
     onPosition(dragged(position, direction));
   }
+
+  // "scrolled to show selection". The chosen card goes to the top of what the
+  // sheet shows rather than merely into view: all three rows leave the sheet at
+  // peek, which sheet.ts gives room for the handle and one card, so the top of
+  // the region is the only place a card can be shown at all.
+  //
+  // What to scroll to is whatever the sheet's own contents mark as current. The
+  // sheet holds a list of anything and knows nothing about restaurants, and
+  // aria-current is already how the chosen one says it is the chosen one.
+  //
+  // No dependency list, because the card may not be there yet: the restaurant
+  // an add just chose arrives with the refetch the add goes back for, several
+  // renders after the act. Nothing is recorded until there was something to
+  // scroll to, so the act is answered on the render it first becomes possible
+  // and the guard makes every render after that a no-op.
+  useEffect(() => {
+    if (showing === undefined || shown.current === showing) return;
+
+    const region = scroller.current;
+    if (region === null) return;
+
+    const current = region.querySelector<HTMLElement>("[aria-current='true']");
+    if (current === null) return;
+
+    shown.current = showing;
+    current.scrollIntoView({ block: "start" });
+  });
 
   // list-screen.states.md gives the list's own scrolling two rows of its own,
   // and the one that moves the sheet is Scroll the list up: "Peek → Half".
@@ -117,7 +164,11 @@ export function ListSheet({ position, onPosition, header, children }: ListSheetP
         the sheet instead of growing it. Without it the cards would push the
         sheet past the positions it is allowed to rest at.
       */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6" onScroll={readScroll}>
+      <div
+        ref={scroller}
+        className="min-h-0 flex-1 overflow-y-auto px-4 pb-6"
+        onScroll={readScroll}
+      >
         {children}
       </div>
     </section>

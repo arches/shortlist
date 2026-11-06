@@ -11,6 +11,7 @@ import {
   BACARI,
   cameraMoves,
   cardFor,
+  cardsScrolledTo,
   PIN_COLOURS,
   pinColourFor,
   pinColours,
@@ -121,9 +122,9 @@ describe("choosing a restaurant", () => {
       expect(await whereTheSheetRests()).toBe("peek");
     });
 
-    // "And Bacari is the restaurant showing in the sheet". At peek there is
-    // room for one, so the chosen card goes to the top of what the sheet shows
-    // rather than merely into view.
+    // "→ Peek, scrolled to show selection". At peek there is room for one
+    // card, so the chosen one goes to the top of what the sheet shows rather
+    // than merely into view.
     it("shows the chosen restaurant in the sheet", async () => {
       renderApp("/");
 
@@ -131,7 +132,21 @@ describe("choosing a restaurant", () => {
       await restAt("full");
       await userEvent.click(cardFor("Bacari"));
 
+      expect(cardsScrolledTo()).toEqual(["Bacari"]);
       expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: "start" });
+    });
+
+    // The Sheet cell names an act, the same as the Map cell beside it. An owner
+    // who scrolled away from the row they chose and tapped it again is asking
+    // to be brought back to it, so the sheet answers every time it arrives.
+    it("scrolls to it again when the row already chosen is tapped", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await userEvent.click(cardFor("Bacari"));
+      await userEvent.click(cardFor("Bacari"));
+
+      expect(cardsScrolledTo()).toEqual(["Bacari", "Bacari"]);
     });
 
     it("moves the choice when a second restaurant is chosen", async () => {
@@ -176,7 +191,7 @@ describe("choosing a restaurant", () => {
       await screen.findByTestId("map");
       await userEvent.click(pinFor("Bacari"));
 
-      expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: "start" });
+      expect(cardsScrolledTo()).toEqual(["Bacari"]);
       expect(cardFor("Bacari")).toHaveAttribute("aria-current", "true");
     });
 
@@ -236,6 +251,24 @@ describe("choosing a restaurant", () => {
 
       expect(cameraMoves()).toBe(told + 1);
       expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(LILIA));
+    });
+  });
+
+  // The four rows leaving "Selection: None" have no selection to show, and the
+  // Sheet cell on each of them reads Unchanged or moves without scrolling. So
+  // dropping the choice scrolls nothing, and the scroll cannot outlive the
+  // selection it was an answer to.
+  describe("when the choice is dropped", () => {
+    it("scrolls nothing", async () => {
+      renderApp("/");
+
+      await screen.findByTestId("map");
+      await userEvent.click(cardFor("Bacari"));
+      vi.mocked(Element.prototype.scrollIntoView).mockClear();
+
+      await userEvent.type(screen.getByRole("searchbox", { name: "Search my list" }), "ba");
+
+      expect(cardsScrolledTo()).toEqual([]);
     });
   });
 

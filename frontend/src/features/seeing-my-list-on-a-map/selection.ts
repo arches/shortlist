@@ -19,11 +19,13 @@ export interface Selection {
 
   // Which act of choosing this was, counted up from the first.
   //
-  // The table answers Tap a row with "Center on selection, zoom 13" however
-  // many times it arrives, so tapping the row already chosen centres the map
-  // again — the owner who panned away and tapped the same row is asking to be
-  // taken back. The restaurant's coordinates cannot carry that, being the same
-  // point twice, which is what this counts instead.
+  // The table answers Tap a row with "Center on selection, zoom 13, pin
+  // highlighted" and "→ Peek, scrolled to show selection" however many times it
+  // arrives, so tapping the row already chosen centres the map and scrolls the
+  // list to it again — the owner who moved away from the restaurant they chose
+  // and tapped it again is asking to be taken back. Neither the restaurant's id
+  // nor its coordinates can carry that, being the same twice, which is what
+  // this counts instead.
   at: number;
 }
 
