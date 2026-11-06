@@ -143,7 +143,7 @@ export async function dragTheSheet(
 // What scrolls inside the sheet. The cards are clipped at its edge and scroll
 // in here; the sheet itself does not move, except where
 // list-screen.states.md says this gesture moves it.
-async function theScrollRegion(): Promise<HTMLElement> {
+export async function theScrollRegion(): Promise<HTMLElement> {
   const region = (await theSheet()).querySelector("div.overflow-y-auto");
   if (region === null) throw new Error("the sheet has nothing that scrolls");
 

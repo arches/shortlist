@@ -18,6 +18,7 @@ import {
   theConfiguration,
   theListDoesNotScrollWhenShown,
   theListScrollsWhenShown,
+  theScrollRegion,
   theSheet,
   whereTheSheetRests,
 } from "./testing";
@@ -244,5 +245,33 @@ describe("the sheet", () => {
     // at the edge instead of letting it out.
     expect(scrolls).toHaveClass("min-h-0", "flex-1");
     expect(screen.getByRole("main")).toHaveClass("overflow-hidden");
+  });
+
+  // bugs/0002_card_clipping.md: "First restaurant card is fully visible". A
+  // card paints its ring outside its own box, so a card flush with the clip
+  // edge above keeps its border and loses the ring — and loses 2px of it
+  // rather than 1px once it is the chosen one, which is the report's "the
+  // clipping is even more pronounced".
+  //
+  // Asserted as room left rather than as a pixel seen. jsdom has no layout, so
+  // the suite cannot see anything cut off; this is the same limitation the
+  // clipping test above works under, and the end-to-end slot
+  // shortlist.stack.md leaves TBD is what would close it.
+  describe("room for a card's ring", () => {
+    it("leaves room above the card resting against the top edge", async () => {
+      renderApp("/");
+
+      expect(await theScrollRegion()).toHaveClass("pt-2");
+    });
+
+    // list-screen.states.md, Tap a row: "→ Peek, scrolled to show selection".
+    // scrollIntoView aligns a card's top with the top of the scrollport, so
+    // without scroll-padding the card the sheet scrolled to loses its ring the
+    // same way the resting one did.
+    it("leaves the same room for a card it scrolled to", async () => {
+      renderApp("/");
+
+      expect(await theScrollRegion()).toHaveClass("scroll-pt-2");
+    });
   });
 });

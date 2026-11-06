@@ -180,10 +180,26 @@ export function ListSheet({ position, onPosition, showing, header, children }: L
         min-h-0 is what lets this shrink past its content and overflow inside
         the sheet instead of growing it. Without it the cards would push the
         sheet past the positions it is allowed to rest at.
+
+        pt-2 is room for the first card's ring. A card paints its ring outside
+        its own box, so a first card flush with this region's clip edge keeps
+        its border and loses the ring — and loses 2px of it rather than 1px
+        once it is the chosen one. The number is the sheet's own drawing:
+        seeing-my-list-on-a-map.drawio puts the handle's bottom edge at y=489
+        and the first card's top at y=497. What the drawing does not say is
+        which side of the clip that room sits on — see ASSUMPTIONS.md, "Where
+        the sheet's clip edge falls".
+
+        scroll-pt-2 is the same room for every other card. scrollIntoView
+        aligns a card's top with the top of the scrollport, so the padding
+        alone would answer only the card at rest and leave the ring of
+        whichever card the sheet scrolled to under the clip. The padding
+        answers the first card; the scroll-padding answers "scrolled to show
+        selection".
       */}
       <div
         ref={scroller}
-        className="min-h-0 flex-1 overflow-y-auto px-4 pb-6"
+        className="min-h-0 flex-1 overflow-y-auto px-4 pt-2 pb-6 scroll-pt-2"
         onScroll={readScroll}
       >
         {children}
