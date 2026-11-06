@@ -25,7 +25,6 @@ import type { SheetPosition } from "@/features/seeing-my-list-on-a-map/sheet";
 
 import { AddRestaurantDialog } from "./AddRestaurantDialog";
 import { RestaurantList } from "./RestaurantList";
-import { TakeOffListDialog } from "./TakeOffListDialog";
 import { useRestaurants } from "./queries";
 
 // seeing-my-list-on-a-map.drawio draws the whole page: the map fills it, the
@@ -41,7 +40,6 @@ export function ListScreen() {
   const navigate = useNavigate();
   const { data: restaurants, isPending, error } = useRestaurants();
   const [adding, setAdding] = useState(false);
-  const [takingOff, setTakingOff] = useState<Restaurant | undefined>();
 
   // seeing-my-list-on-a-map.scenarios.md: "map and list together comprise a
   // single page", and list-screen.states.md has choosing move every region of
@@ -244,12 +242,10 @@ export function ListScreen() {
           empty={empty}
           selected={selection?.id}
           onSelect={choose}
-          onTakeOff={setTakingOff}
         />
       </ListSheet>
 
       <AddRestaurantDialog open={adding} onOpenChange={setAdding} onAdded={added} />
-      <TakeOffListDialog restaurant={takingOff} onClose={() => setTakingOff(undefined)} />
     </main>
   );
 }

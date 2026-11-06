@@ -1,14 +1,12 @@
 import { Link } from "@tanstack/react-router";
 
 import type { Restaurant } from "@/api/types";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
   selected: boolean;
   onSelect: (id: number) => void;
-  onTakeOff: (restaurant: Restaurant) => void;
 }
 
 // seeing-my-list-on-a-map.drawio fills the chosen card pale yellow, and its own
@@ -46,12 +44,7 @@ export function visitsOf(restaurant: Restaurant): string {
     : `Visited ${restaurant.experience_count} times`;
 }
 
-export function RestaurantCard({
-  restaurant,
-  selected,
-  onSelect,
-  onTakeOff,
-}: RestaurantCardProps) {
+export function RestaurantCard({ restaurant, selected, onSelect }: RestaurantCardProps) {
   const detail = selected ? HIGHLIGHT_DETAIL : "text-muted-foreground";
 
   // list-screen.states.md, Tap a row. The card is what is tapped; the name
@@ -66,17 +59,13 @@ export function RestaurantCard({
     <Card
       onClick={() => onSelect(restaurant.id)}
       aria-current={selected ? "true" : undefined}
-      className={`flex cursor-pointer flex-row items-center justify-between gap-4 p-4 ${
-        selected ? HIGHLIGHT : ""
-      }`}
+      className={`cursor-pointer p-4 ${selected ? HIGHLIGHT : ""}`}
     >
       <div className="min-w-0">
         {/*
-          managing-experiences.wireframe.drawio draws the restaurant's own
-          screen with a "‹ My list" back link, but this wireframe draws no way
-          into it — the card has only Remove. The name is the link,
-          because it is the one thing on the card that identifies the restaurant
-          and "When I open 'Joe's Pizza'" reads as opening the thing named.
+          seeing-my-list-on-a-map.drawio: "The name opens the restaurant's own
+          screen." The card carries nothing else to press — the Remove it used
+          to offer is on that screen now.
         */}
         <h2 className="truncate font-medium">
           <Link
@@ -107,12 +96,6 @@ export function RestaurantCard({
         {restaurant.note !== null && (
           <p className="truncate text-sm italic">{restaurant.note}</p>
         )}
-      </div>
-
-      <div className="flex shrink-0 gap-2">
-        <Button variant="outline" size="sm" onClick={() => onTakeOff(restaurant)}>
-          Remove
-        </Button>
       </div>
     </Card>
   );

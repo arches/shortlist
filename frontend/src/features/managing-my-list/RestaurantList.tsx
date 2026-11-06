@@ -13,7 +13,6 @@ interface RestaurantListProps {
   empty: string;
   selected: number | undefined;
   onSelect: (id: number) => void;
-  onTakeOff: (restaurant: Restaurant) => void;
 }
 
 // managing-my-list.wireframe.drawio: one card per restaurant, and the three
@@ -33,7 +32,6 @@ export function RestaurantList({
   empty,
   selected,
   onSelect,
-  onTakeOff,
 }: RestaurantListProps) {
   return (
     <>
@@ -57,7 +55,6 @@ export function RestaurantList({
                 restaurant={restaurant}
                 selected={restaurant.id === selected}
                 onSelect={onSelect}
-                onTakeOff={onTakeOff}
               />
             </li>
           ))}

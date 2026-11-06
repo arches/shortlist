@@ -164,14 +164,16 @@ describe("my list", () => {
     expect(await screen.findByText("Nothing on your list yet.")).toBeInTheDocument();
   });
 
-  // There is nothing on a Restaurant an owner set, so there is nothing to
-  // correct: the card offers a Remove and no Edit.
-  it("offers a Remove for each restaurant, and no Edit", async () => {
+  // seeing-my-list-on-a-map.drawio draws the cards with no buttons on them at
+  // all: the Remove they used to offer is on the restaurant's own screen, and
+  // there has never been anything on a Restaurant an owner could correct.
+  it("offers nothing to press on a card but its name", async () => {
     fetchMock.mockResolvedValue(respond(200, [aRestaurant({ name: "Lilia" })]));
 
     renderApp("/");
 
-    expect(await screen.findByRole("button", { name: "Remove" })).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Lilia" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Remove" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
   });
 
