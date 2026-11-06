@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 
 import type { Restaurant } from "@/api/types";
 import { Card } from "@/components/ui/card";
@@ -45,19 +45,36 @@ export function visitsOf(restaurant: Restaurant): string {
 }
 
 export function RestaurantCard({ restaurant, selected, onSelect }: RestaurantCardProps) {
+  const navigate = useNavigate();
   const detail = selected ? HIGHLIGHT_DETAIL : "text-muted-foreground";
 
-  // list-screen.states.md, Tap a row. The card is what is tapped; the name
-  // inside it is still the way into the restaurant's own screen. See
-  // ASSUMPTIONS.md, "What clicking a card does".
+  // list-screen.states.md has two rows for a tap on a card, and what tells them
+  // apart is whether the card is already the selection.
   //
+  // Tap an unselected row chooses it: the sheet drops to peek, the map centres
+  // on it, its pin is highlighted. Tap a selected row opens the restaurant's
+  // own screen — the owner who taps what they are already looking at is asking
+  // for the whole of it — and that row reads n/a in every region, because the
+  // screen is left behind rather than moved.
+  function tapped() {
+    if (!selected) {
+      onSelect(restaurant.id);
+      return;
+    }
+
+    void navigate({
+      to: "/restaurants/$restaurantId",
+      params: { restaurantId: String(restaurant.id) },
+    });
+  }
+
   // aria-current is what the card is chosen by and what ListSheet scrolls to.
   // "→ Peek, scrolled to show selection" is the sheet's cell rather than the
   // card's, so the card says which one is chosen and the sheet, which owns the
   // region the cards scroll in, does the scrolling.
   return (
     <Card
-      onClick={() => onSelect(restaurant.id)}
+      onClick={tapped}
       aria-current={selected ? "true" : undefined}
       className={`cursor-pointer p-4 ${selected ? HIGHLIGHT : ""}`}
     >

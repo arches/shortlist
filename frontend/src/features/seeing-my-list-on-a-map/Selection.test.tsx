@@ -50,13 +50,19 @@ describe("choosing a restaurant", () => {
     rememberSession({ access_token: "access-one", refresh_token: "refresh-one", expires_in: 900 });
     vi.mocked(Element.prototype.scrollIntoView).mockClear();
 
-    fetchMock.mockImplementation((path: string) =>
-      Promise.resolve(
-        String(path).endsWith("/configuration")
-          ? respond(200, theConfiguration())
-          : respond(200, [aRestaurant({ ...BACARI, id: 1 }), aRestaurant(LILIA)]),
-      ),
-    );
+    // Tap a selected row leaves this screen for the restaurant's own, which
+    // reads that restaurant's experiences — so there is a third path to answer
+    // here, and a list of restaurants is not an answer to it.
+    fetchMock.mockImplementation((path: string) => {
+      if (String(path).endsWith("/configuration")) {
+        return Promise.resolve(respond(200, theConfiguration()));
+      }
+      if (String(path).endsWith("/experiences")) return Promise.resolve(respond(200, []));
+
+      return Promise.resolve(
+        respond(200, [aRestaurant({ ...BACARI, id: 1 }), aRestaurant(LILIA)]),
+      );
+    });
   });
 
   afterEach(() => {
@@ -136,19 +142,6 @@ describe("choosing a restaurant", () => {
       expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: "start" });
     });
 
-    // The Sheet cell names an act, the same as the Map cell beside it. An owner
-    // who scrolled away from the row they chose and tapped it again is asking
-    // to be brought back to it, so the sheet answers every time it arrives.
-    it("scrolls to it again when the row already chosen is tapped", async () => {
-      renderApp("/");
-
-      await screen.findByTestId("map");
-      await userEvent.click(cardFor("Bacari"));
-      await userEvent.click(cardFor("Bacari"));
-
-      expect(cardsScrolledTo()).toEqual(["Bacari", "Bacari"]);
-    });
-
     it("moves the choice when a second restaurant is chosen", async () => {
       renderApp("/");
 
@@ -162,22 +155,28 @@ describe("choosing a restaurant", () => {
       expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(LILIA));
     });
 
-    // list-screen.states.md answers Tap a row with "Center on selection, zoom
-    // 13" every time it arrives, and says nothing about the restaurant having
-    // to be a different one. An owner who panned away from the restaurant they
-    // chose and tapped its row again is asking to be taken back.
-    it("centres again when the row already chosen is tapped", async () => {
+    // list-screen.states.md, Tap a selected row: "Tapping the selected row
+    // opens the restaurant's own screen." A second tap is a different event
+    // from the first rather than the first arriving twice, so nothing on this
+    // screen moves — the table reads n/a across that row.
+    it("opens the restaurant's own screen when the row already chosen is tapped", async () => {
       renderApp("/");
 
       await screen.findByTestId("map");
       await userEvent.click(cardFor("Bacari"));
 
-      const told = cameraMoves();
+      const scrolled = cardsScrolledTo().length;
 
       await userEvent.click(cardFor("Bacari"));
 
-      expect(cameraMoves()).toBe(told + 1);
-      expect(screen.getByTestId("map")).toHaveAttribute("data-moved-to", centredOn(BACARI));
+      expect(
+        await screen.findByRole("heading", { level: 1, name: "Bacari" }),
+      ).toBeInTheDocument();
+
+      // The Sheet cell is the one act whose trace outlives the screen it was
+      // performed on, and it was not performed: the second tap chose nothing.
+      // The map is gone with the screen, so there is nothing left to ask it.
+      expect(cardsScrolledTo()).toHaveLength(scrolled);
     });
   });
 
